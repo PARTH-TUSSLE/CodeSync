@@ -16,9 +16,11 @@
     "@types/node": "^25.0.10"
   },
   "dependencies": {
+    "@types/aws-sdk": "^0.0.42",
     "@types/dotenv": "^6.1.1",
     "@types/uuid": "^10.0.0",
     "@types/yargs": "^17.0.35",
+    "aws-sdk": "^2.1693.0",
     "dotenv": "^17.2.3",
     "uuid": "^13.0.0",
     "yargs": "^18.0.0"
