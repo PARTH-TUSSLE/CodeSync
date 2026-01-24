@@ -2,15 +2,6 @@ import { promises as fs } from "fs";
 import path from "path";
 import { cwd } from "process";
 
-interface StagingPaths {
-  repoPath: string;
-  stagingPath: string;
-}
-
-interface MkdirOptions {
-  recursive?: boolean;
-}
-
 export default async function addFile(filePath: string): Promise<void> {
   const repoPath: string = path.resolve(cwd(), ".codesync");
   const stagingPath: string = path.join(repoPath, "staging");

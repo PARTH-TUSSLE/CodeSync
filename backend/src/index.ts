@@ -37,7 +37,9 @@ yargs(hideBin(process.argv))
         type: "string",
       });
     },
-    commitFiles,
+    (argv) => {
+      commitFiles((argv.message) as string);
+    },
   )
   .command(
     "push",
