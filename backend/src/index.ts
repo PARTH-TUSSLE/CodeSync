@@ -24,7 +24,9 @@ yargs(hideBin(process.argv))
         type: "string",
       });
     },
-    addFile,
+    (argv) => {
+      addFile((argv.file) as string);
+    },
   )
   .command(
     "commit <message>",
