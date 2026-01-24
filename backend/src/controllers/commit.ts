@@ -28,7 +28,7 @@ export default async function commitFiles(message: string): Promise<any> {
       }),
     );
 
-    console.log(`Commit ${commitID} created with message: ${message}`);
+    console.log(`Commit ${commitID} created with message: ${message} !`);
 
   } catch (error) {
     if (error instanceof Error) {

@@ -10,7 +10,7 @@ export default async function addFile(filePath: string): Promise<void> {
     await fs.mkdir(stagingPath, { recursive: true } );
     const fileName: string = path.basename(filePath);
     await fs.copyFile(filePath, path.join(stagingPath, fileName));
-    console.log(`File ${fileName} added to the staging area`);
+    console.log(`File ${fileName} added to the staging area !`);
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.log(

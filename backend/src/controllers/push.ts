@@ -9,7 +9,7 @@ export default async function pushChanges (): Promise<any> {
   try {
 
     const commitDirs = await fs.readdir(commitsPath);
-    
+
     for (const commitDir of commitDirs) {
       const commitPath = path.join(commitsPath, commitDir);
       const files = await fs.readdir(commitPath);
@@ -27,7 +27,7 @@ export default async function pushChanges (): Promise<any> {
        await s3.upload(params).promise();
 
       }
-      console.log(`All commits pushed to the repository`);
+      console.log(`All commits pushed to the repository !`);
     }
 
   } catch (error) {
