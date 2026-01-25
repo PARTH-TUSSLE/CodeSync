@@ -62,7 +62,9 @@ yargs(hideBin(process.argv))
         type: "string",
       });
     },
-    revert,
+    (argv) => {
+      revert((argv.commitID) as string);
+    },
   )
   .demandCommand(1, "You need to enter at least one command !")
   .help().argv;
