@@ -7,8 +7,53 @@ import commitFiles from "./controllers/commit.js";
 import revert from "./controllers/revert.js";
 import pullChanges from "./controllers/pull.js";
 import pushChanges from "./controllers/push.js";
+import express from "express";
+import bodyParser from "body-parser";
+import type { Response, Request } from "express";
+import cors from "cors";
+import http from "http";
+import { Server } from "socket.io";
+
+function startServer() {
+  const app = express();
+  const port = process.env.PORT || 3000;
+
+  app.use(bodyParser.json());
+  app.use(express.json());
+  app.use(cors({ origin: "*" }));
+
+  app.get("/", (req: Request, res: Response) => {
+    res.send("Hello from the server ! ");
+  });
+
+  let user = "test";
+
+  const httpServer = http.createServer(app);
+  const io = new Server(httpServer, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
+
+  io.on("connection", (socket) => {
+    socket.on("joinRoom", (userID) => {
+      user = userID;
+      console.log(`========`);
+      console.log(user);
+      console.log(`========`);
+      socket.join(userID);
+    });
+  });
+
+  httpServer.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+  })
+
+}
 
 yargs(hideBin(process.argv))
+  .command("start", "Starts a new server", {}, startServer)
   .command(
     "init", // command
     "Initialise a new repository", // description
@@ -25,7 +70,7 @@ yargs(hideBin(process.argv))
       });
     },
     (argv) => {
-      addFile((argv.file) as string);
+      addFile(argv.file as string);
     },
   )
   .command(
@@ -38,15 +83,10 @@ yargs(hideBin(process.argv))
       });
     },
     (argv) => {
-      commitFiles((argv.message) as string);
+      commitFiles(argv.message as string);
     },
   )
-  .command(
-    "push",
-    "Push the changes to the repository",
-    {},
-    pushChanges,
-  )
+  .command("push", "Push the changes to the repository", {}, pushChanges)
   .command(
     "pull",
     "Pull the latest changes from the repository",
@@ -63,7 +103,7 @@ yargs(hideBin(process.argv))
       });
     },
     (argv) => {
-      revert((argv.commitID) as string);
+      revert(argv.commitID as string);
     },
   )
   .demandCommand(1, "You need to enter at least one command !")

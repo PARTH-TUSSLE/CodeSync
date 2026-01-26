@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum IssueStatus {
+  open
+  closed
+}
+
+model User {
+  id           String       @id @default(uuid())
+  username     String       @unique
+  email        String       @unique
+  password     String
+
+  repositories Repository[] @relation("UserRepositories")
+  following User[] @relation("UserFollows")
+  followers User[] @relation("UserFollows")
+  starredRepos Repository[] @relation("UserStars")
+  issues       Issue[]
+  createdAt    DateTime     @default(now())
+}
+
+model Repository {
+  id          String   @id @default(uuid())
+
+  name        String   @unique
+  description String?
+  content     String[]        // array of strings
+  visibility  Boolean
+
+  ownerId     String
+  owner       User     @relation("UserRepositories", fields: [ownerId], references: [id])
+  starredBy User[] @relation("UserStars")
+
+  issues      Issue[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Issue {
+   id           String      @id @default(uuid())
+
+  title        String
+  description  String
+  status       IssueStatus @default(open)
+
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id])
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
