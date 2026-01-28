@@ -14,8 +14,6 @@
     "lib": ["esnext"],
     "types": ["node"],
     // and npm install -D @types/node
-    "allowImportingTsExtensions": true,
-    "emitDeclarationOnly": true,
 
     // "strict": true,
 

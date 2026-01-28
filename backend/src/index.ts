@@ -9,11 +9,11 @@ import pullChanges from "./controllers/pull.js";
 import pushChanges from "./controllers/push.js";
 import express from "express";
 import bodyParser from "body-parser";
-import type { Response, Request } from "express";
 import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
-import { prisma } from "./prisma.ts";
+import { prisma } from "./prisma.js";
+import { mainRouter } from "./routes/main.router.js";
 
 async function startServer() {
   const app = express();
@@ -21,11 +21,8 @@ async function startServer() {
 
   app.use(bodyParser.json());
   app.use(express.json());
+  app.use("/", mainRouter);
   app.use(cors({ origin: "*" }));
-
-  app.get("/", (req: Request, res: Response) => {
-    res.send("Hello from the server ! ");
-  });
 
   let user = "test";
 
@@ -61,7 +58,12 @@ async function startServer() {
 }
 
 yargs(hideBin(process.argv))
-  .command("start", "Starts a new server", {}, startServer)
+  .command("start", "Starts a new server", {}, () => {
+    startServer().catch((err) => {
+      console.error("Failed to start server:", err);
+      process.exit(1);
+    });
+  })
   .command(
     "init", // command
     "Initialise a new repository", // description
