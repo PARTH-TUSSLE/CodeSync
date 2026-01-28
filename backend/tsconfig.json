@@ -14,13 +14,17 @@
     "lib": ["esnext"],
     "types": ["node"],
     // and npm install -D @types/node
+    "allowImportingTsExtensions": true,
+    "emitDeclarationOnly": true,
+
+    // "strict": true,
 
     "module": "ESNext",
     "moduleResolution": "bundler",
     "target": "ES2023",
-    // "strict": true,
+    "strict": true,
     "esModuleInterop": true,
-    "ignoreDeprecations": "6.0",
+    // "ignoreDeprecations": "6.0",
 
     // Other Outputs
     "sourceMap": true,
@@ -40,12 +44,12 @@
     // "noPropertyAccessFromIndexSignature": true,
 
     // Recommended Options
-    "strict": true,
+    // "strict": true,
     "jsx": "react-jsx",
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
+    "skipLibCheck": true
   }
 }

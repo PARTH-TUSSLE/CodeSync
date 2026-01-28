@@ -13,8 +13,9 @@ import type { Response, Request } from "express";
 import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
+import { prisma } from "./prisma.ts";
 
-function startServer() {
+async function startServer() {
   const app = express();
   const port = process.env.PORT || 3000;
 
@@ -46,10 +47,17 @@ function startServer() {
     });
   });
 
+  try {
+    await prisma.$connect();
+    console.log("PostgreSQL connected!");
+  } catch (err) {
+    console.error("Unable to connect to DB:", err);
+    process.exit(1);
+  }
+
   httpServer.listen(port, () => {
     console.log(`Server listening on port ${port}`);
-  })
-
+  });
 }
 
 yargs(hideBin(process.argv))

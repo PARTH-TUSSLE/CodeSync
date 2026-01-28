@@ -2,3 +2,8 @@ node_modules/
 dist/
 .env
 .codesync
+/src/generated/prisma
+
+/src/generated/prisma
+
+/src/generated/prisma
