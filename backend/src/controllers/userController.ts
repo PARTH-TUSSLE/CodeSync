@@ -55,8 +55,69 @@ export const signup = async (req: Request, res: Response) => {
   }
 };
 
-export const login = (req: Request, res: Response) => {
-  res.send("logging in!");
+export const login = async (req: Request, res: Response) => {
+  const parsedData = SignInSchema.safeParse(req.body);
+
+  if (!parsedData.success) {
+    return res.status(400).json({
+      message: "Invalid credentials",
+    });
+  }
+
+  try {
+    const username = parsedData.data.username?.trim() || undefined;
+    const email = parsedData.data.email?.trim() || undefined;
+    const password = parsedData.data.password;
+
+    if (!username && !email) {
+      return res.status(400).json({
+        msg: "Username or email is required",
+      });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          ...(username ? [{ username }] : []),
+          ...(email ? [{ email }] : []),
+        ],
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        msg: "Invalid credentials !",
+      });
+    }
+
+    const passCorrect = await bcrypt.compare(password, user.password);
+    if (!passCorrect) {
+      return res.status(401).json({
+        msg: "Invalid credentials !",
+      });
+    }
+
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error("JWT secret not configured");
+    }
+    const token = jwt.sign({ id: user.id }, jwtSecret, {
+      expiresIn: "7d",
+    });
+
+    const { password: _pw, ...userWithoutPassword } = user;
+
+    return res.status(200).json({
+      msg: "login successful!",
+      user: userWithoutPassword,
+      token,
+    });
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({
+      msg,
+    });
+  }
 };
 
 export const getUserProfile = (req: Request, res: Response) => {
