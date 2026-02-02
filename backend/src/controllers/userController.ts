@@ -4,7 +4,26 @@ import { prisma } from "../prisma.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-export const getAllUsers = async (req: Request, res: Response) => {};
+export const getAllUsers = async (req: Request, res: Response) => {
+
+  try {
+
+    const users = await prisma.user.findMany({});
+
+    res.status(200).json({
+      msg: "Fetch successfull",
+      users
+    })
+    
+  } catch (error) {
+    if ( error instanceof Error ) {
+      console.log(`Error while fetching users ${error.message}`);
+    } else{
+      console.log(`Error while fetching users ${String(error)}`);
+    }
+  }
+
+};
 
 export const signup = async (req: Request, res: Response) => {
   const parsedUserInfo = SignupSchema.safeParse(req.body);
