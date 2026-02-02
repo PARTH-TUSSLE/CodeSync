@@ -5,24 +5,20 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export const getAllUsers = async (req: Request, res: Response) => {
-
   try {
-
     const users = await prisma.user.findMany({});
 
-    res.status(200).json({
+    return res.status(200).json({
       msg: "Fetch successfull",
-      users
-    })
-    
+      users,
+    });
   } catch (error) {
-    if ( error instanceof Error ) {
+    if (error instanceof Error) {
       console.log(`Error while fetching users ${error.message}`);
-    } else{
+    } else {
       console.log(`Error while fetching users ${String(error)}`);
     }
   }
-
 };
 
 export const signup = async (req: Request, res: Response) => {
@@ -139,8 +135,36 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const getUserProfile = (req: Request, res: Response) => {
-  res.send("Profile fetched!");
+export const getUserProfile = async (req: Request, res: Response) => {
+  const userID = req.params.id;
+
+  try {
+    const userProfile = await prisma.user.findUnique({
+      where: {
+        id: userID,
+      },
+    });
+
+    if (!userProfile) {
+      return res.status(404).json({
+        msg: "Invalid userID"
+      });
+    }
+
+    const { password: _pw, ...userWithoutPassword } = userProfile;
+
+    return res.status(200).json({
+      msg: "Profile fetch successful !",
+      user: userWithoutPassword
+    });
+
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({
+      msg: "Error while fetching profile",
+      error: msg
+    });
+  }
 };
 
 export const updateUserProfile = (req: Request, res: Response) => {

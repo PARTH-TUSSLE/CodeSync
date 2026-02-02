@@ -12,7 +12,12 @@ export const userRouter = express.Router();
 
 userRouter.get("/allUsers", getAllUsers);
 userRouter.post("/signup", signup);
-userRouter.get("/userProfile", getUserProfile);
+userRouter.get("/userProfile", (req, res) => {
+  return res.status(400).json({
+    msg: "User ID required !",
+  });
+});
+userRouter.get("/userProfile/:id", getUserProfile);
 userRouter.post("/login", login);
 userRouter.put("/updateProfile", updateUserProfile);
 userRouter.delete("/deleteProfile", deleteUserProfile);
