@@ -64,7 +64,8 @@ export const signup = async (req: Request, res: Response) => {
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     return res.status(500).json({
-      message: "Some error occurred while signing up. Possible error could be, username or email already taken",
+      message:
+        "Some error occurred while signing up. Possible error could be, username or email already taken",
       error: msg,
     });
   }
@@ -166,65 +167,121 @@ export const getUserProfile = async (req: Request, res: Response) => {
   }
 };
 
-// export const updateUserProfile = async (req: Request, res: Response) => {
-//   const parsedData = updationSchema.safeParse(req.body);
+export const updateUserProfile = async (req: Request, res: Response) => {
+  const parsedData = updationSchema.safeParse(req.body);
+  const userID = req.params.id;
 
-//   if (!parsedData.success) {
-//     return res.status(400).json({
-//       msg: "Invalid inputs",
-//     });
-//   }
+  if (!parsedData.success) {
+    return res.status(400).json({
+      msg: "Invalid inputs",
+    });
+  }
 
-//   try {
+  try {
+    const newEmail = parsedData.data.email;
+    const newPassword = parsedData.data.password;
 
-//     const newEmail = parsedData.data.email;
-//     const newPassword = parsedData.data.password;
+    if (newEmail && newPassword) {
+      const newHashedPassword = await bcrypt.hash(newPassword, 10);
+      const updatedUser = await prisma.user.update({
+        where: {
+          id: String(userID),
+        },
+        data: {
+          email: newEmail,
+          password: newHashedPassword
+        },
+      });
 
-//     const newHashedPassword = await bcrypt.hash(newPassword, 10);
+      return res.status(200).json({
+        msg: "Email and password updated successfully !",
+        updatedUser,
+      });
 
-    
+    }
 
-//   } catch (error) {
-    
-//     const message = error instanceof Error ? error.message : String(error);
+    if (newEmail) {
+      const updatedUser = await prisma.user.update({
+        where: {
+          id: String(userID),
+        },
+        data: {
+          email: newEmail,
+        },
+      });
 
-//     res.status(500).json({
-//       msg: `Some error occurred while updating! - ${message}`,
-//     });
-//   }
-// };
+      return res.status(200).json({
+        msg: "Email updated successfully !",
+        updatedUser,
+      });
+    }
+
+    if (newPassword) {
+      const newHashedPassword = await bcrypt.hash(newPassword, 10);
+
+      const updatedUser = await prisma.user.update({
+        where: {
+          id: String(userID),
+        },
+        data: {
+          password: newHashedPassword,
+        },
+      });
+
+      return res.status(200).json({
+        msg: "Password updated successfully !",
+        updatedUser,
+      });
+      
+    }
+
+    return res.status(400).json({
+      msg: "At least one field is required, email or password"
+    })
+
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+
+    res.status(500).json({
+      msg: `Some error occurred while updating! - ${message}`,
+    });
+  }
+};
 
 export const deleteUserProfile = async (req: Request, res: Response) => {
-  
   const userID = req.params.id;
 
   try {
-    
     const deletedUser = await prisma.user.delete({
       where: {
-        id: String(userID)
-      }
+        id: String(userID),
+      },
     });
 
-    if ( deletedUser ) {
+    if (deletedUser) {
       return res.status(200).json({
         msg: "User deleted successfully !",
-        deletedUser
-      })
+        deletedUser,
+      });
     } else {
       return res.status(400).json({
-        msg: "User not found !"
-      })
+        msg: "User not found !",
+      });
     }
-
   } catch (error) {
-    
     const errMessage = error instanceof Error ? error.message : String(error);
 
+    if (
+      error instanceof Error &&
+      error.message.includes("No record was found for a delete.")
+    ) {
+      return res.status(404).json({
+        msg: "User not found!",
+      });
+    }
+
     return res.status(500).json({
-      msg: `Error while deleting the user - ${errMessage}`
-    })
-
+      msg: `Error while deleting the user - ${errMessage}`,
+    });
   }
-
 };

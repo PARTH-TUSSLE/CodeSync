@@ -5,7 +5,7 @@ import {
   getUserProfile,
   login,
   signup,
-  // updateUserProfile,
+  updateUserProfile,
 } from "../controllers/userController.js";
 
 export const userRouter = express.Router();
@@ -19,5 +19,5 @@ userRouter.get("/userProfile", (req, res) => {
 });
 userRouter.get("/userProfile/:id", getUserProfile);
 userRouter.post("/login", login);
-// userRouter.put("/updateProfile/:id", updateUserProfile);
+userRouter.put("/updateProfile/:id", updateUserProfile);
 userRouter.delete("/deleteProfile/:id", deleteUserProfile);
