@@ -16,3 +16,10 @@ export const SignInSchema = z.object({
     .string()
     .min(6, { message: "The password must be atleast 6 characters" }),
 });
+
+export const updationSchema = z.object({
+  email: z.string().optional(),
+  password: z
+    .string()
+    .min(6, { message: "The password must be atleast 6 characters" }),
+});

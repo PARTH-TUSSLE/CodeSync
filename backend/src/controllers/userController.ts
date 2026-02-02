@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { SignupSchema, SignInSchema } from "../types.js";
+import { SignupSchema, SignInSchema, updationSchema } from "../types.js";
 import { prisma } from "../prisma.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -64,7 +64,7 @@ export const signup = async (req: Request, res: Response) => {
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     return res.status(500).json({
-      message: "Some error occurred while signing up",
+      message: "Some error occurred while signing up. Possible error could be, username or email already taken",
       error: msg,
     });
   }
@@ -141,13 +141,13 @@ export const getUserProfile = async (req: Request, res: Response) => {
   try {
     const userProfile = await prisma.user.findUnique({
       where: {
-        id: userID,
+        id: String(userID),
       },
     });
 
     if (!userProfile) {
       return res.status(404).json({
-        msg: "Invalid userID"
+        msg: "Invalid userID",
       });
     }
 
@@ -155,22 +155,76 @@ export const getUserProfile = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       msg: "Profile fetch successful !",
-      user: userWithoutPassword
+      user: userWithoutPassword,
     });
-
   } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return res.status(500).json({
       msg: "Error while fetching profile",
-      error: msg
+      error: errMsg,
     });
   }
 };
 
-export const updateUserProfile = (req: Request, res: Response) => {
-  res.send("Profile update");
-};
+// export const updateUserProfile = async (req: Request, res: Response) => {
+//   const parsedData = updationSchema.safeParse(req.body);
 
-export const deleteUserProfile = (req: Request, res: Response) => {
-  res.send("Profile deleted");
+//   if (!parsedData.success) {
+//     return res.status(400).json({
+//       msg: "Invalid inputs",
+//     });
+//   }
+
+//   try {
+
+//     const newEmail = parsedData.data.email;
+//     const newPassword = parsedData.data.password;
+
+//     const newHashedPassword = await bcrypt.hash(newPassword, 10);
+
+    
+
+//   } catch (error) {
+    
+//     const message = error instanceof Error ? error.message : String(error);
+
+//     res.status(500).json({
+//       msg: `Some error occurred while updating! - ${message}`,
+//     });
+//   }
+// };
+
+export const deleteUserProfile = async (req: Request, res: Response) => {
+  
+  const userID = req.params.id;
+
+  try {
+    
+    const deletedUser = await prisma.user.delete({
+      where: {
+        id: String(userID)
+      }
+    });
+
+    if ( deletedUser ) {
+      return res.status(200).json({
+        msg: "User deleted successfully !",
+        deletedUser
+      })
+    } else {
+      return res.status(400).json({
+        msg: "User not found !"
+      })
+    }
+
+  } catch (error) {
+    
+    const errMessage = error instanceof Error ? error.message : String(error);
+
+    return res.status(500).json({
+      msg: `Error while deleting the user - ${errMessage}`
+    })
+
+  }
+
 };
