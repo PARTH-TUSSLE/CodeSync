@@ -2,8 +2,7 @@ import type { Request, Response } from "express";
 import { prisma } from "../prisma.js";
 
 export const createRepository = async (req: Request, res: Response) => {
-  const { name, description, content, visibility, ownerId } =
-    req.body;
+  const { name, description, content, visibility, ownerId } = req.body;
 
   try {
     if (!name) {
@@ -43,41 +42,35 @@ export const createRepository = async (req: Request, res: Response) => {
 
 export const getAllRepositories = async (req: Request, res: Response) => {
   try {
-
     const repos = await prisma.repository.findMany({});
 
     return res.status(200).json({
       msg: "Successfully fetched all repositories !",
-      repos
-    })
-    
+      repos,
+    });
   } catch (error) {
-
-    const errMsg = error instanceof Error? error.message : String(error)
+    const errMsg = error instanceof Error ? error.message : String(error);
 
     return res.status(500).json({
-      msg: `Error occurred while fetching the repositories - ${errMsg}`
-    })
-
+      msg: `Error occurred while fetching the repositories - ${errMsg}`,
+    });
   }
 };
 
 export const fetchRepositoryByID = async (req: Request, res: Response) => {
-
   const repoId = req.params.id;
 
   if (!repoId) {
     return res.status(400).json({
-      msg: "ID is required !"
-    })
+      msg: "ID is required !",
+    });
   }
 
   try {
-    
     const repo = await prisma.repository.findFirst({
       where: {
-        id: String(repoId)
-      }
+        id: String(repoId),
+      },
     });
 
     if (repo) {
@@ -88,20 +81,45 @@ export const fetchRepositoryByID = async (req: Request, res: Response) => {
     }
 
     return res.status(404).json({
-      msg: "Repository with this ID not found !"
-    })
-
+      msg: "Repository with this ID not found !",
+    });
   } catch (error) {
-    const errMsg = error instanceof Error? error.message: String(error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return res.status(500).json({
       msg: `Error occurred while fetching the repositories - ${errMsg}`,
     });
   }
-
 };
 
-export const fetchRepositoryByName = (req: Request, res: Response) => {
-  res.send("Fetched repo by name");
+export const fetchRepositoryByName = async (req: Request, res: Response) => {
+
+  const name  = req.params.name;
+
+  try {
+
+    const repos = await prisma.repository.findMany({
+      where: {
+        name: String(name)
+      }
+    })
+
+    if (repos && repos.length !== 0) {
+      return res.status(200).json({
+        msg: "Fetched repository successfully !",
+        repos
+      })
+    }  
+
+    return res.status(404).json({
+      msg: "Repository with this name not found !"
+    })
+
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({
+      msg: `Error occurred while fetching the repositories - ${errMsg}`,
+    });
+  }
 };
 
 export const fetchRepositoriesForCurrentUser = (
