@@ -34,7 +34,8 @@ model User {
 model Repository {
   id          String   @id @default(uuid())
 
-  name        String   @unique
+  name        String   
+  @@unique([ownerId, name])
   description String?
   content     String[]        // array of strings
   visibility  Boolean
