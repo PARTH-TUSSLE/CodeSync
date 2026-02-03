@@ -17,6 +17,12 @@ export const createRepository = async (req: Request, res: Response) => {
       });
     }
 
+    if ( !ownerId ) {
+      return res.status(400).json({
+        msg: "Required field ownerID is missing !"
+      })
+    }
+
     const createdRepo = await prisma.repository.create({
       data: {
         name,
@@ -67,7 +73,7 @@ export const fetchRepositoryByID = async (req: Request, res: Response) => {
   }
 
   try {
-    const repo = await prisma.repository.findFirst({
+    const repo = await prisma.repository.findUnique({
       where: {
         id: String(repoId),
       },
@@ -94,12 +100,14 @@ export const fetchRepositoryByID = async (req: Request, res: Response) => {
 export const fetchRepositoryByName = async (req: Request, res: Response) => {
 
   const name  = req.params.name;
+  // const { ownerID } = req.body;
 
   try {
 
     const repos = await prisma.repository.findMany({
       where: {
-        name: String(name)
+        name: String(name),
+        // ownerId: ownerID
       }
     })
 
