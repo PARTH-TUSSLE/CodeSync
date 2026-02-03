@@ -6,7 +6,12 @@ export const issueRouter = express.Router();
 issueRouter.post("/issue/create", createIssue);
 issueRouter.put("/issue/update/:id", updateIssueByID);
 issueRouter.delete("/issue/delete/:id", deleteIssueByID);
-issueRouter.get("/issue/all", getAllIssues);
+issueRouter.get("/allIssues/:id", getAllIssues);
+issueRouter.get("/allIssues", (req, res) => {
+  return res.status(400).json({
+    msg: "repoID is required !",
+  });
+});
 issueRouter.get("/issue/:id", getIssueByID);
 issueRouter.get("/issue", (req, res) => {
   return res.status(400).json({

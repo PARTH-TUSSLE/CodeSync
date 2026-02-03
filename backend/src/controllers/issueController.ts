@@ -110,6 +110,36 @@ export const deleteIssueByID = async (req: Request, res: Response) => {
 
 };
 
-export const getAllIssues = (req: Request, res: Response) => {};
+export const getAllIssues = async (req: Request, res: Response) => {
+  
+  const repoID = req.params.id;
+  
+  try {
+
+    const issues = await prisma.issue.findMany({
+      where: {
+        repositoryId: String(repoID)
+      }
+    })
+
+    if (!issues || issues.length == 0) {
+      return res.status(404).json({
+        msg: "Invalid repository ID"
+      })
+    }
+
+    return res.status(200).json({
+      msg: "Issues fetched successfully !",
+      issues
+    })
+
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({
+      msg: `Error occurred while fetching the issues - ${errMsg}`,
+    });
+  }
+
+};
 
 export const getIssueByID = (req: Request, res: Response) => {};
