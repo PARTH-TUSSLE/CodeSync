@@ -62,8 +62,42 @@ export const getAllRepositories = async (req: Request, res: Response) => {
   }
 };
 
-export const fetchRepositoryByID = (req: Request, res: Response) => {
-  res.send("Fetched repo by ID");
+export const fetchRepositoryByID = async (req: Request, res: Response) => {
+
+  const repoId = req.params.id;
+
+  if (!repoId) {
+    return res.status(400).json({
+      msg: "ID is required !"
+    })
+  }
+
+  try {
+    
+    const repo = await prisma.repository.findFirst({
+      where: {
+        id: String(repoId)
+      }
+    });
+
+    if (repo) {
+      return res.json({
+        msg: "Repo successfully fetched !",
+        repo,
+      });
+    }
+
+    return res.status(404).json({
+      msg: "Repository with this ID not found !"
+    })
+
+  } catch (error) {
+    const errMsg = error instanceof Error? error.message: String(error);
+    return res.status(500).json({
+      msg: `Error occurred while fetching the repositories - ${errMsg}`,
+    });
+  }
+
 };
 
 export const fetchRepositoryByName = (req: Request, res: Response) => {
