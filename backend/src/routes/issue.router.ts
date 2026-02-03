@@ -8,3 +8,8 @@ issueRouter.put("/issue/update/:id", updateIssueByID);
 issueRouter.delete("/issue/delete/:id", deleteIssueByID);
 issueRouter.get("/issue/all", getAllIssues);
 issueRouter.get("/issue/:id", getIssueByID);
+issueRouter.get("/issue", (req, res) => {
+  return res.status(400).json({
+    msg: "issueID is required !",
+  });
+});

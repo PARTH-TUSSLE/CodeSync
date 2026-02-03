@@ -78,7 +78,37 @@ export const updateIssueByID = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteIssueByID = (req: Request, res: Response) => {};
+export const deleteIssueByID = async (req: Request, res: Response) => {
+  
+  const issueID = req.params.id;
+
+  try {
+
+    const deletedIssue = await prisma.issue.delete({
+      where: {
+        id: String(issueID)
+      }
+    });
+
+    if (!deletedIssue) {
+      return res.status(404).json({
+        msg: "Issue with this ID not found !"
+      })
+    }
+
+    return res.status(200).json({
+      msg: "Issue deleted successfully !",
+      deletedIssue
+    })
+
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({
+      msg: `Error occurred while deleting the issue - ${errMsg}`,
+    });
+  }
+
+};
 
 export const getAllIssues = (req: Request, res: Response) => {};
 
