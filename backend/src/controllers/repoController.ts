@@ -28,21 +28,38 @@ export const createRepository = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       msg: "Repository created successfully !",
       createdRepo,
     });
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       msg: `Some error occured while creating the repository - ${errMsg}`,
     });
   }
 };
 
-export const getAllRepositories = (req: Request, res: Response) => {
-  res.send("Fetched all repositories");
+export const getAllRepositories = async (req: Request, res: Response) => {
+  try {
+
+    const repos = await prisma.repository.findMany({});
+
+    return res.status(200).json({
+      msg: "Successfully fetched all repositories !",
+      repos
+    })
+    
+  } catch (error) {
+
+    const errMsg = error instanceof Error? error.message : String(error)
+
+    return res.status(500).json({
+      msg: `Error occurred while fetching the repositories - ${errMsg}`
+    })
+
+  }
 };
 
 export const fetchRepositoryByID = (req: Request, res: Response) => {
