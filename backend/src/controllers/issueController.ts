@@ -4,7 +4,7 @@ import { prisma } from "../prisma.js";
 export const createIssue = async (req: Request, res: Response) => {
   const { title, description, status, repoID, creatorID } = req.body;
 
-  if (!title || !status || !repoID || !creatorID) {
+  if (!title || !description || !status || !repoID || !creatorID) {
     return res.status(400).json({
       msg: `Fields title, status, repoID, creatorID are required !`,
     });
@@ -42,6 +42,12 @@ export const createIssue = async (req: Request, res: Response) => {
 export const updateIssueByID = async (req: Request, res: Response) => {
   const { title, description, status } = req.body;
   const issueID = req.params.id;
+
+  if ( !title || !description || !status ) {
+    return res.json({
+      msg: "At least one of the fields (title, description, status) is required !"
+    })
+  }
 
   try {
 
@@ -122,7 +128,7 @@ export const getAllIssues = async (req: Request, res: Response) => {
       }
     })
 
-    if (!issues || issues.length == 0) {
+    if (!issues || issues.length === 0) {
       return res.status(404).json({
         msg: "Invalid repository ID"
       })
