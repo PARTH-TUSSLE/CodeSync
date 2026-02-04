@@ -142,4 +142,34 @@ export const getAllIssues = async (req: Request, res: Response) => {
 
 };
 
-export const getIssueByID = (req: Request, res: Response) => {};
+export const getIssueByID = async (req: Request, res: Response) => {
+
+  const issueID = req.params.id;
+
+  try {
+
+    const issue = await prisma.issue.findUnique({
+      where: {
+        id: String(issueID)
+      }
+    }) 
+
+    if ( !issue ) {
+      return res.status(404).json({
+        msg: "Issue with this ID not found !"
+      })
+    }
+
+    return res.status(200).json({
+      msg: "Issue fetched !",
+      issue
+    })
+
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({
+      msg: `Error occurred while fetching the issue - ${errMsg}`,
+    });
+  }
+
+};
