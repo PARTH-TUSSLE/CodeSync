@@ -1,7 +1,147 @@
-import React from 'react'
+"use client";
 
-function page() {
-  return <div>Login page</div>;
+import React, { useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+function LoginPage() {
+  const router = useRouter();
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = {
+      email: emailRef.current?.value || "",
+      password: passwordRef.current?.value || "",
+    };
+
+    try {
+      setIsLoading(true);
+
+      console.log("Login data:", formData);
+
+      emailRef.current!.value = "";
+      passwordRef.current!.value = "";
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      console.log(`Some error occurred while logging in - ${errMsg}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0d1117] flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <div className="flex justify-center mb-8">
+          <Image
+            src="/codeSyncLogo.svg"
+            alt="CodeSync"
+            width={60}
+            height={60}
+            className="brightness-0 invert"
+          />
+        </div>
+
+        <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-8 shadow-2xl">
+          <h1 className="text-2xl font-light text-[#f0f6fc] mb-2 text-center">
+            Sign in to CodeSync
+          </h1>
+          <p className="text-[#8b949e] text-sm text-center mb-6">
+            Welcome back! Please enter your credentials
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-[#c9d1d9] mb-2"
+              >
+                Email address
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                ref={emailRef}
+                required
+                className="w-full px-3 py-2 bg-[#0d1117] border border-[#30363d] rounded-md text-[#c9d1d9] placeholder-[#6e7681] focus:outline-none focus:ring-2 focus:ring-[#1f6feb] focus:border-transparent transition-all"
+                placeholder="Enter your email"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-[#c9d1d9] mb-2"
+              >
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                ref={passwordRef}
+                required
+                className="w-full px-3 py-2 bg-[#0d1117] border border-[#30363d] rounded-md text-[#c9d1d9] placeholder-[#6e7681] focus:outline-none focus:ring-2 focus:ring-[#1f6feb] focus:border-transparent transition-all"
+                placeholder="Enter your password"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-[#238636] hover:bg-[#2ea043] disabled:bg-[#1a5928] disabled:cursor-not-allowed text-white font-medium py-2.5 px-4 rounded-md transition-colors duration-200 mt-6 flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                "Sign in"
+              )}
+            </button>
+          </form>
+        </div>
+
+        <div className="mt-6 text-center">
+          <p className="text-[#8b949e] text-sm">
+            Don't have an account?{" "}
+            <Link
+              href="/auth/signup"
+              className="text-[#58a6ff] hover:underline font-medium"
+            >
+              Create account
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-export default page
+export default LoginPage;
