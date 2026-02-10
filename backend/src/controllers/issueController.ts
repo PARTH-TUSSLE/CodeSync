@@ -116,7 +116,7 @@ export const deleteIssueByID = async (req: Request, res: Response) => {
 
 };
 
-export const getAllIssues = async (req: Request, res: Response) => {
+export const getAllIssuesOfARepo = async (req: Request, res: Response) => {
   
   const repoID = req.params.id;
   

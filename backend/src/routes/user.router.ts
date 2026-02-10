@@ -7,6 +7,7 @@ import {
   signup,
   updateUserProfile,
 } from "../controllers/userController.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 export const userRouter = express.Router();
 
@@ -17,7 +18,7 @@ userRouter.get("/userProfile", (req, res) => {
     msg: "User ID required !",
   });
 });
-userRouter.get("/userProfile/:id", getUserProfile);
+userRouter.get("/userProfile/:id",authMiddleware, getUserProfile);
 userRouter.post("/login", login);
-userRouter.put("/updateProfile/:id", updateUserProfile);
-userRouter.delete("/deleteProfile/:id", deleteUserProfile);
+userRouter.put("/updateProfile/:id",authMiddleware, updateUserProfile);
+userRouter.delete("/deleteProfile/:id",authMiddleware, deleteUserProfile);

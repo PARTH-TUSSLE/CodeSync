@@ -130,11 +130,39 @@ export const fetchRepositoryByName = async (req: Request, res: Response) => {
   }
 };
 
-export const fetchRepositoriesForCurrentUser = (
+export const fetchRepositoriesForCurrentUser = async (
   req: Request,
   res: Response,
 ) => {
-  res.send("Fetched repos for the logged in user");
+  
+  const userId = req.params.userID;
+
+  try {
+    
+    const userRepos = await prisma.repository.findMany({
+      where: {
+        ownerId: String(userId)
+      }
+    });
+
+    if ( !userRepos || userRepos.length === 0 ) {
+      return res.status(404).json({
+        msg: "No repositories found !"
+      })
+    }
+
+    return res.status(200).json({
+      msg: "Successfully fetched the repositories of the user",
+      userRepos
+    })
+
+  } catch (error) {
+    const errMsg = error instanceof Error? error.message : String(error);
+    return res.status(500).json({
+      msg: `Some error occurred while getting the repositories of this user - ${errMsg}`
+    })
+  }
+
 };
 
 export const updateRepositoryByID = (req: Request, res: Response) => {
