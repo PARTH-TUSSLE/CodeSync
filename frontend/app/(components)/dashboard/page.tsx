@@ -10,14 +10,40 @@ function page() {
   const [searchResults, setSearchResults] = useState([]);
 
 
+    useEffect(() => {
+
+      const userId = localStorage.getItem("userId");
+      const token = localStorage.getItem("token");
+
+      console.log("userId",userId);
+      console.log("token",token);
+
+
+      
+      const fetchUserRepos = async () => {
+        const response = await axios.get(
+          `http://localhost:8000/repo/user/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+        const userRepos = await response.data.userRepos;
+        console.log(userRepos);
+        setRepositories(userRepos);
+      };
+      fetchUserRepos();
+    }, []);
+
   useEffect(() => {
-    const fetchUserRepos = async () => {
+    const fetchAllRepos = async () => {
       const response = await axios.get(`http://localhost:8000/allRepos`);
       const allRepos = await response.data.repos;
       console.log(allRepos);
       setSuggestedRepositories(allRepos);
     };
-    fetchUserRepos();
+    fetchAllRepos();
   }, []);
 
   useEffect(() => {

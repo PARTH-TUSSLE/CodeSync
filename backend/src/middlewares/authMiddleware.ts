@@ -16,14 +16,19 @@ export const authMiddleware = (
   res: Response,
   next: NextFunction,
 ) => {
-  const token = req.headers["authorization"];
+  const authHeader = req.headers["authorization"];
 
   try {
-    if (!token) {
+    if (!authHeader) {
       return res.status(401).json({
         msg: "Unauthorized! No token provided.",
       });
     }
+
+    // Extract token from "Bearer <token>" format
+    const token = authHeader.startsWith("Bearer ")
+      ? authHeader.substring(7)
+      : authHeader;
 
     if (!process.env.JWT_SECRET) {
       return res.status(500).json({
