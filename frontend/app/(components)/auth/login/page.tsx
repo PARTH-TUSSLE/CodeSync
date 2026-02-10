@@ -3,13 +3,20 @@
 import React, { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/authContext";
 
 function LoginPage() {
   const router = useRouter();
+  const { setCurrUser } = useAuth() as {
+    setCurrUser: (userId: string) => void;
+  };
+
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -21,13 +28,29 @@ function LoginPage() {
 
     try {
       setIsLoading(true);
+      setError("");
 
-      console.log("Login data:", formData);
+      const response = await axios.post(
+        "http://localhost:8000/login",
+        formData,
+      );
+
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("userId", response.data.user.id);
+
+      
+      setCurrUser(response.data.user.id);
 
       emailRef.current!.value = "";
       passwordRef.current!.value = "";
-    } catch (error) {
-      const errMsg = error instanceof Error ? error.message : String(error);
+
+      router.push("/dashboard");
+    } catch (error: any) {
+      const errMsg =
+        error.response?.data?.message ||
+        error.message ||
+        "Login failed. Please try again.";
+      setError(errMsg);
       console.log(`Some error occurred while logging in - ${errMsg}`);
     } finally {
       setIsLoading(false);
@@ -56,6 +79,11 @@ function LoginPage() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded-md text-sm">
+                {error.includes("401") && "Invalid credentials" || "Some error occurred, check your credentials"}
+              </div>
+            )}
             <div>
               <label
                 htmlFor="email"

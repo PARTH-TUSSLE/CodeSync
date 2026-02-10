@@ -5,13 +5,18 @@ import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/authContext";
 
 function SignupPage() {
   const router = useRouter();
+  const { setCurrUser } = useAuth() as {
+    setCurrUser: (userId: string) => void;
+  };
   const usernameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -24,21 +29,30 @@ function SignupPage() {
 
     try {
       setIsLoading(true);
+      setError("");
 
-      const response = await axios.post("http://localhost:8000/signup", formData);
+      const response = await axios.post(
+        "http://localhost:8000/signup",
+        formData,
+      );
 
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("userId", response.data.user.id);
 
+      
+      setCurrUser(response.data.user.id);
+
       usernameRef.current!.value = "";
       emailRef.current!.value = "";
       passwordRef.current!.value = "";
-      
-      router.push("/dashboard");
 
-    } catch (error) {
-      const errMsg = error instanceof Error ? error.message : String(error);
-      // alert("Some error occurred, Check console window for more info!");
+      router.push("/dashboard");
+    } catch (error: any) {
+      const errMsg =
+        error.response?.data?.message ||
+        error.message ||
+        "Signup failed. Please try again.";
+      setError(errMsg);
       console.log(`Some error occurred while signing up - ${errMsg}`);
     } finally {
       setIsLoading(false);
@@ -48,7 +62,7 @@ function SignupPage() {
   return (
     <div className="min-h-screen bg-[#0d1117] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
+
         <div className="flex justify-center mb-8">
           <Image
             src="/codeSyncLogo.svg"
@@ -59,7 +73,7 @@ function SignupPage() {
           />
         </div>
 
-        {/* Sign up form card */}
+
         <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-8 shadow-2xl">
           <h1 className="text-2xl font-light text-[#f0f6fc] mb-2 text-center">
             Sign up to CodeSync
@@ -69,7 +83,12 @@ function SignupPage() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Username Field */}
+            {error && (
+              <div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded-md text-sm">
+                {error}
+              </div>
+            )}
+            
             <div>
               <label
                 htmlFor="username"
@@ -88,7 +107,7 @@ function SignupPage() {
               />
             </div>
 
-            {/* Email Field */}
+
             <div>
               <label
                 htmlFor="email"
@@ -107,7 +126,7 @@ function SignupPage() {
               />
             </div>
 
-            {/* Password Field */}
+
             <div>
               <label
                 htmlFor="password"
@@ -129,7 +148,7 @@ function SignupPage() {
               </p>
             </div>
 
-            {/* Submit Button */}
+
             <button
               type="submit"
               disabled={isLoading}
@@ -166,7 +185,7 @@ function SignupPage() {
           </form>
         </div>
 
-        {/* Login Link */}
+        
         <div className="mt-6 text-center">
           <p className="text-[#8b949e] text-sm">
             Already have an account?{" "}
