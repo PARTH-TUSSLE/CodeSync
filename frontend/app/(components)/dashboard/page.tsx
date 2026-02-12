@@ -16,12 +16,66 @@ function page() {
     updatedAt: Date;
   }
 
+  interface UserProfile {
+    id: string;
+    username: string;
+    email: string;
+    starredRepos: string[];
+  }
+
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [suggestedRepositories, setSuggestedRepositories] = useState<
     Repository[]
   >([]);
   const [searchResults, setSearchResults] = useState<Repository[]>([]);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
+  const handleStarRepo = async (repoId: string) => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const isStarred = userProfile?.starredRepos.includes(repoId);
+
+      if (isStarred) {
+        // Unstar the repo
+        await axios.delete(`http://localhost:8000/star/${repoId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        // Update local state
+        if (userProfile) {
+          setUserProfile({
+            ...userProfile,
+            starredRepos: userProfile.starredRepos.filter(
+              (id) => id !== repoId,
+            ),
+          });
+        }
+      } else {
+        // Star the repo
+        await axios.post(
+          `http://localhost:8000/star/${repoId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        // Update local state
+        if (userProfile) {
+          setUserProfile({
+            ...userProfile,
+            starredRepos: [...userProfile.starredRepos, repoId],
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error starring/unstarring repo:", error);
+    }
+  };
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -29,6 +83,22 @@ function page() {
 
     console.log("userId", userId);
     console.log("token", token);
+
+    const fetchUserProfile = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/userProfile/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        setUserProfile(response.data.user);
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
 
     const fetchUserRepos = async () => {
       const response = await axios.get(
@@ -43,6 +113,8 @@ function page() {
       console.log(userRepos);
       setRepositories(userRepos);
     };
+
+    fetchUserProfile();
     fetchUserRepos();
   }, []);
 
@@ -105,24 +177,58 @@ function page() {
                   suggestedRepositories.slice(0, 10).map((repo) => (
                     <div
                       key={repo.id}
-                      className="p-2 sm:p-3 bg-gray-800 border border-gray-700 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-750 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/20"
+                      className="p-2 sm:p-3 bg-gray-800 border border-gray-700 rounded-lg transition-all duration-200 hover:bg-gray-750 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/20"
                     >
-                      <h3 className="text-blue-400 font-semibold text-xs sm:text-sm hover:underline">
-                        {repo.name}
-                      </h3>
-                      <p className="text-gray-400 text-[10px] sm:text-xs mt-1 line-clamp-2">
-                        {repo.description || "No description provided"}
-                      </p>
-                      <div className="flex items-center gap-2 sm:gap-4 mt-2">
-                        <span className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1">
-                          <span
-                            className={`w-2 h-2 rounded-full ${repo.visibility ? "bg-green-500" : "bg-gray-500"}`}
-                          ></span>
-                          {repo.visibility ? "Public" : "Private"}
-                        </span>
-                        <span className="text-[10px] sm:text-xs text-gray-500">
-                          {repo.content.length} files
-                        </span>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 cursor-pointer">
+                          <h3 className="text-blue-400 font-semibold text-xs sm:text-sm hover:underline">
+                            {repo.name}
+                          </h3>
+                          <p className="text-gray-400 text-[10px] sm:text-xs mt-1 line-clamp-2">
+                            {repo.description || "No description provided"}
+                          </p>
+                          <div className="flex items-center gap-2 sm:gap-4 mt-2">
+                            <span className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1">
+                              <span
+                                className={`w-2 h-2 rounded-full ${repo.visibility ? "bg-green-500" : "bg-gray-500"}`}
+                              ></span>
+                              {repo.visibility ? "Public" : "Private"}
+                            </span>
+                            <span className="text-[10px] sm:text-xs text-gray-500">
+                              {repo.content.length} files
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStarRepo(repo.id);
+                          }}
+                          className={`flex-shrink-0 p-1.5 rounded-lg border transition-all ${
+                            userProfile?.starredRepos.includes(repo.id)
+                              ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
+                              : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
+                          }`}
+                          title={
+                            userProfile?.starredRepos.includes(repo.id)
+                              ? "Unstar"
+                              : "Star"
+                          }
+                        >
+                          <svg
+                            className="w-3 h-3 sm:w-4 sm:h-4"
+                            fill={
+                              userProfile?.starredRepos.includes(repo.id)
+                                ? "currentColor"
+                                : "none"
+                            }
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            viewBox="0 0 16 16"
+                          >
+                            <path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path>
+                          </svg>
+                        </button>
                       </div>
                     </div>
                   ))
@@ -232,7 +338,37 @@ function page() {
                             </span>
                           </div>
                         </div>
-                        <div className="flex gap-2 sm:block">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStarRepo(repo.id);
+                            }}
+                            className={`flex-shrink-0 p-2 rounded-lg border transition-all ${
+                              userProfile?.starredRepos.includes(repo.id)
+                                ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
+                                : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
+                            }`}
+                            title={
+                              userProfile?.starredRepos.includes(repo.id)
+                                ? "Unstar"
+                                : "Star"
+                            }
+                          >
+                            <svg
+                              className="w-4 h-4 sm:w-5 sm:h-5"
+                              fill={
+                                userProfile?.starredRepos.includes(repo.id)
+                                  ? "currentColor"
+                                  : "none"
+                              }
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              viewBox="0 0 16 16"
+                            >
+                              <path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path>
+                            </svg>
+                          </button>
                           <button className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white rounded transition-all hover:shadow-lg">
                             View
                           </button>
@@ -328,8 +464,10 @@ function page() {
                   </svg>
                   <span className="truncate">Create New Repository</span>
                 </button>
-                <button className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-blue-500 rounded-lg text-left text-xs sm:text-sm text-gray-300 transition-all duration-200 flex items-center gap-2 sm:gap-3 hover:shadow-lg hover:shadow-blue-500/10"
-                onClick={() => redirect("/user/profile")}>
+                <button
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-blue-500 rounded-lg text-left text-xs sm:text-sm text-gray-300 transition-all duration-200 flex items-center gap-2 sm:gap-3 hover:shadow-lg hover:shadow-blue-500/10"
+                  onClick={() => redirect("/user/profile")}
+                >
                   <svg
                     className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 flex-shrink-0"
                     fill="none"
