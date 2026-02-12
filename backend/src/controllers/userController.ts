@@ -148,7 +148,9 @@ export const getUserProfile = async (req: Request, res: Response) => {
         email: true,
         followers: true,
         following: true,
-        starredRepos: true
+        starredRepos: true,
+        bio: true,
+        profilePic: true
       }
     });
 
