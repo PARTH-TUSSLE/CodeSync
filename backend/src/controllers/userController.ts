@@ -143,15 +143,21 @@ export const getUserProfile = async (req: Request, res: Response) => {
     const userProfile = await prisma.user.findUnique({
       where: {
         id: String(userID),
-      },select: {
+      },
+      select: {
+        id: true,
         username: true,
         email: true,
         followers: true,
         following: true,
-        starredRepos: true,
+        starredRepos: {
+          select: {
+            id: true,
+          },
+        },
         bio: true,
-        profilePic: true
-      }
+        profilePic: true,
+      },
     });
 
     if (!userProfile) {
@@ -160,11 +166,15 @@ export const getUserProfile = async (req: Request, res: Response) => {
       });
     }
 
-    // const { password: _pw, ...userWithoutPassword } = userProfile;
+    // Transform starredRepos to array of IDs
+    const formattedProfile = {
+      ...userProfile,
+      starredRepos: userProfile.starredRepos.map((repo) => repo.id),
+    };
 
     return res.status(200).json({
       msg: "Profile fetch successful !",
-      user: userProfile
+      user: formattedProfile,
     });
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);

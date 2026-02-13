@@ -44,11 +44,15 @@ function page() {
 
       if (isStarred) {
         // Unstar the repo
-        await axios.delete(`http://localhost:8000/star/${repoId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        await axios.put(
+          `http://localhost:8000/unstar/${repoId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
         // Update local state
         if (userProfile) {
           setUserProfile({
@@ -60,7 +64,7 @@ function page() {
         }
       } else {
         // Star the repo
-        await axios.post(
+        await axios.put(
           `http://localhost:8000/star/${repoId}`,
           {},
           {
@@ -456,7 +460,7 @@ function page() {
                           key={repo.id}
                           className="p-3 sm:p-4 bg-gray-900 border border-gray-800 rounded-lg hover:border-gray-700 transition-colors"
                         >
-                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
+                          <div className="flex items-start justify-between gap-2 sm:gap-3">
                             <div className="flex-1 min-w-0">
                               <h3 className="text-blue-400 font-semibold text-sm sm:text-base hover:underline mb-1 truncate cursor-pointer">
                                 {repo.name}
@@ -575,7 +579,7 @@ function page() {
                             key={repo.id}
                             className="p-3 sm:p-4 bg-gray-900 border border-gray-800 rounded-lg hover:border-gray-700 transition-colors"
                           >
-                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
+                            <div className="flex items-start justify-between gap-2 sm:gap-3">
                               <div className="flex-1 min-w-0">
                                 <h3 className="text-blue-400 font-semibold text-sm sm:text-base hover:underline mb-1 truncate cursor-pointer">
                                   {repo.name}

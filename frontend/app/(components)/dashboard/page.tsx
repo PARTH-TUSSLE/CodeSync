@@ -39,7 +39,8 @@ function page() {
 
       if (isStarred) {
         // Unstar the repo
-        await axios.delete(`http://localhost:8000/star/${repoId}`, {
+        console.log(token);
+        await axios.put(`http://localhost:8000/unstar/${repoId}`,{}, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -55,7 +56,7 @@ function page() {
         }
       } else {
         // Star the repo
-        await axios.post(
+        await axios.put(
           `http://localhost:8000/star/${repoId}`,
           {},
           {
