@@ -17,6 +17,8 @@ enum IssueStatus {
   closed
 }
 
+
+
 model User {
   id           String       @id @default(uuid())
   username     String       @unique
@@ -31,6 +33,7 @@ model User {
   starredRepos Repository[] @relation("UserStars")
   issues       Issue[]
   createdAt    DateTime     @default(now())
+   activities   Activity[]
 }
 
 model Repository {
@@ -66,4 +69,27 @@ model Issue {
 
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+}
+
+enum ActivityType {
+  COMMIT
+  PUSH
+  REPO_CREATED
+  ISSUE_CREATED
+  ISSUE_CLOSED
+  STARRED_REPO
+  PULL_REQUEST
+}
+
+model Activity {
+  id        String       @id @default(uuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      ActivityType
+  metadata  Json?        // Store additional info like repoId, issueId, etc.
+  
+  createdAt DateTime     @default(now())
+  
+  @@index([userId, createdAt])
 }
