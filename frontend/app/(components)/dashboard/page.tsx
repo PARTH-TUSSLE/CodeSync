@@ -205,7 +205,7 @@ function page() {
                             e.stopPropagation();
                             handleStarRepo(repo.id);
                           }}
-                          className={`flex-shrink-0 p-1.5 rounded-lg border transition-all ${
+                          className={`flex-shrink-0 p-1.5 rounded-lg border transition-all min-w-[36px] min-h-[36px] flex items-center justify-center ${
                             userProfile?.starredRepos.includes(repo.id)
                               ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
                               : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
@@ -345,7 +345,7 @@ function page() {
                               e.stopPropagation();
                               handleStarRepo(repo.id);
                             }}
-                            className={`flex-shrink-0 p-2 rounded-lg border transition-all ${
+                            className={`flex-shrink-0 p-2 rounded-lg border transition-all min-w-[44px] min-h-[44px] flex items-center justify-center ${
                               userProfile?.starredRepos.includes(repo.id)
                                 ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
                                 : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"

@@ -34,6 +34,8 @@ function page() {
   const [activeTab, setActiveTab] = useState("repositories");
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredRepos, setFilteredRepos] = useState<Repository[]>([]);
+  const [filterType, setFilterType] = useState("All");
+  const [sortBy, setSortBy] = useState("Last updated");
 
   const handleStarRepo = async (repoId: string) => {
     const userId = localStorage.getItem("userId");
@@ -129,15 +131,34 @@ function page() {
   }, []);
 
   useEffect(() => {
-    if (searchQuery === "") {
-      setFilteredRepos(repositories);
-    } else {
-      const filtered = repositories.filter((repo) =>
+    let filtered = repositories;
+
+    // Filter by search query
+    if (searchQuery !== "") {
+      filtered = filtered.filter((repo) =>
         repo.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
-      setFilteredRepos(filtered);
     }
-  }, [searchQuery, repositories]);
+
+    // Filter by type (Public/Private/All)
+    if (filterType === "Public") {
+      filtered = filtered.filter((repo) => repo.visibility === true);
+    } else if (filterType === "Private") {
+      filtered = filtered.filter((repo) => repo.visibility === false);
+    }
+
+    // Sort repositories
+    if (sortBy === "Name") {
+      filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === "Last updated") {
+      filtered = [...filtered].sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+      );
+    }
+
+    setFilteredRepos(filtered);
+  }, [searchQuery, repositories, filterType, sortBy]);
 
   if (loading) {
     return (
@@ -419,14 +440,20 @@ function page() {
                       className="flex-1 px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-xs sm:text-sm text-gray-300 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     />
                     <div className="flex gap-2">
-                      <select className="px-2 sm:px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-xs sm:text-sm text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:bg-gray-750 transition-colors cursor-pointer">
-                        <option>Type</option>
+                      <select
+                        value={filterType}
+                        onChange={(e) => setFilterType(e.target.value)}
+                        className="px-2 sm:px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-xs sm:text-sm text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:bg-gray-750 transition-colors cursor-pointer"
+                      >
                         <option>All</option>
                         <option>Public</option>
                         <option>Private</option>
                       </select>
-                      <select className="px-2 sm:px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-xs sm:text-sm text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:bg-gray-750 transition-colors cursor-pointer">
-                        <option>Sort</option>
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="px-2 sm:px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-xs sm:text-sm text-gray-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:bg-gray-750 transition-colors cursor-pointer"
+                      >
                         <option>Last updated</option>
                         <option>Name</option>
                       </select>
@@ -502,7 +529,7 @@ function page() {
                                 e.stopPropagation();
                                 handleStarRepo(repo.id);
                               }}
-                              className={`flex-shrink-0 p-2 rounded-lg border transition-all ${
+                              className={`flex-shrink-0 p-2 rounded-lg border transition-all min-w-[40px] min-h-[40px] flex items-center justify-center ${
                                 userProfile?.starredRepos.includes(repo.id)
                                   ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
                                   : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
@@ -622,7 +649,7 @@ function page() {
                                   e.stopPropagation();
                                   handleStarRepo(repo.id);
                                 }}
-                                className={`flex-shrink-0 p-2 rounded-lg border transition-all ${
+                                className={`flex-shrink-0 p-2 rounded-lg border transition-all min-w-[40px] min-h-[40px] flex items-center justify-center ${
                                   userProfile?.starredRepos.includes(repo.id)
                                     ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
                                     : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
