@@ -1,8 +1,10 @@
 import type { Request, Response } from "express";
 import { prisma } from "../prisma.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const createRepository = async (req: Request, res: Response) => {
-  const { name, description, content, visibility, ownerId } = req.body;
+  const { name, description, content, visibility } = req.body;
+  const ownerId = req.userId;
 
   try {
     if (!name) {
@@ -31,6 +33,13 @@ export const createRepository = async (req: Request, res: Response) => {
         visibility: visibility ? visibility : true,
         ownerId: ownerId,
       },
+    });
+
+    // L7og the activity for contribution tracking
+    await logActivity(ownerId, "REPO_CREATED", {
+      repoId: createdRepo.id,
+      repoName: createdRepo.name,
+      visibility: createdRepo.visibility,
     });
 
     return res.status(201).json({

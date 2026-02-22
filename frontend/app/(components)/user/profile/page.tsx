@@ -1,6 +1,7 @@
 "use client";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import ContributionHeatmap from "../ContributionHeatmap";
 
 function page() {
   interface Repository {
@@ -415,16 +416,12 @@ function page() {
                     </div>
                   </div>
 
-                  {/* Contribution Activity Placeholder */}
+                  {/* Contribution Activity */}
                   <div>
                     <h2 className="text-xs sm:text-sm font-normal text-gray-300 mb-2 sm:mb-3 flex items-center gap-2">
                       <span>Contribution activity</span>
                     </h2>
-                    <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 sm:p-6 text-center">
-                      <p className="text-gray-500 text-xs sm:text-sm">
-                        Contribution heatmap coming soon...
-                      </p>
-                    </div>
+                    <ContributionHeatmap userId={userProfile.id} />
                   </div>
                 </div>
               )}

@@ -1,9 +1,10 @@
 import type { Request, Response } from "express";
 import { prisma } from "../prisma.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const starRepository = async (req: Request, res: Response) => {
   const repoId = String(req.params.repoId);
-  const userId = req.userId; // From auth middleware
+  const userId = req.userId; 
 
   if (!userId) {
     return res.status(401).json({
@@ -31,6 +32,12 @@ export const starRepository = async (req: Request, res: Response) => {
           connect: { id: repoId },
         },
       },
+    });
+
+
+    await logActivity(userId, "STARRED_REPO", {
+      repoId: repoId,
+      repoName: repository.name,
     });
 
     return res.status(200).json({

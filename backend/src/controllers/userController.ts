@@ -207,7 +207,7 @@ export const updateUserProfile = async (req: Request, res: Response) => {
         },
         data: {
           email: newEmail,
-          password: newHashedPassword
+          password: newHashedPassword,
         },
       });
 
@@ -215,7 +215,6 @@ export const updateUserProfile = async (req: Request, res: Response) => {
         msg: "Email and password updated successfully !",
         updatedUser,
       });
-
     }
 
     if (newEmail) {
@@ -250,13 +249,11 @@ export const updateUserProfile = async (req: Request, res: Response) => {
         msg: "Password updated successfully !",
         updatedUser,
       });
-      
     }
 
     return res.status(400).json({
-      msg: "At least one field is required, email or password"
-    })
-
+      msg: "At least one field is required, email or password",
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
 
@@ -300,6 +297,65 @@ export const deleteUserProfile = async (req: Request, res: Response) => {
 
     return res.status(500).json({
       msg: `Error while deleting the user - ${errMessage}`,
+    });
+  }
+};
+
+
+export const getUserContributions = async (req: Request, res: Response) => {
+  const userId = String(req.params.id);
+  const { year } = req.query;
+
+  try {
+    const currentYear = year
+      ? parseInt(year as string)
+      : new Date().getFullYear();
+    const startDate = new Date(currentYear, 0, 1); 
+    const endDate = new Date(currentYear, 11, 31, 23, 59, 59, 999); 
+
+    // Fetch all activities for this user in the specified year
+    const activities = await prisma.activity.findMany({
+      where: {
+        userId: userId,
+        createdAt: {
+          gte: startDate, // greater than or equal
+          lte: endDate, // less than or equal
+        },
+      },
+      select: {
+        createdAt: true,
+        type: true,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+
+    const contributionMap = new Map<string, number>();
+
+    activities.forEach((activity) => {
+      const date = activity.createdAt.toISOString().split("T")[0]; 
+      contributionMap.set(String(date), (contributionMap.get(String(date)) || 0) + 1);
+    });
+
+    const contributions = Array.from(contributionMap.entries()).map(
+      ([date, count]) => ({
+        date,
+        count,
+      }),
+    );
+
+    return res.status(200).json({
+      msg: "Contributions fetched successfully",
+      contributions,
+      totalContributions: activities.length,
+      year: currentYear,
+    });
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({
+      msg: "Error fetching contributions",
+      error: errMsg,
     });
   }
 };

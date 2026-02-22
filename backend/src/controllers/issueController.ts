@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { prisma } from "../prisma.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const createIssue = async (req: Request, res: Response) => {
   const { title, description, status, repoID, creatorID } = req.body;
@@ -19,6 +20,13 @@ export const createIssue = async (req: Request, res: Response) => {
         repositoryId: repoID,
         authorId: creatorID,
       },
+    });
+
+    // Log the activity for contribution tracking
+    await logActivity(creatorID, "ISSUE_CREATED", {
+      issueId: createdIssue.id,
+      issueTitle: createdIssue.title,
+      repositoryId: repoID,
     });
 
     if (createdIssue) {
@@ -71,6 +79,15 @@ export const updateIssueByID = async (req: Request, res: Response) => {
         ...(status && { status }),
       },
     });
+
+    
+    if (status === "closed" && existingIssue.status !== "closed") {
+      await logActivity(existingIssue.authorId, "ISSUE_CLOSED", {
+        issueId: updatedIssue.id,
+        issueTitle: updatedIssue.title,
+        repositoryId: existingIssue.repositoryId,
+      });
+    }
 
     return res.status(200).json({
       msg: "Issue update successfully !",

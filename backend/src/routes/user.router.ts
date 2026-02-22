@@ -3,6 +3,7 @@ import {
   deleteUserProfile,
   getAllUsers,
   getUserProfile,
+  getUserContributions,
   login,
   signup,
   updateUserProfile,
@@ -22,3 +23,4 @@ userRouter.get("/userProfile/:id",authMiddleware, getUserProfile);
 userRouter.post("/login", login);
 userRouter.put("/updateProfile/:id",authMiddleware, updateUserProfile);
 userRouter.delete("/deleteProfile/:id",authMiddleware, deleteUserProfile);
+userRouter.get("/contributions/:id", authMiddleware, getUserContributions);
