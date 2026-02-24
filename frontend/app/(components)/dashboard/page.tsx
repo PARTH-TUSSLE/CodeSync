@@ -31,6 +31,14 @@ function page() {
   const [searchResults, setSearchResults] = useState<Repository[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
+  // Suggested repos search and pagination
+  const [suggestedSearchQuery, setSuggestedSearchQuery] = useState<string>("");
+  const [filteredSuggestedRepos, setFilteredSuggestedRepos] = useState<
+    Repository[]
+  >([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 5;
+
   const handleStarRepo = async (repoId: string) => {
     const token = localStorage.getItem("token");
 
@@ -40,11 +48,15 @@ function page() {
       if (isStarred) {
         // Unstar the repo
         console.log(token);
-        await axios.put(`http://localhost:8000/unstar/${repoId}`,{}, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        await axios.put(
+          `http://localhost:8000/unstar/${repoId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
         // Update local state
         if (userProfile) {
           setUserProfile({
@@ -142,6 +154,29 @@ function page() {
     setSearchResults(filteredRepos);
   }, [searchQuery, repositories]);
 
+  // Filter suggested repositories based on search
+  useEffect(() => {
+    if (suggestedSearchQuery === "") {
+      setFilteredSuggestedRepos(suggestedRepositories);
+      setCurrentPage(1);
+      return;
+    }
+    const filtered = suggestedRepositories.filter((repo) =>
+      repo.name.toLowerCase().includes(suggestedSearchQuery.toLowerCase()),
+    );
+    setFilteredSuggestedRepos(filtered);
+    setCurrentPage(1);
+  }, [suggestedSearchQuery, suggestedRepositories]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredSuggestedRepos.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedSuggestedRepos = filteredSuggestedRepos.slice(
+    startIndex,
+    endIndex,
+  );
+
   const userName =
     typeof window !== "undefined"
       ? localStorage.getItem("userName") || "User"
@@ -171,11 +206,27 @@ function page() {
                 </svg>
                 Suggested Repositories
               </h2>
-              <div className="space-y-2 sm:space-y-3 max-h-[300px] sm:max-h-[400px] lg:max-h-[600px] overflow-y-auto hide-scrollbar">
-                {suggestedRepositories.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No repositories found</p>
+
+              {/* Search Bar for Suggested Repos */}
+              <div className="mb-3 sm:mb-4">
+                <input
+                  type="text"
+                  placeholder="Search suggestions..."
+                  value={suggestedSearchQuery}
+                  onChange={(e) => setSuggestedSearchQuery(e.target.value)}
+                  className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-gray-200 text-xs sm:text-sm transition-all"
+                />
+              </div>
+
+              <div className="space-y-2 sm:space-y-3 max-h-[300px] sm:max-h-[400px] lg:max-h-[500px] overflow-y-auto hide-scrollbar">
+                {paginatedSuggestedRepos.length === 0 ? (
+                  <p className="text-gray-500 text-sm">
+                    {suggestedSearchQuery
+                      ? "No repositories match your search"
+                      : "No repositories found"}
+                  </p>
                 ) : (
-                  suggestedRepositories.slice(0, 10).map((repo) => (
+                  paginatedSuggestedRepos.map((repo) => (
                     <div
                       key={repo.id}
                       className="p-2 sm:p-3 bg-gray-800 border border-gray-700 rounded-lg transition-all duration-200 hover:bg-gray-750 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/20"
@@ -235,6 +286,57 @@ function page() {
                   ))
                 )}
               </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-3 sm:mt-4 flex items-center justify-center gap-2">
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
+                    }
+                    disabled={currentPage === 1}
+                    className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                      currentPage === 1
+                        ? "bg-gray-800 text-gray-600 cursor-not-allowed"
+                        : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700 hover:border-blue-500"
+                    }`}
+                  >
+                    Previous
+                  </button>
+
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                            currentPage === page
+                              ? "bg-blue-600 text-white"
+                              : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700 hover:border-blue-500"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ),
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                    className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                      currentPage === totalPages
+                        ? "bg-gray-800 text-gray-600 cursor-not-allowed"
+                        : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700 hover:border-blue-500"
+                    }`}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

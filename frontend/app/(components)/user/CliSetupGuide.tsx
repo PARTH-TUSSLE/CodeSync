@@ -299,7 +299,7 @@ export default function CliSetupGuide() {
                   <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400 dark:text-amber-300" />
                 </div>
                 <div>
-                  <h4 className="text-base sm:text-lg font-bold text-amber-300 dark:text-amber-200 mb-2">
+                  <h4          className="text-base sm:text-lg font-bold text-amber-300 dark:text-amber-200 mb-2">
                     Security Notice
                   </h4>
                   <p className="text-xs sm:text-sm text-amber-200/90 dark:text-amber-100/80 leading-relaxed">
