@@ -39,7 +39,6 @@ function SignupPage() {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("userId", response.data.user.id);
 
-      
       setCurrUser(response.data.user.id);
 
       usernameRef.current!.value = "";
@@ -62,17 +61,16 @@ function SignupPage() {
   return (
     <div className="min-h-screen bg-[#0d1117] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-
         <div className="flex justify-center mb-8">
           <Image
             src="/codeSyncLogo.svg"
             alt="CodeSync"
             width={60}
             height={60}
-            className="brightness-0 invert"
+            className="brightness-0 invert object-contain"
+            style={{ maxHeight: "60px", width: "auto" }}
           />
         </div>
-
 
         <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-8 shadow-2xl">
           <h1 className="text-2xl font-light text-[#f0f6fc] mb-2 text-center">
@@ -88,7 +86,7 @@ function SignupPage() {
                 {error}
               </div>
             )}
-            
+
             <div>
               <label
                 htmlFor="username"
@@ -107,7 +105,6 @@ function SignupPage() {
               />
             </div>
 
-
             <div>
               <label
                 htmlFor="email"
@@ -125,7 +122,6 @@ function SignupPage() {
                 placeholder="Enter your email"
               />
             </div>
-
 
             <div>
               <label
@@ -147,7 +143,6 @@ function SignupPage() {
                 Make sure it's at least 8 characters
               </p>
             </div>
-
 
             <button
               type="submit"
@@ -185,7 +180,6 @@ function SignupPage() {
           </form>
         </div>
 
-        
         <div className="mt-6 text-center">
           <p className="text-[#8b949e] text-sm">
             Already have an account?{" "}

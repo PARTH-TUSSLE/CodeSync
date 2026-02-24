@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { prisma } from "../prisma.js";
-import { logActivity } from "../utils/activityLogger.js";
+import { logActivity, removeActivity } from "../utils/activityLogger.js";
 
 export const createIssue = async (req: Request, res: Response) => {
   const { title, description, status, repoID, creatorID } = req.body;
@@ -106,21 +106,38 @@ export const deleteIssueByID = async (req: Request, res: Response) => {
   const issueID = req.params.id;
 
   try {
+    // First get the issue to access its data
+    const issue = await prisma.issue.findUnique({
+      where: { id: String(issueID) },
+    });
 
+    if (!issue) {
+      return res.status(404).json({
+        msg: "Issue with this ID not found !"
+      });
+    }
+
+    // Delete the issue
     const deletedIssue = await prisma.issue.delete({
       where: {
         id: String(issueID)
       }
     });
 
-    if (!deletedIssue) {
-      return res.status(404).json({
-        msg: "Issue with this ID not found !"
-      })
+    // Remove ISSUE_CREATED activity (-1 contribution)
+    await removeActivity(issue.authorId, "ISSUE_CREATED", {
+      issueId: issueID,
+    });
+
+    // Also remove ISSUE_CLOSED activity if it was closed (-1 contribution)
+    if (issue.status === "closed") {
+      await removeActivity(issue.authorId, "ISSUE_CLOSED", {
+        issueId: issueID,
+      });
     }
 
     return res.status(200).json({
-      msg: "Issue deleted successfully !",
+      msg: "Issue deleted successfully and contribution count updated",
       deletedIssue
     })
 

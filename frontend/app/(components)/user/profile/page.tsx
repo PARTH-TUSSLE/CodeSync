@@ -2,6 +2,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import ContributionHeatmap from "../ContributionHeatmap";
+import CliSetupGuide from "../CliSetupGuide";
 
 function page() {
   interface Repository {
@@ -422,6 +423,11 @@ function page() {
                       <span>Contribution activity</span>
                     </h2>
                     <ContributionHeatmap userId={userProfile.id} />
+                  </div>
+
+                  {/* CLI Setup Guide */}
+                  <div>
+                    <CliSetupGuide />
                   </div>
                 </div>
               )}

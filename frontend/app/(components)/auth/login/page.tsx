@@ -66,7 +66,8 @@ function LoginPage() {
             alt="CodeSync"
             width={60}
             height={60}
-            className="brightness-0 invert"
+            className="brightness-0 invert object-contain"
+            style={{ maxHeight: '60px', width: 'auto' }}
           />
         </div>
 

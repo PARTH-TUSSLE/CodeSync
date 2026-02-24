@@ -34,12 +34,6 @@ export const starRepository = async (req: Request, res: Response) => {
       },
     });
 
-
-    await logActivity(userId, "STARRED_REPO", {
-      repoId: repoId,
-      repoName: repository.name,
-    });
-
     return res.status(200).json({
       msg: "Repository starred successfully",
     });
@@ -54,7 +48,7 @@ export const starRepository = async (req: Request, res: Response) => {
 
 export const unstarRepository = async (req: Request, res: Response) => {
   const repoId = String(req.params.repoId);
-  const userId = req.userId; // From auth middleware
+  const userId = req.userId; 
 
   if (!userId) {
     return res.status(401).json({
@@ -63,7 +57,7 @@ export const unstarRepository = async (req: Request, res: Response) => {
   }
 
   try {
-    // Remove the repository from user's starred repos
+    
     await prisma.user.update({
       where: { id: userId },
       data: {

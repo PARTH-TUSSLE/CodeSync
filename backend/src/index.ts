@@ -7,6 +7,7 @@ import commitFiles from "./controllers/commit.js";
 import revert from "./controllers/revert.js";
 import pullChanges from "./controllers/pull.js";
 import pushChanges from "./controllers/push.js";
+import { loginUser, logoutUser } from "./utils/globalConfig.js";
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
@@ -66,11 +67,24 @@ yargs(hideBin(process.argv))
     });
   })
   .command(
-    "init", // command
-    "Initialise a new repository", // description
-    {}, // parameters
-    initRepo, // actual logic/function
+    "login <token>",
+    "Login with your authentication token",
+    (yargs) => {
+      yargs.positional("token", {
+        describe: "JWT token from web app login",
+        type: "string",
+      });
+    },
+    (argv) => {
+      loginUser(argv.token as string);
+    },
   )
+  .command("logout", "Logout and remove stored credentials", {}, () => {
+    logoutUser();
+  })
+  .command("init", "Initialise a new repository", {}, () => {
+    initRepo();
+  })
   .command(
     "add <file>",
     "Add a file to the staging area",

@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { prisma } from "../prisma.js";
-import { logActivity } from "../utils/activityLogger.js";
+import { logActivity, removeActivity } from "../utils/activityLogger.js";
 
 export const createRepository = async (req: Request, res: Response) => {
   const { name, description, content, visibility } = req.body;
@@ -19,10 +19,10 @@ export const createRepository = async (req: Request, res: Response) => {
       });
     }
 
-    if ( !ownerId ) {
+    if (!ownerId) {
       return res.status(400).json({
-        msg: "Required field ownerID is missing !"
-      })
+        msg: "Required field ownerID is missing !",
+      });
     }
 
     const createdRepo = await prisma.repository.create({
@@ -107,30 +107,27 @@ export const fetchRepositoryByID = async (req: Request, res: Response) => {
 };
 
 export const fetchRepositoryByName = async (req: Request, res: Response) => {
-
-  const name  = req.params.name;
+  const name = req.params.name;
   // const { ownerID } = req.body;
 
   try {
-
     const repos = await prisma.repository.findMany({
       where: {
         name: String(name),
         // ownerId: ownerID
-      }
-    })
+      },
+    });
 
     if (repos && repos.length !== 0) {
       return res.status(200).json({
         msg: "Fetched repository successfully !",
-        repos
-      })
-    }  
+        repos,
+      });
+    }
 
     return res.status(404).json({
-      msg: "Repository with this name not found !"
-    })
-
+      msg: "Repository with this name not found !",
+    });
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     return res.status(500).json({
@@ -143,35 +140,31 @@ export const fetchRepositoriesForCurrentUser = async (
   req: Request,
   res: Response,
 ) => {
-  
   const userId = req.params.userID;
 
   try {
-    
     const userRepos = await prisma.repository.findMany({
       where: {
-        ownerId: String(userId)
-      }
+        ownerId: String(userId),
+      },
     });
 
-    if ( !userRepos || userRepos.length === 0 ) {
+    if (!userRepos || userRepos.length === 0) {
       return res.status(404).json({
-        msg: "No repositories found !"
-      })
+        msg: "No repositories found !",
+      });
     }
 
     return res.status(200).json({
       msg: "Successfully fetched the repositories of the user",
-      userRepos
-    })
-
+      userRepos,
+    });
   } catch (error) {
-    const errMsg = error instanceof Error? error.message : String(error);
+    const errMsg = error instanceof Error ? error.message : String(error);
     return res.status(500).json({
-      msg: `Some error occurred while getting the repositories of this user - ${errMsg}`
-    })
+      msg: `Some error occurred while getting the repositories of this user - ${errMsg}`,
+    });
   }
-
 };
 
 export const updateRepositoryByID = (req: Request, res: Response) => {
@@ -182,6 +175,54 @@ export const toggleVisibilityByID = (req: Request, res: Response) => {
   res.send("toggled the visibility of repo");
 };
 
-export const deleteRepositoryByID = (req: Request, res: Response) => {
-  res.send("Deleted repo by ID");
+export const deleteRepositoryByID = async (req: Request, res: Response) => {
+  const repoId = String(req.params.id);
+  const userId = req.userId; // From auth middleware
+
+  if (!userId) {
+    return res.status(401).json({
+      msg: "Unauthorized",
+    });
+  }
+
+  try {
+    // First, find the repository to verify ownership
+    const repository = await prisma.repository.findUnique({
+      where: { id: repoId },
+    });
+
+    if (!repository) {
+      return res.status(404).json({
+        msg: "Repository not found",
+      });
+    }
+
+    // Check if the user is the owner
+    if (repository.ownerId !== userId) {
+      return res.status(403).json({
+        msg: "Forbidden: You can only delete your own repositories",
+      });
+    }
+
+    // Delete the repository
+    const deletedRepo = await prisma.repository.delete({
+      where: { id: repoId },
+    });
+
+    // Remove the REPO_CREATED activity from contributions (-1)
+    await removeActivity(userId, "REPO_CREATED", {
+      repoId: repoId,
+    });
+
+    return res.status(200).json({
+      msg: "Repository deleted successfully and contribution count updated",
+      deletedRepo,
+    });
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({
+      msg: "Error while deleting repository",
+      error: errMsg,
+    });
+  }
 };
