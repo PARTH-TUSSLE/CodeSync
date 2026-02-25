@@ -34,7 +34,7 @@ export default function Navbar() {
     if (storedUsername) {
       setUsername(storedUsername);
     }
-  }, []);
+  }, [pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");

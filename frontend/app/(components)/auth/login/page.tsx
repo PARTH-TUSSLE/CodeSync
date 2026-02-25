@@ -30,15 +30,16 @@ function LoginPage() {
       setIsLoading(true);
       setError("");
 
-      const response = await axios.post(
+      const response = await axios.post<{ token: string; user: { id: string; username: string } }>(
         "http://localhost:8000/login",
         formData,
       );
 
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("userId", response.data.user.id);
+      localStorage.setItem("userName", response.data.user.username);
 
-      
+
       setCurrUser(response.data.user.id);
 
       emailRef.current!.value = "";

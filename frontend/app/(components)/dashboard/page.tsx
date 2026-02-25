@@ -39,6 +39,14 @@ function page() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 5;
 
+  // Create repository modal states
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+  const [newRepoName, setNewRepoName] = useState<string>("");
+  const [newRepoDescription, setNewRepoDescription] = useState<string>("");
+  const [newRepoVisibility, setNewRepoVisibility] = useState<boolean>(true);
+  const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [createError, setCreateError] = useState<string>("");
+
   const handleStarRepo = async (repoId: string) => {
     const token = localStorage.getItem("token");
 
@@ -90,6 +98,56 @@ function page() {
     }
   };
 
+  const handleCreateRepository = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreateError("");
+
+    if (!newRepoName.trim()) {
+      setCreateError("Repository name is required");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+
+    try {
+      setIsCreating(true);
+
+      const response = await axios.post<{ createdRepo: Repository }>(
+        "http://localhost:8000/repo/create",
+        {
+          name: newRepoName.trim(),
+          description: newRepoDescription.trim() || undefined,
+          content: [], // Start with empty content array
+          visibility: newRepoVisibility,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      // Add the new repo to the list
+      setRepositories([response.data.createdRepo, ...repositories]);
+
+      // Reset form and close modal
+      setNewRepoName("");
+      setNewRepoDescription("");
+      setNewRepoVisibility(true);
+      setIsCreateModalOpen(false);
+      setCreateError("");
+    } catch (error: any) {
+      const errMsg =
+        error.response?.data?.msg ||
+        error.message ||
+        "Failed to create repository";
+      setCreateError(errMsg);
+      console.error("Error creating repository:", error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   useEffect(() => {
     const userId = localStorage.getItem("userId");
     const token = localStorage.getItem("token");
@@ -99,7 +157,7 @@ function page() {
 
     const fetchUserProfile = async () => {
       try {
-        const response = await axios.get(
+        const response = await axios.get<{ user: UserProfile }>(
           `http://localhost:8000/userProfile/${userId}`,
           {
             headers: {
@@ -114,7 +172,7 @@ function page() {
     };
 
     const fetchUserRepos = async () => {
-      const response = await axios.get(
+      const response = await axios.get<{ userRepos: Repository[] }>(
         `http://localhost:8000/repo/user/${userId}`,
         {
           headers: {
@@ -133,7 +191,7 @@ function page() {
 
   useEffect(() => {
     const fetchAllRepos = async () => {
-      const response = await axios.get(`http://localhost:8000/allRepos`);
+      const response = await axios.get<{ repos: Repository[] }>(`http://localhost:8000/allRepos`);
       const allRepos = await response.data.repos;
       console.log(allRepos);
       setSuggestedRepositories(allRepos);
@@ -141,7 +199,7 @@ function page() {
     fetchAllRepos();
   }, []);
 
-  useEffect(() => {}, []);
+  useEffect(() => { }, []);
 
   useEffect(() => {
     if (searchQuery === "") {
@@ -256,11 +314,10 @@ function page() {
                             e.stopPropagation();
                             handleStarRepo(repo.id);
                           }}
-                          className={`flex-shrink-0 p-1.5 rounded-lg border transition-all min-w-[36px] min-h-[36px] flex items-center justify-center ${
-                            userProfile?.starredRepos.includes(repo.id)
-                              ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
-                              : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
-                          }`}
+                          className={`flex-shrink-0 p-1.5 rounded-lg border transition-all min-w-[36px] min-h-[36px] flex items-center justify-center ${userProfile?.starredRepos.includes(repo.id)
+                            ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
+                            : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
+                            }`}
                           title={
                             userProfile?.starredRepos.includes(repo.id)
                               ? "Unstar"
@@ -295,11 +352,10 @@ function page() {
                       setCurrentPage((prev) => Math.max(1, prev - 1))
                     }
                     disabled={currentPage === 1}
-                    className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-                      currentPage === 1
-                        ? "bg-gray-800 text-gray-600 cursor-not-allowed"
-                        : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700 hover:border-blue-500"
-                    }`}
+                    className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${currentPage === 1
+                      ? "bg-gray-800 text-gray-600 cursor-not-allowed"
+                      : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700 hover:border-blue-500"
+                      }`}
                   >
                     Previous
                   </button>
@@ -310,11 +366,10 @@ function page() {
                         <button
                           key={page}
                           onClick={() => setCurrentPage(page)}
-                          className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-                            currentPage === page
-                              ? "bg-blue-600 text-white"
-                              : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700 hover:border-blue-500"
-                          }`}
+                          className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg text-xs sm:text-sm font-medium transition-all ${currentPage === page
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700 hover:border-blue-500"
+                            }`}
                         >
                           {page}
                         </button>
@@ -327,11 +382,10 @@ function page() {
                       setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                     }
                     disabled={currentPage === totalPages}
-                    className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-                      currentPage === totalPages
-                        ? "bg-gray-800 text-gray-600 cursor-not-allowed"
-                        : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700 hover:border-blue-500"
-                    }`}
+                    className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${currentPage === totalPages
+                      ? "bg-gray-800 text-gray-600 cursor-not-allowed"
+                      : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700 hover:border-blue-500"
+                      }`}
                   >
                     Next
                   </button>
@@ -371,7 +425,10 @@ function page() {
                   </svg>
                   Your Repositories
                 </h2>
-                <button className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                >
                   + New Repository
                 </button>
               </div>
@@ -447,11 +504,10 @@ function page() {
                               e.stopPropagation();
                               handleStarRepo(repo.id);
                             }}
-                            className={`flex-shrink-0 p-2 rounded-lg border transition-all min-w-[44px] min-h-[44px] flex items-center justify-center ${
-                              userProfile?.starredRepos.includes(repo.id)
-                                ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
-                                : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
-                            }`}
+                            className={`flex-shrink-0 p-2 rounded-lg border transition-all min-w-[44px] min-h-[44px] flex items-center justify-center ${userProfile?.starredRepos.includes(repo.id)
+                              ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
+                              : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
+                              }`}
                             title={
                               userProfile?.starredRepos.includes(repo.id)
                                 ? "Unstar"
@@ -551,7 +607,10 @@ function page() {
                 Quick Actions
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
-                <button className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-green-500 rounded-lg text-left text-xs sm:text-sm text-gray-300 transition-all duration-200 flex items-center gap-2 sm:gap-3 hover:shadow-lg hover:shadow-green-500/10">
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-green-500 rounded-lg text-left text-xs sm:text-sm text-gray-300 transition-all duration-200 flex items-center gap-2 sm:gap-3 hover:shadow-lg hover:shadow-green-500/10"
+                >
                   <svg
                     className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0"
                     fill="none"
@@ -629,6 +688,225 @@ function page() {
           </div>
         </div>
       </div>
+
+      {/* Create Repository Modal */}
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg shadow-2xl w-full max-w-md md:max-w-lg lg:max-w-2xl">
+            <div className="p-4 sm:p-6 lg:p-8">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-white">
+                  Create New Repository
+                </h2>
+                <button
+                  onClick={() => {
+                    setIsCreateModalOpen(false);
+                    setCreateError("");
+                    setNewRepoName("");
+                    setNewRepoDescription("");
+                    setNewRepoVisibility(true);
+                  }}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateRepository} className="space-y-4">
+                {createError && (
+                  <div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded-lg text-sm">
+                    {createError}
+                  </div>
+                )}
+
+                <div>
+                  <label
+                    htmlFor="repoName"
+                    className="block text-sm font-medium text-gray-300 mb-2"
+                  >
+                    Repository Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="repoName"
+                    value={newRepoName}
+                    onChange={(e) => setNewRepoName(e.target.value)}
+                    placeholder="my-awesome-project"
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-gray-200 text-sm transition-all"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="repoDescription"
+                    className="block text-sm font-medium text-gray-300 mb-2"
+                  >
+                    Description{" "}
+                    <span className="text-gray-500 text-xs">(Optional)</span>
+                  </label>
+                  <textarea
+                    id="repoDescription"
+                    value={newRepoDescription}
+                    onChange={(e) => setNewRepoDescription(e.target.value)}
+                    placeholder="A brief description of your repository..."
+                    rows={3}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-gray-200 text-sm transition-all resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Visibility
+                  </label>
+                  <div className="space-y-2 sm:space-y-3">
+                    <label
+                      onClick={() => setNewRepoVisibility(true)}
+                      className={`flex items-start p-2.5 sm:p-3 lg:p-4 bg-gray-800 border rounded-lg cursor-pointer transition-all ${newRepoVisibility === true
+                        ? "border-blue-500 ring-1 ring-blue-500/40"
+                        : "border-gray-700 hover:border-blue-500"
+                        }`}
+                    >
+                      <span className="mt-0.5 mr-2 sm:mr-3 flex-shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
+                        style={{
+                          borderColor: newRepoVisibility === true ? "#3b82f6" : "#6b7280",
+                          backgroundColor: "transparent",
+                        }}
+                      >
+                        {newRepoVisibility === true && (
+                          <span className="w-2 h-2 rounded-full bg-blue-500" />
+                        )}
+                      </span>
+                      <div>
+                        <div className="text-sm font-medium text-white flex items-center gap-2">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          Public
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Anyone can see this repository
+                        </p>
+                      </div>
+                    </label>
+                    <label
+                      onClick={() => setNewRepoVisibility(false)}
+                      className={`flex items-start p-2.5 sm:p-3 lg:p-4 bg-gray-800 border rounded-lg cursor-pointer transition-all ${newRepoVisibility === false
+                        ? "border-blue-500 ring-1 ring-blue-500/40"
+                        : "border-gray-700 hover:border-blue-500"
+                        }`}
+                    >
+                      <span className="mt-0.5 mr-2 sm:mr-3 flex-shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
+                        style={{
+                          borderColor: newRepoVisibility === false ? "#3b82f6" : "#6b7280",
+                          backgroundColor: "transparent",
+                        }}
+                      >
+                        {newRepoVisibility === false && (
+                          <span className="w-2 h-2 rounded-full bg-blue-500" />
+                        )}
+                      </span>
+                      <div>
+                        <div className="text-sm font-medium text-white flex items-center gap-2">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                            />
+                          </svg>
+                          Private
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Only you can see this repository
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 sm:gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCreateModalOpen(false);
+                      setCreateError("");
+                      setNewRepoName("");
+                      setNewRepoDescription("");
+                      setNewRepoVisibility(false);
+                    }}
+                    className="flex-1 px-3 py-1.5 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5 text-sm bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 rounded-lg transition-all"
+                    disabled={isCreating}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isCreating || !newRepoName.trim()}
+                    className="flex-1 px-3 py-1.5 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5 text-sm bg-green-600 hover:bg-green-700 disabled:bg-green-900 disabled:cursor-not-allowed text-white rounded-lg transition-all font-medium flex items-center justify-center gap-2"
+                  >
+                    {isCreating ? (
+                      <>
+                        <svg
+                          className="animate-spin h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Creating...
+                      </>
+                    ) : (
+                      "Create Repository"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

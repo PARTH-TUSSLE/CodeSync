@@ -97,7 +97,7 @@ function page() {
     const fetchUserData = async () => {
       try {
         // Fetch user profile
-        const profileResponse = await axios.get(
+        const profileResponse = await axios.get<{ user: UserProfile }>(
           `http://localhost:8000/userProfile/${userId}`,
           {
             headers: {
@@ -110,7 +110,7 @@ function page() {
         setUserProfile(user);
 
         // Fetch user repositories
-        const repoResponse = await axios.get(
+        const repoResponse = await axios.get<{ userRepos: Repository[] }>(
           `http://localhost:8000/repo/user/${userId}`,
           {
             headers: {
@@ -322,11 +322,10 @@ function page() {
               <nav className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto hide-scrollbar">
                 <button
                   onClick={() => setActiveTab("overview")}
-                  className={`py-2 sm:py-3 px-1 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-                    activeTab === "overview"
+                  className={`py-2 sm:py-3 px-1 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${activeTab === "overview"
                       ? "border-orange-500 text-white"
                       : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <svg
@@ -345,11 +344,10 @@ function page() {
                 </button>
                 <button
                   onClick={() => setActiveTab("repositories")}
-                  className={`py-2 sm:py-3 px-1 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-                    activeTab === "repositories"
+                  className={`py-2 sm:py-3 px-1 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${activeTab === "repositories"
                       ? "border-orange-500 text-white"
                       : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <svg
@@ -369,11 +367,10 @@ function page() {
                 </button>
                 <button
                   onClick={() => setActiveTab("stars")}
-                  className={`py-2 sm:py-3 px-1 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-                    activeTab === "stars"
+                  className={`py-2 sm:py-3 px-1 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${activeTab === "stars"
                       ? "border-orange-500 text-white"
                       : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     <svg
@@ -501,11 +498,10 @@ function page() {
                               <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-gray-500">
                                 <span className="flex items-center gap-1">
                                   <span
-                                    className={`w-2 h-2 rounded-full ${
-                                      repo.visibility
+                                    className={`w-2 h-2 rounded-full ${repo.visibility
                                         ? "bg-green-500"
                                         : "bg-gray-500"
-                                    }`}
+                                      }`}
                                   ></span>
                                   {repo.visibility ? "Public" : "Private"}
                                 </span>
@@ -532,11 +528,10 @@ function page() {
                                 e.stopPropagation();
                                 handleStarRepo(repo.id);
                               }}
-                              className={`flex-shrink-0 p-2 rounded-lg border transition-all min-w-[40px] min-h-[40px] flex items-center justify-center ${
-                                userProfile?.starredRepos.includes(repo.id)
+                              className={`flex-shrink-0 p-2 rounded-lg border transition-all min-w-[40px] min-h-[40px] flex items-center justify-center ${userProfile?.starredRepos.includes(repo.id)
                                   ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
                                   : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
-                              }`}
+                                }`}
                               title={
                                 userProfile?.starredRepos.includes(repo.id)
                                   ? "Unstar"
@@ -621,11 +616,10 @@ function page() {
                                 <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-gray-500">
                                   <span className="flex items-center gap-1">
                                     <span
-                                      className={`w-2 h-2 rounded-full ${
-                                        repo.visibility
+                                      className={`w-2 h-2 rounded-full ${repo.visibility
                                           ? "bg-green-500"
                                           : "bg-gray-500"
-                                      }`}
+                                        }`}
                                     ></span>
                                     {repo.visibility ? "Public" : "Private"}
                                   </span>
@@ -652,11 +646,10 @@ function page() {
                                   e.stopPropagation();
                                   handleStarRepo(repo.id);
                                 }}
-                                className={`flex-shrink-0 p-2 rounded-lg border transition-all min-w-[40px] min-h-[40px] flex items-center justify-center ${
-                                  userProfile?.starredRepos.includes(repo.id)
+                                className={`flex-shrink-0 p-2 rounded-lg border transition-all min-w-[40px] min-h-[40px] flex items-center justify-center ${userProfile?.starredRepos.includes(repo.id)
                                     ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
                                     : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
-                                }`}
+                                  }`}
                                 title={
                                   userProfile?.starredRepos.includes(repo.id)
                                     ? "Unstar"
