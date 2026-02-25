@@ -30,7 +30,7 @@ export const createRepository = async (req: Request, res: Response) => {
         name,
         description,
         content,
-        visibility: visibility ? visibility : true,
+        visibility: visibility ?? true,
         ownerId: ownerId,
       },
     });

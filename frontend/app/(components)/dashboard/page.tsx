@@ -907,7 +907,7 @@ function page() {
                       setCreateError("");
                       setNewRepoName("");
                       setNewRepoDescription("");
-                      setNewRepoVisibility(false);
+                      setNewRepoVisibility(true);
                     }}
                     className="flex-1 px-3 py-1.5 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5 text-sm bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 rounded-lg transition-all"
                     disabled={isCreating}
