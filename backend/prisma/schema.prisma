@@ -31,6 +31,7 @@ model User {
   following User[] @relation("UserFollows")
   followers User[] @relation("UserFollows")
   starredRepos Repository[] @relation("UserStars")
+  pinnedRepos  Repository[] @relation("UserPins")
   issues       Issue[]
   createdAt    DateTime     @default(now())
    activities   Activity[]
@@ -48,6 +49,7 @@ model Repository {
   ownerId     String
   owner       User     @relation("UserRepositories", fields: [ownerId], references: [id])
   starredBy User[] @relation("UserStars")
+  pinnedBy  User[]   @relation("UserPins")
 
   issues      Issue[]
 

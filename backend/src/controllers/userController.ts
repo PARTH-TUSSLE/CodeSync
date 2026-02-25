@@ -151,9 +151,10 @@ export const getUserProfile = async (req: Request, res: Response) => {
         followers: true,
         following: true,
         starredRepos: {
-          select: {
-            id: true,
-          },
+          select: { id: true },
+        },
+        pinnedRepos: {
+          select: { id: true },
         },
         bio: true,
         profilePic: true,
@@ -170,6 +171,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
     const formattedProfile = {
       ...userProfile,
       starredRepos: userProfile.starredRepos.map((repo) => repo.id),
+      pinnedRepos: userProfile.pinnedRepos.map((repo) => repo.id),
     };
 
     return res.status(200).json({
@@ -310,8 +312,8 @@ export const getUserContributions = async (req: Request, res: Response) => {
     const currentYear = year
       ? parseInt(year as string)
       : new Date().getFullYear();
-    const startDate = new Date(currentYear, 0, 1); 
-    const endDate = new Date(currentYear, 11, 31, 23, 59, 59, 999); 
+    const startDate = new Date(currentYear, 0, 1);
+    const endDate = new Date(currentYear, 11, 31, 23, 59, 59, 999);
 
     // Fetch all activities for this user in the specified year
     const activities = await prisma.activity.findMany({
@@ -334,7 +336,7 @@ export const getUserContributions = async (req: Request, res: Response) => {
     const contributionMap = new Map<string, number>();
 
     activities.forEach((activity) => {
-      const date = activity.createdAt.toISOString().split("T")[0]; 
+      const date = activity.createdAt.toISOString().split("T")[0];
       contributionMap.set(String(date), (contributionMap.get(String(date)) || 0) + 1);
     });
 

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { redirect } from "next/navigation";
+import { Pin } from "lucide-react";
 
 function page() {
   interface Repository {
@@ -21,6 +22,7 @@ function page() {
     username: string;
     email: string;
     starredRepos: string[];
+    pinnedRepos: string[];
   }
 
   const [repositories, setRepositories] = useState<Repository[]>([]);
@@ -47,11 +49,37 @@ function page() {
   const [isCreating, setIsCreating] = useState<boolean>(false);
   const [createError, setCreateError] = useState<string>("");
 
+  // Pinned repos — stored in DB via API
+  const handlePinRepo = async (repoId: string) => {
+    const token = localStorage.getItem("token");
+    const isPinned = userProfile?.pinnedRepos?.includes(repoId);
+    const endpoint = isPinned
+      ? `http://localhost:8000/unpin/${repoId}`
+      : `http://localhost:8000/pin/${repoId}`;
+
+    try {
+      await axios.put(endpoint, {}, { headers: { Authorization: `Bearer ${token}` } });
+      // Optimistically update local state
+      setUserProfile((prev) =>
+        prev
+          ? {
+            ...prev,
+            pinnedRepos: isPinned
+              ? prev.pinnedRepos.filter((id) => id !== repoId)
+              : [...prev.pinnedRepos, repoId],
+          }
+          : prev
+      );
+    } catch (err) {
+      console.error("Error toggling pin:", err);
+    }
+  };
+
   const handleStarRepo = async (repoId: string) => {
     const token = localStorage.getItem("token");
 
     try {
-      const isStarred = userProfile?.starredRepos.includes(repoId);
+      const isStarred = userProfile?.starredRepos?.includes(repoId);
 
       if (isStarred) {
         // Unstar the repo
@@ -499,6 +527,24 @@ function page() {
                           </div>
                         </div>
                         <div className="flex gap-2">
+                          {/* Pin button */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePinRepo(repo.id);
+                            }}
+                            title={userProfile?.pinnedRepos?.includes(repo.id) ? "Unpin from profile" : "Pin to profile"}
+                            className={`flex-shrink-0 p-2 rounded-lg border transition-all duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center ${userProfile?.pinnedRepos?.includes(repo.id)
+                              ? "bg-purple-500/10 border-purple-500/40 text-purple-400 hover:bg-purple-500/20"
+                              : "bg-gray-800 border-gray-700 text-gray-400 hover:border-purple-500/40 hover:text-purple-400"
+                              }`}
+                          >
+                            <Pin
+                              className="w-4 h-4 sm:w-[18px] sm:h-[18px]"
+                              fill={userProfile?.pinnedRepos?.includes(repo.id) ? "currentColor" : "none"}
+                            />
+                          </button>
+                          {/* Star button */}
                           <button
                             onClick={(e) => {
                               e.stopPropagation();

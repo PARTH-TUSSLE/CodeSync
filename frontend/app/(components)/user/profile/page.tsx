@@ -3,6 +3,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import ContributionHeatmap from "../ContributionHeatmap";
 import CliSetupGuide from "../CliSetupGuide";
+import { Pin } from "lucide-react";
 
 function page() {
   interface Repository {
@@ -23,6 +24,7 @@ function page() {
     following: string[];
     followers: string[];
     starredRepos: string[];
+    pinnedRepos: string[];
     bio?: string;
     profilePic?: string;
     location?: string;
@@ -323,8 +325,8 @@ function page() {
                 <button
                   onClick={() => setActiveTab("overview")}
                   className={`py-2 sm:py-3 px-1 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${activeTab === "overview"
-                      ? "border-orange-500 text-white"
-                      : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700"
+                    ? "border-orange-500 text-white"
+                    : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700"
                     }`}
                 >
                   <div className="flex items-center gap-1.5 sm:gap-2">
@@ -345,8 +347,8 @@ function page() {
                 <button
                   onClick={() => setActiveTab("repositories")}
                   className={`py-2 sm:py-3 px-1 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${activeTab === "repositories"
-                      ? "border-orange-500 text-white"
-                      : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700"
+                    ? "border-orange-500 text-white"
+                    : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700"
                     }`}
                 >
                   <div className="flex items-center gap-1.5 sm:gap-2">
@@ -368,8 +370,8 @@ function page() {
                 <button
                   onClick={() => setActiveTab("stars")}
                   className={`py-2 sm:py-3 px-1 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${activeTab === "stars"
-                      ? "border-orange-500 text-white"
-                      : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700"
+                    ? "border-orange-500 text-white"
+                    : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700"
                     }`}
                 >
                   <div className="flex items-center gap-1.5 sm:gap-2">
@@ -397,21 +399,51 @@ function page() {
                 <div className="space-y-3 sm:space-y-4">
                   {/* Pinned Repositories Section */}
                   <div className="mb-4 sm:mb-6">
-                    <h2 className="text-xs sm:text-sm font-normal text-gray-300 mb-2 sm:mb-3">
+                    <h2 className="text-xs sm:text-sm font-normal text-gray-300 mb-2 sm:mb-3 flex items-center gap-2">
+                      <Pin className="w-3.5 h-3.5 text-purple-400" fill="currentColor" />
                       Pinned
                     </h2>
-                    <div className="text-center py-8 sm:py-12 bg-gray-900 border border-gray-800 rounded-lg">
-                      <svg
-                        className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-gray-700 mb-2 sm:mb-3"
-                        fill="currentColor"
-                        viewBox="0 0 16 16"
-                      >
-                        <path d="M4.456.734a1.75 1.75 0 012.826.504l.613 1.327a3.081 3.081 0 002.084 1.707l2.454.584c1.332.317 1.8 1.972.832 2.94L11.06 10l.78 2.341a1.75 1.75 0 01-2.491 2.049L8 13.81l-1.349.58a1.75 1.75 0 01-2.491-2.049L5.94 10 3.736 7.796c-.968-.968-.5-2.623.832-2.94l2.454-.584a3.08 3.08 0 002.084-1.707l.613-1.327a1.75 1.75 0 01.737-.504z"></path>
-                      </svg>
-                      <p className="text-gray-500 text-xs sm:text-sm">
-                        No pinned repositories yet
-                      </p>
-                    </div>
+
+                    {(() => {
+                      const pinned = repositories.filter((r) => userProfile?.pinnedRepos.includes(r.id)).slice(0, 6);
+                      if (pinned.length === 0) {
+                        return (
+                          <div className="text-center py-8 sm:py-10 bg-gray-900 border border-gray-800 rounded-lg">
+                            <Pin className="w-10 h-10 mx-auto text-gray-700 mb-2" />
+                            <p className="text-gray-500 text-xs sm:text-sm">No pinned repositories yet</p>
+                            <p className="text-gray-600 text-xs mt-1">Pin repos from your dashboard to feature them here</p>
+                          </div>
+                        );
+                      }
+                      return (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {pinned.map((repo) => (
+                            <div
+                              key={repo.id}
+                              className="p-3 sm:p-4 bg-gray-900 border border-gray-800 rounded-lg hover:border-purple-500/40 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/10"
+                            >
+                              <div className="flex items-start justify-between gap-2 mb-2">
+                                <h3 className="text-blue-400 font-semibold text-sm hover:underline cursor-pointer truncate">
+                                  {repo.name}
+                                </h3>
+                                <Pin className="w-3.5 h-3.5 flex-shrink-0 text-purple-400/70" fill="currentColor" />
+                              </div>
+                              <p className="text-gray-500 text-xs line-clamp-2 mb-3">
+                                {repo.description || "No description provided"}
+                              </p>
+                              <div className="flex items-center gap-3 text-[10px] sm:text-xs text-gray-600">
+                                <span className="flex items-center gap-1">
+                                  <span className={`w-2 h-2 rounded-full ${repo.visibility ? "bg-green-500" : "bg-gray-500"}`} />
+                                  {repo.visibility ? "Public" : "Private"}
+                                </span>
+                                <span>{repo.content.length} files</span>
+                                <span>Updated {new Date(repo.updatedAt).toLocaleDateString()}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Contribution Activity */}
@@ -499,8 +531,8 @@ function page() {
                                 <span className="flex items-center gap-1">
                                   <span
                                     className={`w-2 h-2 rounded-full ${repo.visibility
-                                        ? "bg-green-500"
-                                        : "bg-gray-500"
+                                      ? "bg-green-500"
+                                      : "bg-gray-500"
                                       }`}
                                   ></span>
                                   {repo.visibility ? "Public" : "Private"}
@@ -529,8 +561,8 @@ function page() {
                                 handleStarRepo(repo.id);
                               }}
                               className={`flex-shrink-0 p-2 rounded-lg border transition-all min-w-[40px] min-h-[40px] flex items-center justify-center ${userProfile?.starredRepos.includes(repo.id)
-                                  ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
-                                  : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
+                                ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
+                                : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
                                 }`}
                               title={
                                 userProfile?.starredRepos.includes(repo.id)
@@ -617,8 +649,8 @@ function page() {
                                   <span className="flex items-center gap-1">
                                     <span
                                       className={`w-2 h-2 rounded-full ${repo.visibility
-                                          ? "bg-green-500"
-                                          : "bg-gray-500"
+                                        ? "bg-green-500"
+                                        : "bg-gray-500"
                                         }`}
                                     ></span>
                                     {repo.visibility ? "Public" : "Private"}
@@ -647,8 +679,8 @@ function page() {
                                   handleStarRepo(repo.id);
                                 }}
                                 className={`flex-shrink-0 p-2 rounded-lg border transition-all min-w-[40px] min-h-[40px] flex items-center justify-center ${userProfile?.starredRepos.includes(repo.id)
-                                    ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
-                                    : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
+                                  ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
+                                  : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
                                   }`}
                                 title={
                                   userProfile?.starredRepos.includes(repo.id)
