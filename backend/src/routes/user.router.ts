@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  changePassword,
   deleteUserProfile,
   getAllUsers,
   getUserProfile,
@@ -22,5 +23,6 @@ userRouter.get("/userProfile", (req, res) => {
 userRouter.get("/userProfile/:id",authMiddleware, getUserProfile);
 userRouter.post("/login", login);
 userRouter.put("/updateProfile/:id",authMiddleware, updateUserProfile);
+userRouter.put("/changePassword/:id", authMiddleware, changePassword);
 userRouter.delete("/deleteProfile/:id",authMiddleware, deleteUserProfile);
 userRouter.get("/contributions/:id", authMiddleware, getUserContributions);

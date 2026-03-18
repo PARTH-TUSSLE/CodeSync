@@ -1,5 +1,10 @@
 import type { Request, Response } from "express";
-import { SignupSchema, SignInSchema, updationSchema } from "../types.js";
+import {
+  SignupSchema,
+  SignInSchema,
+  updationSchema,
+  changePasswordSchema,
+} from "../types.js";
 import { prisma } from "../prisma.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -191,6 +196,12 @@ export const updateUserProfile = async (req: Request, res: Response) => {
   const parsedData = updationSchema.safeParse(req.body);
   const userID = req.params.id;
 
+  if (!req.userId || req.userId !== userID) {
+    return res.status(403).json({
+      msg: "You can only update your own profile",
+    });
+  }
+
   if (!parsedData.success) {
     return res.status(400).json({
       msg: "Invalid inputs",
@@ -198,69 +209,140 @@ export const updateUserProfile = async (req: Request, res: Response) => {
   }
 
   try {
-    const newEmail = parsedData.data.email;
-    const newPassword = parsedData.data.password;
+    const { username, bio, profilePic } = parsedData.data;
 
-    if (newEmail && newPassword) {
-      const newHashedPassword = await bcrypt.hash(newPassword, 10);
-      const updatedUser = await prisma.user.update({
-        where: {
-          id: String(userID),
-        },
-        data: {
-          email: newEmail,
-          password: newHashedPassword,
-        },
-      });
+    const updateData: {
+      username?: string;
+      bio?: string[];
+      profilePic?: string | null;
+    } = {};
 
-      return res.status(200).json({
-        msg: "Email and password updated successfully !",
-        updatedUser,
+    if (username !== undefined) {
+      const trimmedUsername = username.trim();
+      if (!trimmedUsername) {
+        return res.status(400).json({ msg: "Username cannot be empty" });
+      }
+      updateData.username = trimmedUsername;
+    }
+
+    if (bio !== undefined) {
+      updateData.bio = [bio.trim()];
+    }
+
+    if (profilePic !== undefined) {
+      const trimmedPic = profilePic.trim();
+      updateData.profilePic = trimmedPic || null;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        msg: "At least one field is required: username, bio, or profilePic",
       });
     }
 
-    if (newEmail) {
-      const updatedUser = await prisma.user.update({
-        where: {
-          id: String(userID),
-        },
-        data: {
-          email: newEmail,
-        },
-      });
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: String(userID),
+      },
+      data: updateData,
+      select: {
+        id: true,
+        username: true,
+        bio: true,
+        profilePic: true,
+      },
+    });
 
-      return res.status(200).json({
-        msg: "Email updated successfully !",
-        updatedUser,
-      });
-    }
-
-    if (newPassword) {
-      const newHashedPassword = await bcrypt.hash(newPassword, 10);
-
-      const updatedUser = await prisma.user.update({
-        where: {
-          id: String(userID),
-        },
-        data: {
-          password: newHashedPassword,
-        },
-      });
-
-      return res.status(200).json({
-        msg: "Password updated successfully !",
-        updatedUser,
-      });
-    }
-
-    return res.status(400).json({
-      msg: "At least one field is required, email or password",
+    return res.status(200).json({
+      msg: "Profile updated successfully !",
+      updatedUser,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
 
-    res.status(500).json({
+    if (
+      error instanceof Error &&
+      error.message.toLowerCase().includes("unique")
+    ) {
+      return res.status(409).json({
+        msg: "Username is already taken",
+      });
+    }
+
+    return res.status(500).json({
       msg: `Some error occurred while updating! - ${message}`,
+    });
+  }
+};
+
+export const changePassword = async (req: Request, res: Response) => {
+  const parsedData = changePasswordSchema.safeParse(req.body);
+  const userID = req.params.id;
+
+  if (!req.userId || req.userId !== userID) {
+    return res.status(403).json({
+      msg: "You can only change your own password",
+    });
+  }
+
+  if (!parsedData.success) {
+    return res.status(400).json({
+      msg: "Invalid password inputs",
+    });
+  }
+
+  try {
+    const { oldPassword, newPassword, confirmNewPassword } = parsedData.data;
+
+    if (newPassword !== confirmNewPassword) {
+      return res.status(400).json({
+        msg: "New password and confirm password do not match",
+      });
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { id: String(userID) },
+      select: { password: true },
+    });
+
+    if (!existingUser) {
+      return res.status(404).json({
+        msg: "User not found",
+      });
+    }
+
+    const isOldPasswordCorrect = await bcrypt.compare(
+      oldPassword,
+      existingUser.password,
+    );
+
+    if (!isOldPasswordCorrect) {
+      return res.status(401).json({
+        msg: "Old password is incorrect",
+      });
+    }
+
+    const isSameAsOld = await bcrypt.compare(newPassword, existingUser.password);
+    if (isSameAsOld) {
+      return res.status(400).json({
+        msg: "New password must be different from old password",
+      });
+    }
+
+    const newHashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: String(userID) },
+      data: { password: newHashedPassword },
+    });
+
+    return res.status(200).json({
+      msg: "Password updated successfully !",
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({
+      msg: `Some error occurred while updating password! - ${message}`,
     });
   }
 };

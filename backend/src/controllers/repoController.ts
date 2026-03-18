@@ -35,7 +35,7 @@ export const createRepository = async (req: Request, res: Response) => {
       },
     });
 
-    // L7og the activity for contribution tracking
+    // Log the activity for contribution tracking
     await logActivity(ownerId, "REPO_CREATED", {
       repoId: createdRepo.id,
       repoName: createdRepo.name,

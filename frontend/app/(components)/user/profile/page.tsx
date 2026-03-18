@@ -24,7 +24,7 @@ interface UserProfile {
   followers: string[];
   starredRepos: string[];
   pinnedRepos: string[];
-  bio?: string;
+  bio?: string[];
   profilePic?: string;
   location?: string;
   company?: string;
@@ -48,6 +48,23 @@ function page() {
   const [newRepoVisibility, setNewRepoVisibility] = useState<boolean>(true);
   const [isCreating, setIsCreating] = useState<boolean>(false);
   const [createError, setCreateError] = useState<string>("");
+
+  // Edit profile modal states
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [editUsername, setEditUsername] = useState<string>("");
+  const [editBio, setEditBio] = useState<string>("");
+  const [editProfilePic, setEditProfilePic] = useState<string>("");
+  const [uploadedProfilePicData, setUploadedProfilePicData] = useState<string>("");
+  const [editError, setEditError] = useState<string>("");
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState<boolean>(false);
+
+  // Change password modal states
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState<boolean>(false);
+  const [oldPassword, setOldPassword] = useState<string>("");
+  const [newPassword, setNewPassword] = useState<string>("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState<string>("");
+  const [passwordError, setPasswordError] = useState<string>("");
+  const [isChangingPassword, setIsChangingPassword] = useState<boolean>(false);
 
   const handleCreateRepository = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,6 +148,207 @@ function page() {
       }
     } catch (error) {
       console.error("Error starring/unstarring repo:", error);
+    }
+  };
+
+  const openEditProfileModal = () => {
+    if (!userProfile) return;
+    setEditUsername(userProfile.username || "");
+    setEditBio(userProfile.bio?.[0] || "");
+    setEditProfilePic(userProfile.profilePic || "");
+    setUploadedProfilePicData("");
+    setEditError("");
+    setIsEditModalOpen(true);
+  };
+
+  const closeEditProfileModal = () => {
+    setIsEditModalOpen(false);
+    setEditUsername("");
+    setEditBio("");
+    setEditProfilePic("");
+    setUploadedProfilePicData("");
+    setEditError("");
+    setIsUpdatingProfile(false);
+  };
+
+  const fileToDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("Failed to read image file"));
+      reader.readAsDataURL(file);
+    });
+
+  const handleProfilePicUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setEditError("Please upload a valid image file");
+      e.target.value = "";
+      return;
+    }
+
+    const maxSizeInBytes = 2 * 1024 * 1024;
+    if (file.size > maxSizeInBytes) {
+      setEditError("Image size should be 2MB or less");
+      e.target.value = "";
+      return;
+    }
+
+    try {
+      setEditError("");
+      const dataUrl = await fileToDataUrl(file);
+      setUploadedProfilePicData(dataUrl);
+    } catch (error: any) {
+      setEditError(error.message || "Failed to process uploaded image");
+    }
+  };
+
+  const openChangePasswordModal = () => {
+    setOldPassword("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setPasswordError("");
+    setIsPasswordModalOpen(true);
+  };
+
+  const closeChangePasswordModal = () => {
+    setIsPasswordModalOpen(false);
+    setOldPassword("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setPasswordError("");
+    setIsChangingPassword(false);
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userProfile) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setEditError("Not authenticated");
+      return;
+    }
+
+    const trimmedUsername = editUsername.trim();
+    const trimmedBio = editBio.trim();
+    const trimmedProfilePic = editProfilePic.trim();
+    const finalProfilePic = uploadedProfilePicData || trimmedProfilePic;
+
+    const payload: { username?: string; bio?: string; profilePic?: string } = {};
+
+    if (!trimmedUsername) {
+      setEditError("Username is required");
+      return;
+    }
+
+    if (trimmedUsername !== userProfile.username) {
+      payload.username = trimmedUsername;
+    }
+
+    if (trimmedBio !== (userProfile.bio?.[0] || "")) {
+      payload.bio = trimmedBio;
+    }
+
+    if (finalProfilePic !== (userProfile.profilePic || "")) {
+      payload.profilePic = finalProfilePic;
+    }
+
+    if (!payload.username && payload.bio === undefined && payload.profilePic === undefined) {
+      setEditError("Please change username, bio, or profile picture before saving");
+      return;
+    }
+
+    try {
+      setIsUpdatingProfile(true);
+      setEditError("");
+
+      await axios.put(
+        `http://localhost:8000/updateProfile/${userProfile.id}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      setUserProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              username: payload.username ?? prev.username,
+              bio: payload.bio !== undefined ? [payload.bio] : prev.bio,
+              profilePic:
+                payload.profilePic !== undefined ? payload.profilePic || undefined : prev.profilePic,
+            }
+          : prev,
+      );
+
+      if (payload.username) {
+        localStorage.setItem("userName", payload.username);
+      }
+
+      closeEditProfileModal();
+    } catch (error: any) {
+      setEditError(error.response?.data?.msg || error.message || "Failed to update profile");
+    } finally {
+      setIsUpdatingProfile(false);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userProfile) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setPasswordError("Not authenticated");
+      return;
+    }
+
+    if (!oldPassword || !newPassword || !confirmNewPassword) {
+      setPasswordError("All password fields are required");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters");
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setPasswordError("New password and confirm password do not match");
+      return;
+    }
+
+    try {
+      setIsChangingPassword(true);
+      setPasswordError("");
+
+      await axios.put(
+        `http://localhost:8000/changePassword/${userProfile.id}`,
+        {
+          oldPassword,
+          newPassword,
+          confirmNewPassword,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      closeChangePasswordModal();
+    } catch (error: any) {
+      setPasswordError(error.response?.data?.msg || error.message || "Failed to change password");
+    } finally {
+      setIsChangingPassword(false);
     }
   };
 
@@ -247,26 +465,36 @@ function page() {
 
                 {/* Name and Username */}
                 <div className="mb-2 sm:mb-3 text-center lg:text-left">
-                  <h1 className="text-lg sm:text-xl lg:text-xl font-semibold text-white mb-0.5 break-words">
+                  <h1 className="text-lg sm:text-xl lg:text-xl font-semibold text-white mb-0.5 wrap-break-word">
                     {userProfile.username}
                   </h1>
-                  <p className="text-sm sm:text-base lg:text-lg text-gray-400 font-light break-words">
+                  <p className="text-sm sm:text-base lg:text-lg text-gray-400 font-light wrap-break-word">
                     {userProfile.username.toLowerCase()}
                   </p>
                 </div>
 
                 {/* Bio */}
-                {userProfile.bio && (
+                {!!userProfile.bio?.[0]?.trim() && (
                   <div className="mb-2 sm:mb-3 text-center lg:text-left">
-                    <p className="text-xs sm:text-sm text-gray-300 break-words">
-                      {userProfile.bio}
+                    <p className="text-xs sm:text-sm text-gray-300 wrap-break-word">
+                      {userProfile.bio?.[0]}
                     </p>
                   </div>
                 )}
 
                 {/* Edit Profile Button */}
-                <button className="w-full px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-lg text-xs sm:text-sm font-medium text-white transition-colors mb-2 sm:mb-3">
+                <button
+                  onClick={openEditProfileModal}
+                  className="w-full px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-lg text-xs sm:text-sm font-medium text-white transition-colors mb-2 sm:mb-3"
+                >
                   Edit profile
+                </button>
+
+                <button
+                  onClick={openChangePasswordModal}
+                  className="w-full px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-lg text-xs sm:text-sm font-medium text-white transition-colors mb-2 sm:mb-3"
+                >
+                  Change password
                 </button>
 
                 {/* Followers */}
@@ -298,32 +526,32 @@ function page() {
                   {userProfile.company && (
                     <div className="flex items-center gap-2 text-gray-400">
                       <svg
-                        className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0"
+                        className="w-3 h-3 sm:w-4 sm:h-4 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 16 16"
                       >
                         <path d="M1.75 1A1.75 1.75 0 000 2.75v11.5C0 15.216.784 16 1.75 16h12.5A1.75 1.75 0 0016 14.25V2.75A1.75 1.75 0 0014.25 1H1.75zM1.5 2.75a.25.25 0 01.25-.25h12.5a.25.25 0 01.25.25v11.5a.25.25 0 01-.25.25H1.75a.25.25 0 01-.25-.25V2.75zM4 5a.75.75 0 000 1.5h8a.75.75 0 000-1.5H4zm0 3a.75.75 0 000 1.5h5a.75.75 0 000-1.5H4z"></path>
                       </svg>
-                      <span className="break-words">{userProfile.company}</span>
+                      <span className="wrap-break-word">{userProfile.company}</span>
                     </div>
                   )}
 
                   {userProfile.location && (
                     <div className="flex items-center gap-2 text-gray-400">
                       <svg
-                        className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0"
+                        className="w-3 h-3 sm:w-4 sm:h-4 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 16 16"
                       >
                         <path d="M11.536 3.464a5 5 0 010 7.072L8 14.07l-3.536-3.535a5 5 0 117.072-7.072v.001zm1.06 8.132a6.5 6.5 0 10-9.192 0l3.535 3.536a1.5 1.5 0 002.122 0l3.535-3.536zM8 9a2 2 0 100-4 2 2 0 000 4z"></path>
                       </svg>
-                      <span className="break-words">{userProfile.location}</span>
+                      <span className="wrap-break-word">{userProfile.location}</span>
                     </div>
                   )}
 
                   <div className="flex items-center gap-2 text-gray-400">
                     <svg
-                      className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0"
+                      className="w-3 h-3 sm:w-4 sm:h-4 shrink-0"
                       fill="currentColor"
                       viewBox="0 0 16 16"
                     >
@@ -340,7 +568,7 @@ function page() {
                   {userProfile.website && (
                     <div className="flex items-center gap-2 text-gray-400">
                       <svg
-                        className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0"
+                        className="w-3 h-3 sm:w-4 sm:h-4 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 16 16"
                       >
@@ -469,7 +697,7 @@ function page() {
                                   <h3 className="text-blue-400 font-semibold text-sm hover:underline cursor-pointer truncate">
                                     {repo.name}
                                   </h3>
-                                  <Pin className="w-3.5 h-3.5 flex-shrink-0 text-purple-400/70" fill="currentColor" />
+                                  <Pin className="w-3.5 h-3.5 shrink-0 text-purple-400/70" fill="currentColor" />
                                 </div>
                                 <p className="text-gray-500 text-xs line-clamp-2 mb-3">
                                   {repo.description || "No description provided"}
@@ -605,7 +833,7 @@ function page() {
                                   e.stopPropagation();
                                   handleStarRepo(repo.id);
                                 }}
-                                className={`flex-shrink-0 p-2 rounded-lg border transition-all min-w-[40px] min-h-[40px] flex items-center justify-center ${userProfile?.starredRepos?.includes(repo.id)
+                                className={`shrink-0 p-2 rounded-lg border transition-all min-w-10 min-h-10 flex items-center justify-center ${userProfile?.starredRepos?.includes(repo.id)
                                   ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
                                   : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
                                   }`}
@@ -723,7 +951,7 @@ function page() {
                                     e.stopPropagation();
                                     handleStarRepo(repo.id);
                                   }}
-                                  className={`flex-shrink-0 p-2 rounded-lg border transition-all min-w-[40px] min-h-[40px] flex items-center justify-center ${userProfile?.starredRepos?.includes(repo.id)
+                                  className={`shrink-0 p-2 rounded-lg border transition-all min-w-10 min-h-10 flex items-center justify-center ${userProfile?.starredRepos?.includes(repo.id)
                                     ? "bg-yellow-500/10 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/20"
                                     : "bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-750 hover:border-gray-600 hover:text-yellow-500"
                                     }`}
@@ -759,6 +987,245 @@ function page() {
           </div>
         </div>
       </div>
+
+      {/* Edit Profile Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg shadow-2xl w-full max-w-md md:max-w-lg">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-xl font-semibold text-white">Edit Profile</h2>
+                <button
+                  onClick={closeEditProfileModal}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleUpdateProfile} className="space-y-4">
+                {editError && (
+                  <div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded-lg text-sm">
+                    {editError}
+                  </div>
+                )}
+
+                <div>
+                  <label htmlFor="editUsername" className="block text-sm font-medium text-gray-300 mb-2">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    id="editUsername"
+                    value={editUsername}
+                    onChange={(e) => setEditUsername(e.target.value)}
+                    placeholder="your-username"
+                    minLength={3}
+                    maxLength={50}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-gray-200 text-sm transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="editBio" className="block text-sm font-medium text-gray-300 mb-2">
+                    Bio
+                  </label>
+                  <textarea
+                    id="editBio"
+                    value={editBio}
+                    onChange={(e) => setEditBio(e.target.value)}
+                    placeholder="Tell people about yourself"
+                    rows={3}
+                    maxLength={200}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-gray-200 text-sm transition-all resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="editProfilePic" className="block text-sm font-medium text-gray-300 mb-2">
+                    Profile Picture URL
+                  </label>
+                  <input
+                    type="url"
+                    id="editProfilePic"
+                    value={editProfilePic}
+                    onChange={(e) => setEditProfilePic(e.target.value)}
+                    placeholder="https://example.com/avatar.jpg"
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-gray-200 text-sm transition-all"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Optional. Add a URL, or upload from your device below.
+                  </p>
+                </div>
+
+                <div>
+                  <label htmlFor="editProfilePicUpload" className="block text-sm font-medium text-gray-300 mb-2">
+                    Upload From Device
+                  </label>
+                  <input
+                    type="file"
+                    id="editProfilePicUpload"
+                    accept="image/*"
+                    onChange={handleProfilePicUpload}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 text-sm file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Max size: 2MB. Upload takes priority over URL.</p>
+
+                  {(uploadedProfilePicData || editProfilePic || userProfile?.profilePic) && (
+                    <div className="mt-3 flex items-center gap-3">
+                      <img
+                        src={uploadedProfilePicData || editProfilePic || userProfile?.profilePic}
+                        alt="Profile preview"
+                        className="w-12 h-12 rounded-full object-cover border border-gray-700 bg-gray-800"
+                      />
+                      {uploadedProfilePicData && (
+                        <button
+                          type="button"
+                          onClick={() => setUploadedProfilePicData("")}
+                          className="text-xs px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-md text-gray-300 hover:bg-gray-700"
+                        >
+                          Remove uploaded image
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={closeEditProfileModal}
+                    className="flex-1 px-4 py-2 text-sm bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 rounded-lg transition-all"
+                    disabled={isUpdatingProfile}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isUpdatingProfile}
+                    className="flex-1 px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 disabled:bg-blue-900 disabled:cursor-not-allowed text-white rounded-lg transition-all font-medium flex items-center justify-center gap-2"
+                  >
+                    {isUpdatingProfile ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Saving...
+                      </>
+                    ) : "Save changes"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Password Modal */}
+      {isPasswordModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg shadow-2xl w-full max-w-md md:max-w-lg">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-xl font-semibold text-white">Change Password</h2>
+                <button
+                  onClick={closeChangePasswordModal}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleChangePassword} className="space-y-4">
+                {passwordError && (
+                  <div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded-lg text-sm">
+                    {passwordError}
+                  </div>
+                )}
+
+                <div>
+                  <label htmlFor="oldPassword" className="block text-sm font-medium text-gray-300 mb-2">
+                    Old Password
+                  </label>
+                  <input
+                    type="password"
+                    id="oldPassword"
+                    value={oldPassword}
+                    onChange={(e) => setOldPassword(e.target.value)}
+                    placeholder="Enter your current password"
+                    minLength={6}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-gray-200 text-sm transition-all"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="newPassword" className="block text-sm font-medium text-gray-300 mb-2">
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    id="newPassword"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter a new password"
+                    minLength={6}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-gray-200 text-sm transition-all"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="confirmNewPassword" className="block text-sm font-medium text-gray-300 mb-2">
+                    Confirm New Password
+                  </label>
+                  <input
+                    type="password"
+                    id="confirmNewPassword"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    placeholder="Re-enter your new password"
+                    minLength={6}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-gray-200 text-sm transition-all"
+                    required
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={closeChangePasswordModal}
+                    className="flex-1 px-4 py-2 text-sm bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 rounded-lg transition-all"
+                    disabled={isChangingPassword}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isChangingPassword}
+                    className="flex-1 px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 disabled:bg-blue-900 disabled:cursor-not-allowed text-white rounded-lg transition-all font-medium flex items-center justify-center gap-2"
+                  >
+                    {isChangingPassword ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Saving...
+                      </>
+                    ) : "Save password"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Create Repository Modal */}
       {isCreateModalOpen && (
@@ -814,7 +1281,7 @@ function page() {
                       onClick={() => setNewRepoVisibility(true)}
                       className={`flex items-start p-3 bg-gray-800 border rounded-lg cursor-pointer transition-all ${newRepoVisibility === true ? "border-blue-500 ring-1 ring-blue-500/40" : "border-gray-700 hover:border-blue-500"}`}
                     >
-                      <span className="mt-0.5 mr-3 flex-shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
+                      <span className="mt-0.5 mr-3 shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
                         style={{ borderColor: newRepoVisibility === true ? "#3b82f6" : "#6b7280" }}>
                         {newRepoVisibility === true && <span className="w-2 h-2 rounded-full bg-blue-500" />}
                       </span>
@@ -827,7 +1294,7 @@ function page() {
                       onClick={() => setNewRepoVisibility(false)}
                       className={`flex items-start p-3 bg-gray-800 border rounded-lg cursor-pointer transition-all ${newRepoVisibility === false ? "border-blue-500 ring-1 ring-blue-500/40" : "border-gray-700 hover:border-blue-500"}`}
                     >
-                      <span className="mt-0.5 mr-3 flex-shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
+                      <span className="mt-0.5 mr-3 shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
                         style={{ borderColor: newRepoVisibility === false ? "#3b82f6" : "#6b7280" }}>
                         {newRepoVisibility === false && <span className="w-2 h-2 rounded-full bg-blue-500" />}
                       </span>

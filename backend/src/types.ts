@@ -18,8 +18,36 @@ export const SignInSchema = z.object({
 });
 
 export const updationSchema = z.object({
-  email: z.string().optional(),
-  password: z
+  username: z
     .string()
-    .min(6, { message: "The password must be atleast 6 characters" }).optional()
+    .min(3, { message: "The username should atleast contain three characters" })
+    .max(50)
+    .optional(),
+  bio: z.string().max(200).optional(),
+  profilePic: z
+    .string()
+    .refine(
+      (value) => {
+        if (!value.trim()) return true;
+        const isHttpUrl = /^https?:\/\//i.test(value.trim());
+        const isDataImage = /^data:image\/[a-zA-Z0-9.+-]+;base64,/i.test(
+          value.trim(),
+        );
+        return isHttpUrl || isDataImage;
+      },
+      { message: "Profile picture must be a valid URL or uploaded image data" },
+    )
+    .optional(),
+});
+
+export const changePasswordSchema = z.object({
+  oldPassword: z
+    .string()
+    .min(6, { message: "Old password must be atleast 6 characters" }),
+  newPassword: z
+    .string()
+    .min(6, { message: "The password must be atleast 6 characters" }),
+  confirmNewPassword: z
+    .string()
+    .min(6, { message: "Confirm password must be atleast 6 characters" }),
 });

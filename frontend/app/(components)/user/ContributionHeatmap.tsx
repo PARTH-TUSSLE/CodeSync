@@ -42,7 +42,7 @@ export default function ContributionHeatmap({
         return;
       }
 
-      const response = await axios.get(
+      const response = await axios.get<{ contributions?: Contribution[] }>(
         `http://localhost:8000/contributions/${userId}?year=${year}`,
         {
           headers: { Authorization: `Bearer ${token}` },

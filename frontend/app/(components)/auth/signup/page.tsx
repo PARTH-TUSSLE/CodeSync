@@ -31,7 +31,10 @@ function SignupPage() {
       setIsLoading(true);
       setError("");
 
-      const response = await axios.post(
+      const response = await axios.post<{
+        token: string;
+        user: { id: string; username: string };
+      }>(
         "http://localhost:8000/signup",
         formData,
       );
