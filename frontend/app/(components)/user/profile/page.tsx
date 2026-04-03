@@ -191,9 +191,9 @@ function page() {
       return;
     }
 
-    const maxSizeInBytes = 2 * 1024 * 1024;
+    const maxSizeInBytes = 5 * 1024 * 1024;
     if (file.size > maxSizeInBytes) {
-      setEditError("Image size should be 2MB or less");
+      setEditError("Image size should be 5MB or less");
       e.target.value = "";
       return;
     }
@@ -295,7 +295,11 @@ function page() {
 
       closeEditProfileModal();
     } catch (error: any) {
-      setEditError(error.response?.data?.msg || error.message || "Failed to update profile");
+      if (error.response?.status === 413) {
+        setEditError("Image is too large. Please use an image under 5MB.");
+      } else {
+        setEditError(error.response?.data?.msg || error.message || "Failed to update profile");
+      }
     } finally {
       setIsUpdatingProfile(false);
     }
@@ -1071,7 +1075,7 @@ function page() {
                     onChange={handleProfilePicUpload}
                     className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-200 text-sm file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Max size: 2MB. Upload takes priority over URL.</p>
+                  <p className="text-xs text-gray-500 mt-1">Max size: 5MB. Upload takes priority over URL.</p>
 
                   {(uploadedProfilePicData || editProfilePic || userProfile?.profilePic) && (
                     <div className="mt-3 flex items-center gap-3">

@@ -46,32 +46,32 @@ export default function CliSetupGuide() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+      <div className="relative bg-gray-900 rounded-2xl border border-gray-800 shadow-sm overflow-hidden">
         {/* Hero Section */}
-        <div className="bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 px-6 sm:px-8 lg:px-12 py-8 sm:py-10 border-b border-gray-200 dark:border-gray-800">
+        <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 px-6 sm:px-8 lg:px-12 py-8 sm:py-10 border-b border-gray-800">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
             <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg">
               <Terminal className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
             </div>
             <div className="flex-1">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                 CLI Authentication Setup
               </h2>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-sm sm:text-base text-gray-400 mt-1">
                 Connect your terminal to track contributions automatically
               </p>
             </div>
           </div>
 
           {/* Why This Matters */}
-          <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
+          <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700">
             <div className="flex items-start gap-3 mb-4">
-              <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+              <Sparkles className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
               <div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-2">
                   Why authenticate your CLI?
                 </h3>
-                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                <p className="text-sm text-gray-300 leading-relaxed mb-4">
                   Your contribution graph only tracks web activity by default.
                   To show commits and pushes made from your terminal (the real
                   developer workflow), you need to authenticate your CLI once.
@@ -80,38 +80,38 @@ export default function CliSetupGuide() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-3 sm:p-4 border border-blue-100 dark:border-blue-800/30">
+              <div className="bg-gradient-to-br from-blue-900/20 to-indigo-900/20 rounded-lg p-3 sm:p-4 border border-blue-800/30">
                 <div className="flex items-center gap-2 mb-2">
-                  <Code2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  <h4 className="text-xs sm:text-sm font-semibold text-blue-900 dark:text-blue-300">
+                  <Code2 className="w-4 h-4 text-blue-400" />
+                  <h4 className="text-xs sm:text-sm font-semibold text-blue-300">
                     Track Commits
                   </h4>
                 </div>
-                <p className="text-xs text-blue-800 dark:text-blue-400">
+                <p className="text-xs text-blue-400">
                   Every commit you make appears on your profile
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-3 sm:p-4 border border-purple-100 dark:border-purple-800/30">
+              <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 rounded-lg p-3 sm:p-4 border border-purple-800/30">
                 <div className="flex items-center gap-2 mb-2">
-                  <GitBranch className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                  <h4 className="text-xs sm:text-sm font-semibold text-purple-900 dark:text-purple-300">
+                  <GitBranch className="w-4 h-4 text-purple-400" />
+                  <h4 className="text-xs sm:text-sm font-semibold text-purple-300">
                     Track Pushes
                   </h4>
                 </div>
-                <p className="text-xs text-purple-800 dark:text-purple-400">
+                <p className="text-xs text-purple-400">
                   Push events add to your contribution streak
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-3 sm:p-4 border border-green-100 dark:border-green-800/30">
+              <div className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 rounded-lg p-3 sm:p-4 border border-green-800/30">
                 <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-4 h-4 text-green-600 dark:text-green-400" />
-                  <h4 className="text-xs sm:text-sm font-semibold text-green-900 dark:text-green-300">
+                  <Sparkles className="w-4 h-4 text-green-400" />
+                  <h4 className="text-xs sm:text-sm font-semibold text-green-300">
                     One-time Setup
                   </h4>
                 </div>
-                <p className="text-xs text-green-800 dark:text-green-400">
+                <p className="text-xs text-green-400">
                   Login once, works forever - just like Git
                 </p>
               </div>
@@ -127,13 +127,13 @@ export default function CliSetupGuide() {
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white text-sm font-bold shadow-md">
                 1
               </div>
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-base sm:text-lg font-semibold text-white">
                 Copy your login command
               </h3>
             </div>
 
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="bg-gray-900 dark:bg-gray-950 px-3 sm:px-4 py-2.5 sm:py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-gray-700">
+            <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+              <div className="bg-gray-950 px-3 sm:px-4 py-2.5 sm:py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-gray-700">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <div className="flex gap-1.5">
                     <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500"></div>
@@ -205,16 +205,16 @@ export default function CliSetupGuide() {
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white text-sm font-bold shadow-md">
                 2
               </div>
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-base sm:text-lg font-semibold text-white">
                 Run in your terminal
               </h3>
             </div>
 
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 italic">
+            <p className="text-xs sm:text-sm text-gray-400 italic">
               Navigate to your project root directory first, then run:
             </p>
 
-            <div className="bg-gray-900 dark:bg-gray-950 rounded-xl p-4 sm:p-5 border border-gray-700 dark:border-gray-800 font-mono text-xs sm:text-sm text-gray-100 overflow-x-auto">
+            <div className="bg-gray-950 rounded-xl p-4 sm:p-5 border border-gray-800 font-mono text-xs sm:text-sm text-gray-100 overflow-x-auto">
               <div className="space-y-2.5 sm:space-y-3">
                 <div className="flex items-start gap-2">
                   <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400 mt-0.5 shrink-0" />
@@ -241,12 +241,12 @@ export default function CliSetupGuide() {
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white text-sm font-bold shadow-md">
                 3
               </div>
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-base sm:text-lg font-semibold text-white">
                 Use CodeSync normally
               </h3>
             </div>
 
-            <div className="bg-gray-900 dark:bg-gray-950 rounded-xl p-4 sm:p-5 border border-gray-700 dark:border-gray-800 font-mono text-xs sm:text-sm text-gray-100 overflow-x-auto">
+            <div className="bg-gray-950 rounded-xl p-4 sm:p-5 border border-gray-800 font-mono text-xs sm:text-sm text-gray-100 overflow-x-auto">
               <div className="space-y-2.5 sm:space-y-3">
                 <div className="flex items-start gap-2">
                   <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400 mt-0.5 shrink-0" />

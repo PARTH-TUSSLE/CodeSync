@@ -64,7 +64,6 @@ export default function Navbar() {
   const navLinks = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
     { href: "/user/profile", label: "Profile", icon: User },
-    { href: "/repositories", label: "Repositories", icon: FolderGit2 },
     { href: "/docs", label: "Docs", icon: BookOpen },
   ];
 
@@ -121,8 +120,8 @@ export default function Navbar() {
 
       <nav
         className={`sticky top-0 z-50 w-full transition-all duration-300 ${scrolled
-            ? "bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_1px_40px_rgba(0,0,0,0.6)]"
-            : "bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/[0.04]"
+            ? "bg-[#0a0a0a] border-b border-white/[0.06] shadow-[0_1px_40px_rgba(0,0,0,0.6)]"
+            : "bg-[#0a0a0a] border-b border-white/[0.04]"
           }`}
       >
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
