@@ -28,7 +28,8 @@ export default function Navbar() {
   const hideNavbar =
     pathname === "/" ||
     pathname === "/auth/login" ||
-    pathname === "/auth/signup";
+    pathname === "/auth/signup" ||
+    pathname === "/pricing";
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("userName");
