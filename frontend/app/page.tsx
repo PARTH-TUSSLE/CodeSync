@@ -27,7 +27,7 @@ export default function LandingPage() {
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         .lp-root {
-          background-color: #09090b;
+          background-color: #0a0f1a;
           color: #fafafa;
           font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           min-height: 100vh;
@@ -42,24 +42,22 @@ export default function LandingPage() {
           position: fixed;
           top: 0; left: 0; right: 0; bottom: 0;
           background-image:
-            linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-          background-size: 80px 80px;
-          mask-image: radial-gradient(ellipse 70% 50% at 50% 0%, black 20%, transparent 100%);
-          -webkit-mask-image: radial-gradient(ellipse 70% 50% at 50% 0%, black 20%, transparent 100%);
+            linear-gradient(rgba(148,163,184,0.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(148,163,184,0.08) 1px, transparent 1px);
+          background-size: 64px 64px;
           pointer-events: none;
           z-index: 0;
         }
 
-        /* Subtle top glow */
+        /* Top glow – rich cyan/indigo blend */
         .glow-top {
           position: fixed;
-          top: -300px; left: 50%;
+          top: -350px; left: 50%;
           transform: translateX(-50%);
-          width: 900px; height: 600px;
+          width: 1400px; height: 900px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%);
-          filter: blur(80px);
+          background: radial-gradient(ellipse at center, rgba(56,189,248,0.10) 0%, rgba(99,102,241,0.08) 30%, rgba(139,92,246,0.04) 60%, transparent 80%);
+          filter: blur(60px);
           pointer-events: none;
           z-index: 0;
         }
@@ -79,10 +77,10 @@ export default function LandingPage() {
           justify-content: space-between;
           padding: 0 48px;
           height: 56px;
-          background: rgba(9, 9, 11, 0.8);
+          background: rgba(10, 15, 26, 0.85);
           backdrop-filter: blur(16px) saturate(1.6);
           -webkit-backdrop-filter: blur(16px) saturate(1.6);
-          border-bottom: 1px solid rgba(255,255,255,0.06);
+          border-bottom: 1px solid rgba(148,163,184,0.12);
         }
         .lp-logo {
           display: flex;
@@ -142,9 +140,9 @@ export default function LandingPage() {
         .hero-badge {
           display: inline-flex; align-items: center; gap: 7px;
           font-size: 12px; font-weight: 500;
-          color: rgba(255,255,255,0.55);
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
+          color: rgba(255,255,255,0.6);
+          background: rgba(15,23,42,0.6);
+          border: 1px solid rgba(148,163,184,0.18);
           border-radius: 100px;
           padding: 5px 14px 5px 8px;
           margin-bottom: 28px;
@@ -171,7 +169,7 @@ export default function LandingPage() {
         }
         .hero-subtitle {
           font-size: 16px; font-weight: 400; line-height: 1.65;
-          color: rgba(255,255,255,0.4); max-width: 460px;
+          color: rgba(255,255,255,0.5); max-width: 460px;
           margin: 24px auto 40px;
           letter-spacing: -0.1px;
         }
@@ -191,7 +189,7 @@ export default function LandingPage() {
         .cta-secondary {
           padding: 10px 24px;
           background: transparent;
-          border: 1px solid rgba(255,255,255,0.12);
+          border: 1px solid rgba(148,163,184,0.18);
           color: rgba(255,255,255,0.65); font-size: 13px; font-weight: 500;
           border-radius: 8px; text-decoration: none;
           transition: all 0.15s;
@@ -207,14 +205,14 @@ export default function LandingPage() {
           padding: 0 24px; position: relative;
         }
         .code-window {
-          background: rgba(255,255,255,0.02);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: rgba(15,23,42,0.6);
+          border: 1px solid rgba(148,163,184,0.15);
           border-radius: 12px; overflow: hidden;
         }
         .code-titlebar {
           display: flex; align-items: center; gap: 6px; padding: 12px 16px;
-          background: rgba(255,255,255,0.02);
-          border-bottom: 1px solid rgba(255,255,255,0.06);
+          background: rgba(15,23,42,0.4);
+          border-bottom: 1px solid rgba(148,163,184,0.12);
         }
         .dot { width: 10px; height: 10px; border-radius: 50%; }
         .dot-red { background: #ff5f57; } .dot-yellow { background: #febc2e; } .dot-green { background: #28c840; }
@@ -238,9 +236,10 @@ export default function LandingPage() {
           display: grid; grid-template-columns: repeat(3, 1fr);
           margin: 80px auto 0; max-width: 720px;
           padding: 0 24px;
-          border: 1px solid rgba(255,255,255,0.08);
+          border: 1px solid rgba(148,163,184,0.15);
           border-radius: 12px;
           overflow: hidden;
+          background: rgba(15,23,42,0.4);
         }
         .stat-item {
           padding: 32px 24px; text-align: center;
@@ -251,14 +250,14 @@ export default function LandingPage() {
           position: absolute;
           right: 0; top: 20%; height: 60%;
           width: 1px;
-          background: rgba(255,255,255,0.08);
+          background: rgba(255,255,255,0.10);
         }
         .stat-number {
           font-size: 28px; font-weight: 800; color: #fff;
           letter-spacing: -1px; margin-bottom: 4px;
           font-variant-numeric: tabular-nums;
         }
-        .stat-label { font-size: 12px; color: rgba(255,255,255,0.3); font-weight: 450; letter-spacing: 0.2px; }
+        .stat-label { font-size: 12px; color: rgba(255,255,255,0.45); font-weight: 450; letter-spacing: 0.2px; }
 
         /* ──────────────────── SECTION COMMON ──────────────────── */
         .section-pad { padding: 100px 48px 80px; }
@@ -279,7 +278,7 @@ export default function LandingPage() {
           letter-spacing: -1.5px; color: #fafafa; margin-bottom: 14px; line-height: 1.1;
         }
         .section-subtitle {
-          font-size: 15px; color: rgba(255,255,255,0.35); line-height: 1.6;
+          font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.6;
           max-width: 440px; margin: 0 auto 56px;
           letter-spacing: -0.1px;
         }
@@ -289,32 +288,41 @@ export default function LandingPage() {
         .features-grid {
           display: grid; grid-template-columns: repeat(3, 1fr);
           max-width: 1000px; margin: 0 auto;
-          border: 1px solid rgba(255,255,255,0.08);
+          border: 1px solid rgba(148,163,184,0.15);
           border-radius: 16px;
           overflow: hidden;
+          background: rgba(15,23,42,0.3);
         }
         .feature-card {
           padding: 40px 32px;
           display: flex; flex-direction: column; gap: 0;
-          transition: background 0.2s;
+          transition: all 0.3s ease;
           position: relative;
-          border-right: 1px solid rgba(255,255,255,0.06);
-          border-bottom: 1px solid rgba(255,255,255,0.06);
+          border-right: 1px solid rgba(148,163,184,0.12);
+          border-bottom: 1px solid rgba(148,163,184,0.12);
         }
         .feature-card:nth-child(3n) { border-right: none; }
         .feature-card:nth-child(n+4) { border-bottom: none; }
         .feature-card:hover {
-          background: rgba(255,255,255,0.02);
+          background: rgba(255, 165, 0, 0.03);
+          border-color: rgba(255, 165, 0, 0.2);
+        }
+        .feature-card:hover::after {
+          content: '';
+          position: absolute;
+          bottom: 0; left: 20%; right: 20%;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(255, 165, 0, 0.5), transparent);
         }
         .feature-icon-wrap {
           width: 40px; height: 40px; margin-bottom: 24px;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: rgba(148,163,184,0.08);
+          border: 1px solid rgba(148,163,184,0.15);
           border-radius: 10px; display: flex; align-items: center; justify-content: center;
         }
         .feature-icon { width: 18px; height: 18px; color: rgba(255,255,255,0.5); }
         .feature-title { font-size: 14px; font-weight: 650; color: #fafafa; margin-bottom: 8px; text-align: left; letter-spacing: -0.2px; }
-        .feature-desc { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.3); text-align: left; }
+        .feature-desc { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.45); text-align: left; }
         .feature-desc .hl { color: rgba(255,255,255,0.55); font-weight: 500; }
 
         /* ──────────────────── HOW IT WORKS ──────────────────── */
@@ -322,20 +330,21 @@ export default function LandingPage() {
         .how-grid {
           display: grid; grid-template-columns: repeat(3, 1fr);
           gap: 0; max-width: 860px; margin: 0 auto;
-          border: 1px solid rgba(255,255,255,0.08);
+          border: 1px solid rgba(148,163,184,0.15);
           border-radius: 16px;
           overflow: hidden;
+          background: rgba(15,23,42,0.3);
         }
         .how-step {
           display: flex; flex-direction: column; align-items: center;
           text-align: center; padding: 48px 32px; position: relative;
-          border-right: 1px solid rgba(255,255,255,0.06);
+          border-right: 1px solid rgba(148,163,184,0.12);
         }
         .how-step:last-child { border-right: none; }
         .how-number {
           width: 36px; height: 36px; border-radius: 10px;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(148,163,184,0.08);
+          border: 1px solid rgba(148,163,184,0.18);
           display: flex; align-items: center; justify-content: center;
           font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.6);
           margin-bottom: 20px;
@@ -346,7 +355,7 @@ export default function LandingPage() {
           margin-bottom: 8px; letter-spacing: -0.2px;
         }
         .how-step-desc {
-          font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.3);
+          font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.45);
           max-width: 220px;
         }
 
@@ -357,8 +366,9 @@ export default function LandingPage() {
         .showcase-section {
           display: grid; grid-template-columns: 1fr 1.6fr; gap: 48px;
           align-items: center;
-          border: 1px solid rgba(255,255,255,0.08);
+          border: 1px solid rgba(148,163,184,0.15);
           border-radius: 16px; padding: 56px 56px; position: relative; overflow: hidden;
+          background: rgba(15,23,42,0.3);
         }
         .showcase-eyebrow {
           font-size: 11px; font-weight: 600; letter-spacing: 0.8px;
@@ -370,7 +380,7 @@ export default function LandingPage() {
           letter-spacing: -1.2px; color: #fafafa; line-height: 1.1; margin-bottom: 16px;
         }
         .showcase-desc {
-          font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.35);
+          font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.5);
           margin-bottom: 28px;
         }
         .showcase-desc .accent { color: rgba(255,255,255,0.6); font-weight: 500; }
@@ -386,7 +396,7 @@ export default function LandingPage() {
         .showcase-slider {
           position: relative; width: 100%; aspect-ratio: 16/10;
           border-radius: 10px; overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.08);
+          border: 1px solid rgba(148,163,184,0.15);
           cursor: zoom-in;
         }
         .showcase-slider-track {
@@ -433,22 +443,23 @@ export default function LandingPage() {
         .testimonials-grid {
           display: grid; grid-template-columns: repeat(3, 1fr);
           max-width: 1000px; margin: 0 auto;
-          border: 1px solid rgba(255,255,255,0.08);
+          border: 1px solid rgba(148,163,184,0.15);
           border-radius: 16px;
           overflow: hidden;
+          background: rgba(15,23,42,0.3);
         }
         .testimonial-card {
           padding: 36px 28px;
           text-align: left;
-          transition: background 0.2s;
-          border-right: 1px solid rgba(255,255,255,0.06);
+          transition: all 0.3s ease;
+          border-right: 1px solid rgba(148,163,184,0.12);
         }
         .testimonial-card:last-child { border-right: none; }
         .testimonial-card:hover {
-          background: rgba(255,255,255,0.02);
+          background: rgba(56,189,248,0.04);
         }
         .testimonial-quote {
-          font-size: 13px; line-height: 1.65; color: rgba(255,255,255,0.4);
+          font-size: 13px; line-height: 1.65; color: rgba(255,255,255,0.5);
           margin-bottom: 24px;
         }
         .testimonial-author {
@@ -475,11 +486,12 @@ export default function LandingPage() {
         }
         .cta-banner-inner {
           max-width: 640px; margin: 0 auto;
-          border: 1px solid rgba(255,255,255,0.08);
+          border: 1px solid rgba(148,163,184,0.15);
           border-radius: 16px;
           padding: 64px 48px;
           position: relative;
           overflow: hidden;
+          background: rgba(15,23,42,0.4);
         }
         .cta-banner-title {
           font-size: clamp(28px, 3.5vw, 40px); font-weight: 750;
@@ -488,7 +500,7 @@ export default function LandingPage() {
           position: relative;
         }
         .cta-banner-desc {
-          font-size: 14px; color: rgba(255,255,255,0.35);
+          font-size: 14px; color: rgba(255,255,255,0.5);
           margin-bottom: 32px; line-height: 1.6;
           position: relative;
         }
@@ -524,7 +536,7 @@ export default function LandingPage() {
 
         /* ──────────────────── FOOTER ──────────────────── */
         .footer {
-          border-top: 1px solid rgba(255,255,255,0.06);
+          border-top: 1px solid rgba(148,163,184,0.12);
           padding: 56px 48px 0;
         }
         .footer-grid {
@@ -536,7 +548,7 @@ export default function LandingPage() {
           letter-spacing: -0.2px;
         }
         .footer-brand-desc {
-          font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,0.2); max-width: 200px;
+          font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,0.35); max-width: 200px;
         }
         .footer-col-label {
           font-size: 11px; font-weight: 600;
@@ -546,12 +558,12 @@ export default function LandingPage() {
         }
         .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
         .footer-links a {
-          font-size: 12.5px; color: rgba(255,255,255,0.25); text-decoration: none;
+          font-size: 12.5px; color: rgba(255,255,255,0.35); text-decoration: none;
           transition: color 0.15s;
         }
         .footer-links a:hover { color: rgba(255,255,255,0.6); }
         .footer-bottom {
-          border-top: 1px solid rgba(255,255,255,0.06);
+          border-top: 1px solid rgba(255,255,255,0.10);
           display: flex; align-items: center; justify-content: space-between;
           padding: 16px 0;
         }
@@ -639,6 +651,18 @@ export default function LandingPage() {
       {/* ────── BACKGROUND ────── */}
       <div className="grid-bg" />
       <div className="glow-top" />
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        backgroundImage: 'radial-gradient(circle, rgba(148,163,184,0.15) 1px, transparent 1px)',
+        backgroundSize: '64px 64px',
+        pointerEvents: 'none', zIndex: 0
+      }} />
+      <div style={{
+        position: 'fixed', bottom: '-200px', left: '50%', transform: 'translateX(-50%)',
+        width: '1200px', height: '600px', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(251,146,60,0.06) 0%, rgba(99,102,241,0.03) 50%, transparent 80%)',
+        filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0
+      }} />
 
       <div className="lp-content">
         {/* ────── NAVBAR ────── */}
