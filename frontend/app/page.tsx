@@ -68,67 +68,198 @@ export default function LandingPage() {
         }
 
         /* ──────────────────── NAVBAR ──────────────────── */
-        .lp-nav {
+        .lp-nav-wrap {
           position: sticky;
           top: 0;
           z-index: 100;
+        }
+        .lp-nav {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 0 48px;
+          padding: 0 32px;
           height: 56px;
-          background: rgba(10, 15, 26, 0.85);
-          backdrop-filter: blur(16px) saturate(1.6);
-          -webkit-backdrop-filter: blur(16px) saturate(1.6);
-          border-bottom: 1px solid rgba(148,163,184,0.12);
+          background: rgba(10, 15, 26, 0.6);
+          backdrop-filter: blur(12px) saturate(1.5);
+          -webkit-backdrop-filter: blur(12px) saturate(1.5);
+          border-bottom: 1px solid rgba(148,163,184,0.08);
+          position: relative;
         }
         .lp-logo {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 9px;
           font-size: 15px;
-          font-weight: 700;
-          color: #fff;
+          font-weight: 650;
+          color: #f0f0f0;
           text-decoration: none;
           letter-spacing: -0.3px;
         }
         .lp-logo-icon {
-          width: 24px; height: 24px;
+          width: 22px; height: 22px;
           filter: brightness(0) invert(1);
-          opacity: 0.9;
+          opacity: 0.85;
         }
-        .lp-nav-links {
-          display: flex;
-          gap: 32px;
-          align-items: center;
+        .lp-nav-center {
           position: absolute;
           left: 50%;
           transform: translateX(-50%);
+          display: flex;
+          align-items: center;
+        }
+        .lp-nav-links {
+          display: flex;
+          gap: 2px;
+          align-items: center;
         }
         .lp-nav-links a {
           font-size: 13px;
-          font-weight: 450;
-          color: rgba(255,255,255,0.45);
+          font-weight: 400;
+          color: rgba(255,255,255,0.5);
           text-decoration: none;
           transition: color 0.15s;
           letter-spacing: 0;
+          padding: 6px 12px;
         }
-        .lp-nav-links a:hover { color: #fff; }
-        .lp-nav-actions { display: flex; align-items: center; gap: 6px; }
+        .lp-nav-links a:hover {
+          color: rgba(255,255,255,0.9);
+        }
+        .lp-nav-actions { display: flex; align-items: center; gap: 4px; }
         .btn-signin {
-          font-size: 13px; font-weight: 500;
+          font-size: 13px; font-weight: 400;
           color: rgba(255,255,255,0.5); text-decoration: none;
-          padding: 6px 14px; border-radius: 6px; transition: color 0.15s;
+          padding: 6px 12px; transition: color 0.15s;
         }
-        .btn-signin:hover { color: #fff; }
+        .btn-signin:hover { color: rgba(255,255,255,0.9); }
         .btn-signup {
-          font-size: 13px; font-weight: 600; color: #fff; text-decoration: none;
-          padding: 6px 16px; background: #fff; color: #09090b; border-radius: 6px;
+          font-size: 13px; font-weight: 500; text-decoration: none;
+          padding: 6px 14px; border-radius: 6px;
+          background: #fafafa;
+          color: #09090b;
           border: none;
           transition: all 0.15s;
+          margin-left: 4px;
         }
         .btn-signup:hover {
-          background: rgba(255,255,255,0.9);
+          background: #e4e4e7;
+        }
+
+        /* ──────────── MOBILE MENU TOGGLE ──────────── */
+        .nav-hamburger {
+          display: none;
+          align-items: center;
+          justify-content: center;
+          width: 32px; height: 32px;
+          border: none;
+          background: none;
+          cursor: pointer;
+          transition: opacity 0.15s;
+          padding: 0;
+          opacity: 0.5;
+        }
+        .nav-hamburger:hover { opacity: 0.9; }
+        .nav-hamburger span {
+          display: block;
+          width: 18px; height: 1.5px;
+          background: #fff;
+          border-radius: 1px;
+          transition: all 0.25s ease;
+          transform-origin: center;
+          position: absolute;
+        }
+        .nav-hamburger span:nth-child(1) { transform: translateY(-5px); }
+        .nav-hamburger span:nth-child(2) { transform: translateY(0); }
+        .nav-hamburger span:nth-child(3) { transform: translateY(5px); }
+        .nav-hamburger.open span:nth-child(1) {
+          transform: translateY(0) rotate(45deg);
+        }
+        .nav-hamburger.open span:nth-child(2) {
+          opacity: 0;
+        }
+        .nav-hamburger.open span:nth-child(3) {
+          transform: translateY(0) rotate(-45deg);
+        }
+
+        /* ──────────── MOBILE DRAWER ──────────── */
+        .mobile-drawer {
+          display: none;
+          position: fixed;
+          top: 56px; left: 0; right: 0;
+          bottom: 0;
+          background: rgba(10, 14, 24, 0.98);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          z-index: 99;
+          padding: 16px 24px 40px;
+          opacity: 0;
+          transform: translateY(-10px);
+          pointer-events: none;
+          transition: opacity 0.2s ease, transform 0.2s ease;
+          overflow-y: auto;
+        }
+        .mobile-drawer.open {
+          opacity: 1;
+          transform: translateY(0);
+          pointer-events: all;
+        }
+        .mobile-drawer-links {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+          padding-bottom: 20px;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+          margin-bottom: 20px;
+        }
+        .mobile-drawer-links a {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 16px;
+          font-weight: 400;
+          color: rgba(255,255,255,0.7);
+          text-decoration: none;
+          padding: 16px 4px;
+          border-bottom: 1px solid rgba(255,255,255,0.04);
+          transition: color 0.15s;
+        }
+        .mobile-drawer-links a:last-child { border-bottom: none; }
+        .mobile-drawer-links a:hover { color: #fff; }
+        .mobile-drawer-links .link-icon {
+          width: 18px; height: 18px;
+          color: rgba(255,255,255,0.25);
+        }
+        .mobile-drawer-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .mobile-drawer-actions a {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 15px;
+          font-weight: 500;
+          text-decoration: none;
+          padding: 14px 16px;
+          border-radius: 8px;
+          transition: all 0.15s;
+        }
+        .mobile-signin {
+          color: rgba(255,255,255,0.7);
+          background: transparent;
+          border: 1px solid rgba(255,255,255,0.1);
+        }
+        .mobile-signin:hover {
+          color: #fff;
+          border-color: rgba(255,255,255,0.2);
+        }
+        .mobile-cta {
+          color: #09090b;
+          background: #fafafa;
+          font-weight: 600;
+        }
+        .mobile-cta:hover {
+          background: #e4e4e7;
         }
 
         /* ──────────────────── HERO ──────────────────── */
@@ -536,43 +667,63 @@ export default function LandingPage() {
 
         /* ──────────────────── FOOTER ──────────────────── */
         .footer {
-          border-top: 1px solid rgba(148,163,184,0.12);
-          padding: 56px 48px 0;
+          position: relative;
+          margin-top: 40px;
+          padding: 64px 48px 0;
+          background: rgba(10, 15, 28, 0.85);
+          border-top: 1px solid rgba(148,163,184,0.18);
+        }
+        .footer::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent 5%, rgba(99,102,241,0.5) 30%, rgba(251,146,60,0.4) 70%, transparent 95%);
+        }
+        .footer::after {
+          content: '';
+          position: absolute;
+          top: -60px; left: 10%; right: 10%;
+          height: 120px;
+          background: radial-gradient(ellipse at center, rgba(99,102,241,0.07) 0%, transparent 70%);
+          pointer-events: none;
         }
         .footer-grid {
           display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr;
           gap: 40px; margin-bottom: 56px;
+          position: relative;
         }
         .footer-brand-name {
-          font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 10px;
+          font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 10px;
           letter-spacing: -0.2px;
         }
         .footer-brand-desc {
-          font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,0.35); max-width: 200px;
+          font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,0.45); max-width: 200px;
         }
         .footer-col-label {
           font-size: 11px; font-weight: 600;
-          color: rgba(255,255,255,0.45); margin-bottom: 16px;
+          color: rgba(255,255,255,0.55); margin-bottom: 16px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
         .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
         .footer-links a {
-          font-size: 12.5px; color: rgba(255,255,255,0.35); text-decoration: none;
-          transition: color 0.15s;
+          font-size: 12.5px; color: rgba(255,255,255,0.45); text-decoration: none;
+          transition: color 0.2s;
         }
-        .footer-links a:hover { color: rgba(255,255,255,0.6); }
+        .footer-links a:hover { color: rgba(255,255,255,0.75); }
         .footer-bottom {
-          border-top: 1px solid rgba(255,255,255,0.10);
+          border-top: 1px solid rgba(148,163,184,0.12);
           display: flex; align-items: center; justify-content: space-between;
-          padding: 16px 0;
+          padding: 20px 0;
+          position: relative;
         }
         .footer-copy {
           font-size: 12px;
-          color: rgba(255,255,255,0.15);
+          color: rgba(255,255,255,0.25);
         }
-        .github-icon { color: rgba(255,255,255,0.2); transition: color 0.15s; cursor: pointer; }
-        .github-icon:hover { color: rgba(255,255,255,0.5); }
+        .github-icon { color: rgba(255,255,255,0.3); transition: color 0.2s; cursor: pointer; }
+        .github-icon:hover { color: rgba(255,255,255,0.7); }
 
         /* ──────────────────── ANIMATIONS ──────────────────── */
         @keyframes fade-in-up {
@@ -589,7 +740,7 @@ export default function LandingPage() {
 
         /* ──────────────────── RESPONSIVE ──────────────────── */
         @media (max-width: 1024px) {
-          .lp-nav { padding: 0 28px; }
+          .lp-nav { padding: 0 24px; }
           .section-pad { padding: 80px 28px 64px; }
           .showcase-outer { padding: 20px 28px 80px; }
           .showcase-section { grid-template-columns: 1fr; gap: 40px; padding: 40px 36px; }
@@ -598,53 +749,143 @@ export default function LandingPage() {
         }
 
         @media (max-width: 768px) {
-          .lp-nav { padding: 0 20px; }
-          .lp-nav-links { display: none; }
+          /* Nav */
+          .lp-nav { padding: 0 16px; height: 52px; }
+          .lp-nav-center { display: none; }
           .btn-signin { display: none; }
+          .btn-signup.desktop-only { display: none; }
+          .nav-hamburger { display: flex; }
+          .mobile-drawer { display: block; }
 
-          .hero { padding: 64px 20px 48px; }
-          .hero-subtitle { font-size: 14px; }
+          /* Hero - tighter, bolder on mobile */
+          .hero { padding: 56px 20px 40px; }
+          .hero-badge { font-size: 11px; padding: 4px 12px 4px 7px; margin-bottom: 20px; }
+          .hero-title { font-size: 36px; letter-spacing: -1.5px; max-width: 100%; }
+          .hero-subtitle { font-size: 14px; max-width: 320px; margin: 16px auto 28px; }
+          .hero-ctas { gap: 8px; }
+          .cta-primary, .cta-secondary { padding: 10px 20px; font-size: 13px; }
 
-          .code-window-wrap { padding: 0 16px; max-width: 100%; }
-          .code-body { padding: 20px; font-size: 12px; }
+          /* Code window */
+          .code-window-wrap { padding: 0 16px; max-width: 100%; margin-top: 40px; }
+          .code-body { padding: 16px 20px 20px; font-size: 11.5px; line-height: 1.7; }
+          .code-titlebar { padding: 10px 14px; }
+          .dot { width: 8px; height: 8px; }
+          .code-filename { font-size: 10.5px; }
 
+          /* Stats - compact 3-column on mobile */
           .stats-bar {
-            margin: 48px 16px 0; grid-template-columns: 1fr;
+            margin: 36px 16px 0;
+            grid-template-columns: repeat(3, 1fr);
             max-width: 100%;
+            border-radius: 10px;
           }
-          .stat-item:not(:last-child)::after {
-            right: 20%; top: auto; bottom: 0; height: 1px;
-            width: 60%;
-          }
-          .stat-number { font-size: 24px; }
+          .stat-item { padding: 20px 8px; }
+          .stat-number { font-size: 20px; }
+          .stat-label { font-size: 10px; }
 
-          .section-pad { padding: 64px 20px 48px; }
+          /* Section general */
+          .section-pad { padding: 56px 20px 40px; }
+          .section-title { font-size: 28px; letter-spacing: -1px; }
+          .section-subtitle { font-size: 13px; margin-bottom: 36px; }
+          .section-tag { font-size: 10px; margin-bottom: 12px; }
+
+          /* Features - 2-column grid on tablet, better than 1-col */
+          .features-grid {
+            grid-template-columns: 1fr 1fr;
+            border-radius: 12px;
+          }
+          .feature-card { padding: 28px 20px; }
+          .feature-card:nth-child(2n) { border-right: none; }
+          .feature-icon-wrap { width: 34px; height: 34px; margin-bottom: 16px; border-radius: 8px; }
+          .feature-icon { width: 15px; height: 15px; }
+          .feature-title { font-size: 13px; }
+          .feature-desc { font-size: 12px; }
+
+          /* How it works */
+          .how-grid { grid-template-columns: 1fr; border-radius: 12px; }
+          .how-step {
+            border-right: none !important;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 32px 24px;
+            flex-direction: row;
+            text-align: left;
+            gap: 16px;
+          }
+          .how-step:last-child { border-bottom: none; }
+          .how-number { margin-bottom: 0; flex-shrink: 0; }
+          .how-step-title { font-size: 14px; margin-bottom: 4px; }
+          .how-step-desc { font-size: 12px; max-width: 100%; }
+
+          /* Testimonials */
+          .testimonials-grid { grid-template-columns: 1fr; border-radius: 12px; }
+          .testimonial-card {
+            border-right: none !important;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 28px 24px;
+          }
+          .testimonial-card:last-child { border-bottom: none; }
+          .testimonial-quote { font-size: 12.5px; margin-bottom: 16px; }
+
+          /* Showcase */
+          .showcase-outer { padding: 16px 20px 56px; }
+          .showcase-section { padding: 28px 20px; gap: 28px; border-radius: 12px; }
+          .showcase-eyebrow { font-size: 10px; }
+          .showcase-title { font-size: 24px; letter-spacing: -0.8px; }
+          .showcase-desc { font-size: 13px; margin-bottom: 20px; }
+          .showcase-list li { font-size: 12px; }
+
+          /* CTA */
+          .cta-banner { padding: 40px 20px; }
+          .cta-banner-inner { padding: 40px 24px; border-radius: 12px; }
+          .cta-banner-title { font-size: 24px; letter-spacing: -0.8px; }
+          .cta-banner-desc { font-size: 13px; margin-bottom: 24px; }
+
+          /* Footer */
+          .footer { padding: 36px 20px 0; margin-top: 20px; }
+          .footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 36px; }
+          .footer-brand-name { font-size: 14px; }
+          .footer-brand-desc { font-size: 12px; }
+          .footer-col-label { font-size: 10px; margin-bottom: 12px; }
+          .footer-links a { font-size: 12px; }
+          .footer-bottom {
+            flex-direction: column; gap: 10px;
+            align-items: center; padding: 16px 0;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .lp-nav { padding: 0 14px; height: 48px; }
+          .lp-logo { font-size: 14px; gap: 7px; }
+          .lp-logo-icon { width: 20px; height: 20px; }
+
+          .hero { padding: 44px 16px 32px; }
+          .hero-title { font-size: 30px; letter-spacing: -1.2px; }
+          .hero-subtitle { font-size: 13px; max-width: 280px; margin: 14px auto 24px; }
+
+          .code-window-wrap { padding: 0 12px; margin-top: 32px; }
+          .code-body { padding: 14px 16px 16px; font-size: 10.5px; }
+
+          .stats-bar { margin: 28px 12px 0; }
+          .stat-item { padding: 16px 6px; }
+          .stat-number { font-size: 18px; }
+          .stat-label { font-size: 9px; }
+
+          .section-pad { padding: 44px 16px 32px; }
+          .section-title { font-size: 24px; }
+
+          /* Features single column on very small screens */
           .features-grid { grid-template-columns: 1fr; }
           .feature-card { border-right: none !important; }
           .feature-card:last-child { border-bottom: none; }
 
-          .how-grid { grid-template-columns: 1fr; }
-          .how-step { border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.06); }
-          .how-step:last-child { border-bottom: none; }
+          .showcase-outer { padding: 12px 16px 44px; }
+          .showcase-section { padding: 24px 16px; }
 
-          .testimonials-grid { grid-template-columns: 1fr; }
-          .testimonial-card { border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.06); }
-          .testimonial-card:last-child { border-bottom: none; }
+          .cta-banner { padding: 32px 16px; }
+          .cta-banner-inner { padding: 32px 20px; }
 
-          .showcase-outer { padding: 16px 20px 64px; }
-          .showcase-section { padding: 32px 24px; gap: 32px; }
-
-          .cta-banner { padding: 48px 20px; }
-          .cta-banner-inner { padding: 48px 24px; }
-
-          .footer { padding: 40px 20px 0; }
-          .footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
-          .footer-bottom { flex-direction: column; gap: 10px; align-items: center; }
-        }
-
-        @media (max-width: 500px) {
-          .hero-title { letter-spacing: -1.5px; }
-          .footer-grid { grid-template-columns: 1fr; }
+          .footer { padding: 28px 16px 0; }
+          .footer-grid { grid-template-columns: 1fr; gap: 20px; }
         }
       `}</style>
 
@@ -667,6 +908,7 @@ export default function LandingPage() {
       <div className="lp-content">
         {/* ────── NAVBAR ────── */}
         <NavbarLanding />
+
 
         {/* ────── HERO ────── */}
         <section className="hero">
@@ -1006,21 +1248,70 @@ export default function LandingPage() {
 
 /* ────── LANDING NAV COMPONENT ────── */
 function NavbarLanding() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
   return (
-    <nav className="lp-nav">
-      <Link href="/" className="lp-logo">
-        <Image src="/codeSyncLogo.svg" alt="CodeSync" width={24} height={24} className="lp-logo-icon" />
-        CodeSync
-      </Link>
-      <div className="lp-nav-links">
-        <a href="#features">Features</a>
-        <Link href="/pricing">Pricing</Link>
-        <a href="#docs">Docs</a>
+    <div className="lp-nav-wrap">
+      <nav className="lp-nav">
+        <Link href="/" className="lp-logo">
+          <Image src="/codeSyncLogo.svg" alt="CodeSync" width={22} height={22} className="lp-logo-icon" />
+          CodeSync
+        </Link>
+        <div className="lp-nav-center">
+          <div className="lp-nav-links">
+            <a href="#features">Features</a>
+            <Link href="/pricing">Pricing</Link>
+            <a href="#docs">Docs</a>
+          </div>
+        </div>
+        <div className="lp-nav-actions">
+          <Link href="/auth/login" className="btn-signin">Sign In</Link>
+          <Link href="/auth/signup" className="btn-signup desktop-only">Get Started</Link>
+          <button
+            className={`nav-hamburger ${mobileOpen ? 'open' : ''}`}
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
+            style={{ position: 'relative' }}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile Drawer - full screen overlay */}
+      <div className={`mobile-drawer ${mobileOpen ? 'open' : ''}`}>
+        <div className="mobile-drawer-links">
+          <a href="#features" onClick={() => setMobileOpen(false)}>
+            <svg className="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+            Features
+          </a>
+          <Link href="/pricing" onClick={() => setMobileOpen(false)}>
+            <svg className="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+            Pricing
+          </Link>
+          <a href="#docs" onClick={() => setMobileOpen(false)}>
+            <svg className="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
+            Docs
+          </a>
+        </div>
+        <div className="mobile-drawer-actions">
+          <Link href="/auth/login" className="mobile-signin" onClick={() => setMobileOpen(false)}>Sign In</Link>
+          <Link href="/auth/signup" className="mobile-cta" onClick={() => setMobileOpen(false)}>Get Started Free</Link>
+        </div>
       </div>
-      <div className="lp-nav-actions">
-        <Link href="/auth/login" className="btn-signin">Sign In</Link>
-        <Link href="/auth/signup" className="btn-signup">Get Started</Link>
-      </div>
-    </nav>
+    </div>
   );
 }
+
