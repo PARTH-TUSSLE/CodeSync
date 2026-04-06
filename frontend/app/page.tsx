@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Home, User, BookOpen, Star, DollarSign, LogIn, ArrowRight, Menu } from "lucide-react";
 
 export default function LandingPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -27,7 +27,7 @@ export default function LandingPage() {
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         .lp-root {
-          background-color: #0a0f1a;
+          background-color: #0c1222;
           color: #fafafa;
           font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           min-height: 100vh;
@@ -67,205 +67,12 @@ export default function LandingPage() {
           z-index: 1;
         }
 
-        /* ──────────────────── NAVBAR ──────────────────── */
-        .lp-nav-wrap {
-          position: sticky;
-          top: 0;
-          z-index: 100;
-        }
-        .lp-nav {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 32px;
-          height: 56px;
-          background: rgba(10, 15, 26, 0.6);
-          backdrop-filter: blur(12px) saturate(1.5);
-          -webkit-backdrop-filter: blur(12px) saturate(1.5);
-          border-bottom: 1px solid rgba(148,163,184,0.08);
-          position: relative;
-        }
-        .lp-logo {
-          display: flex;
-          align-items: center;
-          gap: 9px;
-          font-size: 15px;
-          font-weight: 650;
-          color: #f0f0f0;
-          text-decoration: none;
-          letter-spacing: -0.3px;
-        }
-        .lp-logo-icon {
-          width: 22px; height: 22px;
-          filter: brightness(0) invert(1);
-          opacity: 0.85;
-        }
-        .lp-nav-center {
-          position: absolute;
-          left: 50%;
-          transform: translateX(-50%);
-          display: flex;
-          align-items: center;
-        }
-        .lp-nav-links {
-          display: flex;
-          gap: 2px;
-          align-items: center;
-        }
-        .lp-nav-links a {
-          font-size: 13px;
-          font-weight: 400;
-          color: rgba(255,255,255,0.5);
-          text-decoration: none;
-          transition: color 0.15s;
-          letter-spacing: 0;
-          padding: 6px 12px;
-        }
-        .lp-nav-links a:hover {
-          color: rgba(255,255,255,0.9);
-        }
-        .lp-nav-actions { display: flex; align-items: center; gap: 4px; }
-        .btn-signin {
-          font-size: 13px; font-weight: 400;
-          color: rgba(255,255,255,0.5); text-decoration: none;
-          padding: 6px 12px; transition: color 0.15s;
-        }
-        .btn-signin:hover { color: rgba(255,255,255,0.9); }
-        .btn-signup {
-          font-size: 13px; font-weight: 500; text-decoration: none;
-          padding: 6px 14px; border-radius: 6px;
-          background: #fafafa;
-          color: #09090b;
-          border: none;
-          transition: all 0.15s;
-          margin-left: 4px;
-        }
-        .btn-signup:hover {
-          background: #e4e4e7;
-        }
-
-        /* ──────────── MOBILE MENU TOGGLE ──────────── */
-        .nav-hamburger {
-          display: none;
-          align-items: center;
-          justify-content: center;
-          width: 32px; height: 32px;
-          border: none;
-          background: none;
-          cursor: pointer;
-          transition: opacity 0.15s;
-          padding: 0;
-          opacity: 0.5;
-        }
-        .nav-hamburger:hover { opacity: 0.9; }
-        .nav-hamburger span {
-          display: block;
-          width: 18px; height: 1.5px;
-          background: #fff;
-          border-radius: 1px;
-          transition: all 0.25s ease;
-          transform-origin: center;
-          position: absolute;
-        }
-        .nav-hamburger span:nth-child(1) { transform: translateY(-5px); }
-        .nav-hamburger span:nth-child(2) { transform: translateY(0); }
-        .nav-hamburger span:nth-child(3) { transform: translateY(5px); }
-        .nav-hamburger.open span:nth-child(1) {
-          transform: translateY(0) rotate(45deg);
-        }
-        .nav-hamburger.open span:nth-child(2) {
-          opacity: 0;
-        }
-        .nav-hamburger.open span:nth-child(3) {
-          transform: translateY(0) rotate(-45deg);
-        }
-
-        /* ──────────── MOBILE DRAWER ──────────── */
-        .mobile-drawer {
-          display: none;
-          position: fixed;
-          top: 56px; left: 0; right: 0;
-          bottom: 0;
-          background: rgba(10, 14, 24, 0.98);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          z-index: 99;
-          padding: 16px 24px 40px;
-          opacity: 0;
-          transform: translateY(-10px);
-          pointer-events: none;
-          transition: opacity 0.2s ease, transform 0.2s ease;
-          overflow-y: auto;
-        }
-        .mobile-drawer.open {
-          opacity: 1;
-          transform: translateY(0);
-          pointer-events: all;
-        }
-        .mobile-drawer-links {
-          display: flex;
-          flex-direction: column;
-          gap: 0;
-          padding-bottom: 20px;
-          border-bottom: 1px solid rgba(255,255,255,0.06);
-          margin-bottom: 20px;
-        }
-        .mobile-drawer-links a {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-size: 16px;
-          font-weight: 400;
-          color: rgba(255,255,255,0.7);
-          text-decoration: none;
-          padding: 16px 4px;
-          border-bottom: 1px solid rgba(255,255,255,0.04);
-          transition: color 0.15s;
-        }
-        .mobile-drawer-links a:last-child { border-bottom: none; }
-        .mobile-drawer-links a:hover { color: #fff; }
-        .mobile-drawer-links .link-icon {
-          width: 18px; height: 18px;
-          color: rgba(255,255,255,0.25);
-        }
-        .mobile-drawer-actions {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-        .mobile-drawer-actions a {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          font-size: 15px;
-          font-weight: 500;
-          text-decoration: none;
-          padding: 14px 16px;
-          border-radius: 8px;
-          transition: all 0.15s;
-        }
-        .mobile-signin {
-          color: rgba(255,255,255,0.7);
-          background: transparent;
-          border: 1px solid rgba(255,255,255,0.1);
-        }
-        .mobile-signin:hover {
-          color: #fff;
-          border-color: rgba(255,255,255,0.2);
-        }
-        .mobile-cta {
-          color: #09090b;
-          background: #fafafa;
-          font-weight: 600;
-        }
-        .mobile-cta:hover {
-          background: #e4e4e7;
-        }
+        /* Navbar is rendered with Tailwind (matching dashboard Navbar) */
 
         /* ──────────────────── HERO ──────────────────── */
         .hero {
           display: flex; flex-direction: column; align-items: center;
-          text-align: center; padding: 100px 24px 72px;
+          text-align: center; padding: 120px 24px 80px;
           position: relative;
         }
         .hero-badge {
@@ -301,7 +108,7 @@ export default function LandingPage() {
         .hero-subtitle {
           font-size: 16px; font-weight: 400; line-height: 1.65;
           color: rgba(255,255,255,0.5); max-width: 460px;
-          margin: 24px auto 40px;
+          margin: 28px auto 48px;
           letter-spacing: -0.1px;
         }
         .hero-ctas {
@@ -332,7 +139,7 @@ export default function LandingPage() {
 
         /* ──────────────────── CODE WINDOW ──────────────────── */
         .code-window-wrap {
-          width: 100%; max-width: 720px; margin: 56px auto 0;
+          width: 100%; max-width: 720px; margin: 64px auto 0;
           padding: 0 24px; position: relative;
         }
         .code-window {
@@ -365,7 +172,7 @@ export default function LandingPage() {
         /* ──────────────────── STATS BAR ──────────────────── */
         .stats-bar {
           display: grid; grid-template-columns: repeat(3, 1fr);
-          margin: 80px auto 0; max-width: 720px;
+          margin: 88px auto 0; max-width: 720px;
           padding: 0 24px;
           border: 1px solid rgba(148,163,184,0.15);
           border-radius: 12px;
@@ -391,7 +198,7 @@ export default function LandingPage() {
         .stat-label { font-size: 12px; color: rgba(255,255,255,0.45); font-weight: 450; letter-spacing: 0.2px; }
 
         /* ──────────────────── SECTION COMMON ──────────────────── */
-        .section-pad { padding: 100px 48px 80px; }
+        .section-pad { padding: 112px 48px 88px; }
         .section-tag {
           display: inline-flex; align-items: center; gap: 5px;
           font-size: 11px; font-weight: 600;
@@ -492,7 +299,7 @@ export default function LandingPage() {
 
         /* ──────────────────── SHOWCASE ──────────────────── */
         .showcase-outer {
-          padding: 20px 48px 100px; max-width: 1200px; margin: 0 auto;
+          padding: 32px 48px 100px; max-width: 1200px; margin: 0 auto;
         }
         .showcase-section {
           display: grid; grid-template-columns: 1fr 1.6fr; gap: 48px;
@@ -612,7 +419,7 @@ export default function LandingPage() {
 
         /* ──────────────────── CTA BANNER ──────────────────── */
         .cta-banner {
-          text-align: center; padding: 80px 24px;
+          text-align: center; padding: 96px 24px;
           position: relative;
         }
         .cta-banner-inner {
@@ -670,7 +477,7 @@ export default function LandingPage() {
           position: relative;
           margin-top: 40px;
           padding: 64px 48px 0;
-          background: rgba(10, 15, 28, 0.85);
+          background: rgba(12, 18, 34, 0.9);
           border-top: 1px solid rgba(148,163,184,0.18);
         }
         .footer::before {
@@ -740,29 +547,21 @@ export default function LandingPage() {
 
         /* ──────────────────── RESPONSIVE ──────────────────── */
         @media (max-width: 1024px) {
-          .lp-nav { padding: 0 24px; }
-          .section-pad { padding: 80px 28px 64px; }
-          .showcase-outer { padding: 20px 28px 80px; }
+          .section-pad { padding: 88px 28px 72px; }
+          .showcase-outer { padding: 24px 28px 80px; }
           .showcase-section { grid-template-columns: 1fr; gap: 40px; padding: 40px 36px; }
           .footer { padding: 48px 28px 0; }
           .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
         }
 
         @media (max-width: 768px) {
-          /* Nav */
-          .lp-nav { padding: 0 16px; height: 52px; }
-          .lp-nav-center { display: none; }
-          .btn-signin { display: none; }
-          .btn-signup.desktop-only { display: none; }
-          .nav-hamburger { display: flex; }
-          .mobile-drawer { display: block; }
 
           /* Hero - tighter, bolder on mobile */
-          .hero { padding: 56px 20px 40px; }
-          .hero-badge { font-size: 11px; padding: 4px 12px 4px 7px; margin-bottom: 20px; }
+          .hero { padding: 72px 20px 48px; }
+          .hero-badge { font-size: 11px; padding: 4px 12px 4px 7px; margin-bottom: 24px; }
           .hero-title { font-size: 36px; letter-spacing: -1.5px; max-width: 100%; }
-          .hero-subtitle { font-size: 14px; max-width: 320px; margin: 16px auto 28px; }
-          .hero-ctas { gap: 8px; }
+          .hero-subtitle { font-size: 14px; max-width: 320px; margin: 20px auto 36px; }
+          .hero-ctas { gap: 10px; }
           .cta-primary, .cta-secondary { padding: 10px 20px; font-size: 13px; }
 
           /* Code window */
@@ -774,27 +573,27 @@ export default function LandingPage() {
 
           /* Stats - compact 3-column on mobile */
           .stats-bar {
-            margin: 36px 16px 0;
+            margin: 44px 16px 0;
             grid-template-columns: repeat(3, 1fr);
             max-width: 100%;
             border-radius: 10px;
           }
-          .stat-item { padding: 20px 8px; }
+          .stat-item { padding: 24px 10px; }
           .stat-number { font-size: 20px; }
           .stat-label { font-size: 10px; }
 
           /* Section general */
-          .section-pad { padding: 56px 20px 40px; }
+          .section-pad { padding: 72px 20px 52px; }
           .section-title { font-size: 28px; letter-spacing: -1px; }
-          .section-subtitle { font-size: 13px; margin-bottom: 36px; }
-          .section-tag { font-size: 10px; margin-bottom: 12px; }
+          .section-subtitle { font-size: 13px; margin-bottom: 40px; }
+          .section-tag { font-size: 10px; margin-bottom: 14px; }
 
           /* Features - 2-column grid on tablet, better than 1-col */
           .features-grid {
             grid-template-columns: 1fr 1fr;
             border-radius: 12px;
           }
-          .feature-card { padding: 28px 20px; }
+          .feature-card { padding: 32px 22px; }
           .feature-card:nth-child(2n) { border-right: none; }
           .feature-icon-wrap { width: 34px; height: 34px; margin-bottom: 16px; border-radius: 8px; }
           .feature-icon { width: 15px; height: 15px; }
@@ -835,10 +634,10 @@ export default function LandingPage() {
           .showcase-list li { font-size: 12px; }
 
           /* CTA */
-          .cta-banner { padding: 40px 20px; }
-          .cta-banner-inner { padding: 40px 24px; border-radius: 12px; }
+          .cta-banner { padding: 56px 20px; }
+          .cta-banner-inner { padding: 48px 28px; border-radius: 12px; }
           .cta-banner-title { font-size: 24px; letter-spacing: -0.8px; }
-          .cta-banner-desc { font-size: 13px; margin-bottom: 24px; }
+          .cta-banner-desc { font-size: 13px; margin-bottom: 28px; }
 
           /* Footer */
           .footer { padding: 36px 20px 0; margin-top: 20px; }
@@ -858,19 +657,19 @@ export default function LandingPage() {
           .lp-logo { font-size: 14px; gap: 7px; }
           .lp-logo-icon { width: 20px; height: 20px; }
 
-          .hero { padding: 44px 16px 32px; }
+          .hero { padding: 56px 16px 40px; }
           .hero-title { font-size: 30px; letter-spacing: -1.2px; }
-          .hero-subtitle { font-size: 13px; max-width: 280px; margin: 14px auto 24px; }
+          .hero-subtitle { font-size: 13px; max-width: 280px; margin: 16px auto 28px; }
 
-          .code-window-wrap { padding: 0 12px; margin-top: 32px; }
-          .code-body { padding: 14px 16px 16px; font-size: 10.5px; }
+          .code-window-wrap { padding: 0 12px; margin-top: 36px; }
+          .code-body { padding: 16px 18px 18px; font-size: 10.5px; }
 
-          .stats-bar { margin: 28px 12px 0; }
-          .stat-item { padding: 16px 6px; }
+          .stats-bar { margin: 36px 12px 0; }
+          .stat-item { padding: 20px 8px; }
           .stat-number { font-size: 18px; }
           .stat-label { font-size: 9px; }
 
-          .section-pad { padding: 44px 16px 32px; }
+          .section-pad { padding: 56px 16px 40px; }
           .section-title { font-size: 24px; }
 
           /* Features single column on very small screens */
@@ -878,14 +677,14 @@ export default function LandingPage() {
           .feature-card { border-right: none !important; }
           .feature-card:last-child { border-bottom: none; }
 
-          .showcase-outer { padding: 12px 16px 44px; }
-          .showcase-section { padding: 24px 16px; }
+          .showcase-outer { padding: 16px 16px 48px; }
+          .showcase-section { padding: 28px 18px; }
 
-          .cta-banner { padding: 32px 16px; }
-          .cta-banner-inner { padding: 32px 20px; }
+          .cta-banner { padding: 40px 16px; }
+          .cta-banner-inner { padding: 36px 22px; }
 
-          .footer { padding: 28px 16px 0; }
-          .footer-grid { grid-template-columns: 1fr; gap: 20px; }
+          .footer { padding: 32px 16px 0; }
+          .footer-grid { grid-template-columns: 1fr; gap: 24px; }
         }
       `}</style>
 
@@ -1248,70 +1047,212 @@ export default function LandingPage() {
 
 /* ────── LANDING NAV COMPONENT ────── */
 function NavbarLanding() {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [mobileOpen]);
+    const handleScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const navLinks = [
+    { href: '#features', label: 'Features', icon: Star },
+    { href: '/pricing', label: 'Pricing', icon: DollarSign },
+    { href: '#docs', label: 'Docs', icon: BookOpen },
+  ];
 
   return (
-    <div className="lp-nav-wrap">
-      <nav className="lp-nav">
-        <Link href="/" className="lp-logo">
-          <Image src="/codeSyncLogo.svg" alt="CodeSync" width={22} height={22} className="lp-logo-icon" />
-          CodeSync
-        </Link>
-        <div className="lp-nav-center">
-          <div className="lp-nav-links">
-            <a href="#features">Features</a>
-            <Link href="/pricing">Pricing</Link>
-            <a href="#docs">Docs</a>
+    <>
+      <style>{`
+        @keyframes fadeInDown {
+          from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+          to   { opacity: 1; transform: translateY(0)   scale(1); }
+        }
+        @keyframes slideDown {
+          from { opacity: 0; max-height: 0; }
+          to   { opacity: 1; max-height: 500px; }
+        }
+        .dropdown-enter { animation: fadeInDown 0.18s cubic-bezier(0.16,1,0.3,1) forwards; }
+        .mobile-enter   { animation: slideDown  0.22s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+        .nav-link-hover::after {
+          content: '';
+          position: absolute;
+          bottom: -1px;
+          left: 50%;
+          transform: translateX(-50%) scaleX(0);
+          width: 60%;
+          height: 1.5px;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+          transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+          border-radius: 9999px;
+        }
+        .nav-link-hover:hover::after { transform: translateX(-50%) scaleX(1); }
+
+        .lp-logo-text {
+          background: linear-gradient(135deg, #ffffff 0%, #d4d4d4 40%, #737373 70%, #ffffff 100%);
+          background-size: 200% 200%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: logoShimmer 4s ease-in-out infinite;
+        }
+        @keyframes logoShimmer {
+          0%,100% { background-position: 0% 50%; }
+          50%      { background-position: 100% 50%; }
+        }
+
+        .active-pill {
+          background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%);
+          border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        .avatar-ring:hover { box-shadow: 0 0 0 2px rgba(255,255,255,0.15), 0 0 16px rgba(255,255,255,0.08); }
+      `}</style>
+
+      <nav
+        className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+          scrolled
+            ? 'bg-[#0a0f1d]/90 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_4px_40px_rgba(0,0,0,0.5)]'
+            : 'bg-[#0a0f1d]/70 backdrop-blur-lg border-b border-white/[0.04]'
+        }`}
+      >
+        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="flex items-center justify-between h-[80px]">
+
+            {/* ── Logo ── */}
+            <Link
+              href="/"
+              className="flex items-center gap-2.5 group select-none"
+            >
+              <div className="relative w-7 h-7 flex-shrink-0">
+                <div className="absolute inset-0 rounded-full bg-white/10 blur-md group-hover:bg-white/20 transition-all duration-500" />
+                <Image
+                  src="/codeSyncLogo.svg"
+                  alt="CodeSync"
+                  width={28}
+                  height={28}
+                  className="relative brightness-0 invert opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 ease-out"
+                />
+              </div>
+              <span className="lp-logo-text text-[1.25rem] font-extrabold tracking-tight">
+                CodeSync
+              </span>
+            </Link>
+
+            {/* ── Desktop Nav Links ── */}
+            <div className="hidden md:flex items-center gap-3">
+              {navLinks.map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="
+                    relative nav-link-hover flex items-center gap-2.5 px-5 py-3 rounded-xl text-[15px] font-medium
+                    transition-all duration-200 ease-out group
+                    text-gray-400 hover:text-gray-100 hover:bg-white/[0.06]
+                  "
+                >
+                  <Icon className="w-[18px] h-[18px] text-gray-500 transition-colors duration-200 group-hover:text-gray-300" />
+                  <span className="tracking-wide">{label}</span>
+                </Link>
+              ))}
+            </div>
+
+            {/* ── Desktop Sign In (pill style matching dashboard's user button) ── */}
+            <div className="hidden md:flex items-center ml-6">
+              <Link
+                href="/auth/login"
+                className="
+                  avatar-ring flex items-center gap-3 pl-2 pr-6 py-2 rounded-full
+                  bg-white/[0.05] border border-white/[0.1]
+                  hover:bg-white/[0.09] hover:border-white/[0.18]
+                  transition-all duration-200 ease-out group
+                "
+              >
+                <div className="
+                  w-9 h-9 rounded-full flex items-center justify-center
+                  text-[13px] font-bold text-white tracking-wider
+                  bg-gradient-to-br from-neutral-600 to-neutral-800
+                  border border-white/20 shadow-inner
+                ">
+                  <LogIn className="w-[18px] h-[18px] ml-0.5" />
+                </div>
+                <span className="text-[15px] font-medium text-gray-300 group-hover:text-white transition-colors duration-150">
+                  Sign In
+                </span>
+              </Link>
+            </div>
+
+            {/* ── Mobile Hamburger ── */}
+            <button
+              onClick={() => setIsMenuOpen((v) => !v)}
+              className="
+                md:hidden p-3 rounded-xl text-gray-400
+                hover:text-white hover:bg-white/[0.08]
+                transition-all duration-200
+              "
+              aria-label="Toggle menu"
+            >
+              <div className={`transition-all duration-200 ${isMenuOpen ? 'rotate-90 opacity-100' : 'rotate-0 opacity-100'}`}>
+                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </div>
+            </button>
           </div>
         </div>
-        <div className="lp-nav-actions">
-          <Link href="/auth/login" className="btn-signin">Sign In</Link>
-          <Link href="/auth/signup" className="btn-signup desktop-only">Get Started</Link>
-          <button
-            className={`nav-hamburger ${mobileOpen ? 'open' : ''}`}
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
-            style={{ position: 'relative' }}
-          >
-            <span />
-            <span />
-            <span />
-          </button>
-        </div>
-      </nav>
 
-      {/* Mobile Drawer - full screen overlay */}
-      <div className={`mobile-drawer ${mobileOpen ? 'open' : ''}`}>
-        <div className="mobile-drawer-links">
-          <a href="#features" onClick={() => setMobileOpen(false)}>
-            <svg className="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-            Features
-          </a>
-          <Link href="/pricing" onClick={() => setMobileOpen(false)}>
-            <svg className="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
-            Pricing
-          </Link>
-          <a href="#docs" onClick={() => setMobileOpen(false)}>
-            <svg className="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>
-            Docs
-          </a>
-        </div>
-        <div className="mobile-drawer-actions">
-          <Link href="/auth/login" className="mobile-signin" onClick={() => setMobileOpen(false)}>Sign In</Link>
-          <Link href="/auth/signup" className="mobile-cta" onClick={() => setMobileOpen(false)}>Get Started Free</Link>
-        </div>
-      </div>
-    </div>
+        {/* ── Mobile Menu ── */}
+        {isMenuOpen && (
+          <div className="mobile-enter md:hidden border-t border-white/[0.06] bg-[#0c1222]/98 backdrop-blur-3xl overflow-hidden shadow-2xl">
+            <div className="px-6 py-6 flex flex-col gap-3">
+              {navLinks.map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="
+                    flex items-center gap-4 px-5 py-4 rounded-2xl text-[16px] font-medium
+                    transition-all duration-150 group
+                    text-gray-400 hover:text-white hover:bg-white/[0.06]
+                  "
+                >
+                  <Icon className="w-6 h-6 text-gray-500 group-hover:text-white transition-colors" />
+                  <span className="tracking-wide">{label}</span>
+                </Link>
+              ))}
+            </div>
+
+            {/* Divider */}
+            <div className="mx-8 h-px bg-white/[0.06]" />
+
+            {/* Mobile Auth Section */}
+            <div className="px-6 py-8 flex flex-col gap-4 mb-4">
+              <Link
+                href="/auth/login"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center justify-center gap-3 px-6 py-4 rounded-2xl text-[16px] font-medium
+                  text-gray-300 bg-white/[0.05] border border-white/[0.10]
+                  hover:bg-white/[0.08] hover:border-white/[0.16] hover:text-white
+                  transition-all duration-200"
+              >
+                <LogIn className="w-5 h-5" />
+                Sign In
+              </Link>
+              <Link
+                href="/auth/signup"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center justify-center gap-3 px-6 py-4 rounded-2xl text-[16px] font-semibold
+                  text-[#0c1222] bg-white hover:scale-[1.02]
+                  hover:bg-gray-100
+                  transition-all duration-200 shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+              >
+                Get Started Free
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
+          </div>
+        )}
+      </nav>
+    </>
   );
 }
-
