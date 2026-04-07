@@ -1112,19 +1112,18 @@ function NavbarLanding() {
       `}</style>
 
       <nav
-        className={`sticky top-0 z-50 w-full transition-all duration-300 ${
-          scrolled
-            ? 'bg-[#0a0f1d]/90 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_4px_40px_rgba(0,0,0,0.5)]'
-            : 'bg-[#0a0f1d]/70 backdrop-blur-lg border-b border-white/[0.04]'
-        }`}
+        className={`sticky top-0 z-50 w-full transition-all duration-300 ${scrolled
+            ? 'bg-[#0c1222]/90 backdrop-blur-xl border-b border-white/[0.06] shadow-[0_4px_40px_rgba(0,0,0,0.5)]'
+            : 'bg-[#0c1222]/70 backdrop-blur-lg border-b border-white/[0.04]'
+          }`}
       >
-        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="flex items-center justify-between h-[80px]">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-[60px]">
 
             {/* ── Logo ── */}
             <Link
               href="/"
-              className="flex items-center gap-2.5 group select-none"
+              className="flex items-center gap-2.5 group select-none ml-2 md:ml-6 lg:ml-12"
             >
               <div className="relative w-7 h-7 flex-shrink-0">
                 <div className="absolute inset-0 rounded-full bg-white/10 blur-md group-hover:bg-white/20 transition-all duration-500" />
@@ -1136,49 +1135,53 @@ function NavbarLanding() {
                   className="relative brightness-0 invert opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 ease-out"
                 />
               </div>
-              <span className="lp-logo-text text-[1.25rem] font-extrabold tracking-tight">
+              <span className="lp-logo-text text-[1.15rem] font-bold tracking-tight">
                 CodeSync
               </span>
             </Link>
 
             {/* ── Desktop Nav Links ── */}
-            <div className="hidden md:flex items-center gap-3">
-              {navLinks.map(({ href, label, icon: Icon }) => (
+            <div className="hidden md:flex items-center gap-6">
+              {navLinks.map(({ href, label, icon: Icon }, i) => (
                 <Link
                   key={href}
                   href={href}
-                  className="
-                    relative nav-link-hover flex items-center gap-2.5 px-5 py-3 rounded-xl text-[15px] font-medium
+                  className={`
+                    relative nav-link-hover flex items-center gap-3 rounded-full text-[14.5px] font-medium
                     transition-all duration-200 ease-out group
-                    text-gray-400 hover:text-gray-100 hover:bg-white/[0.06]
-                  "
+                    ${i === 0 
+                      ? "active-pill text-white shadow-sm px-6 py-2" 
+                      : "text-gray-400 hover:text-gray-100 hover:bg-white/[0.05] px-4 py-2"}
+                  `}
                 >
-                  <Icon className="w-[18px] h-[18px] text-gray-500 transition-colors duration-200 group-hover:text-gray-300" />
+                  <Icon className={`w-4 h-4 transition-colors duration-200 ${i === 0 ? "text-white" : "text-gray-500 group-hover:text-gray-300"}`} />
                   <span className="tracking-wide">{label}</span>
+                  {i === 0 && (
+                    <span className="absolute bottom-[-1px] left-1/2 -translate-x-1/2 w-8 h-[1.5px] bg-white/40 rounded-full" />
+                  )}
                 </Link>
               ))}
             </div>
 
-            {/* ── Desktop Sign In (pill style matching dashboard's user button) ── */}
-            <div className="hidden md:flex items-center ml-6">
+            {/* ── Desktop Sign In ── */}
+            <div className="hidden md:flex items-center mr-2 md:mr-6 lg:mr-12">
               <Link
                 href="/auth/login"
                 className="
-                  avatar-ring flex items-center gap-3 pl-2 pr-6 py-2 rounded-full
-                  bg-white/[0.05] border border-white/[0.1]
-                  hover:bg-white/[0.09] hover:border-white/[0.18]
-                  transition-all duration-200 ease-out group
+                  flex items-center gap-3 pl-2.5 pr-5 py-1.5 rounded-full
+                  bg-white/[0.06] border border-white/[0.18]
+                  hover:bg-white/[0.12] hover:border-white/[0.35] hover:shadow-[0_0_30px_rgba(255,255,255,0.08)]
+                  transition-all duration-300 ease-out group
                 "
               >
                 <div className="
                   w-9 h-9 rounded-full flex items-center justify-center
-                  text-[13px] font-bold text-white tracking-wider
-                  bg-gradient-to-br from-neutral-600 to-neutral-800
-                  border border-white/20 shadow-inner
+                  bg-gradient-to-br from-white/15 to-white/5
+                  border border-white/30 shadow-inner group-hover:scale-110 transition-transform duration-300
                 ">
-                  <LogIn className="w-[18px] h-[18px] ml-0.5" />
+                  <LogIn className="w-4 h-4 text-white ml-0.5 opacity-90 group-hover:opacity-100" />
                 </div>
-                <span className="text-[15px] font-medium text-gray-300 group-hover:text-white transition-colors duration-150">
+                <span className="text-[14.5px] font-semibold text-gray-200 group-hover:text-white transition-colors duration-200">
                   Sign In
                 </span>
               </Link>
