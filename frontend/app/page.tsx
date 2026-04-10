@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, X, Home, User, BookOpen, Star, DollarSign, LogIn, ArrowRight, Menu } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Home, User, FileText, Sparkles, Layers, LogIn, ArrowRight, Menu } from "lucide-react";
 
 export default function LandingPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -1057,9 +1057,9 @@ function NavbarLanding() {
   }, []);
 
   const navLinks = [
-    { href: '#features', label: 'Features', icon: Star },
-    { href: '/pricing', label: 'Pricing', icon: DollarSign },
-    { href: '#docs', label: 'Docs', icon: BookOpen },
+    { href: '#features', label: 'Features', icon: Sparkles },
+    { href: '/pricing', label: 'Pricing', icon: Layers },
+    { href: '#docs', label: 'Docs', icon: FileText },
   ];
 
   return (
@@ -1071,10 +1071,24 @@ function NavbarLanding() {
         }
         @keyframes slideDown {
           from { opacity: 0; max-height: 0; }
-          to   { opacity: 1; max-height: 500px; }
+          to   { opacity: 1; max-height: 800px; }
+        }
+        @keyframes mobileItemIn {
+          from { opacity: 0; transform: translateX(-12px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes glowPulse {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 0.8; }
         }
         .dropdown-enter { animation: fadeInDown 0.18s cubic-bezier(0.16,1,0.3,1) forwards; }
-        .mobile-enter   { animation: slideDown  0.22s cubic-bezier(0.16,1,0.3,1) forwards; }
+        .mobile-enter   { animation: slideDown  0.35s cubic-bezier(0.16,1,0.3,1) forwards; }
+        .mobile-item { opacity: 0; animation: mobileItemIn 0.4s cubic-bezier(0.16,1,0.3,1) forwards; }
+        .mobile-item-0 { animation-delay: 0.08s; }
+        .mobile-item-1 { animation-delay: 0.14s; }
+        .mobile-item-2 { animation-delay: 0.20s; }
+        .mobile-item-3 { animation-delay: 0.28s; }
+        .mobile-item-4 { animation-delay: 0.34s; }
 
         .nav-link-hover::after {
           content: '';
@@ -1117,13 +1131,13 @@ function NavbarLanding() {
             : 'bg-[#0c1222]/70 backdrop-blur-lg border-b border-white/[0.04]'
           }`}
       >
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-8 sm:px-14 lg:px-24">
           <div className="flex items-center justify-between h-[60px]">
 
             {/* ── Logo ── */}
             <Link
               href="/"
-              className="flex items-center gap-2.5 group select-none ml-2 md:ml-6 lg:ml-12"
+              className="flex items-center gap-2.5 group select-none"
             >
               <div className="relative w-7 h-7 flex-shrink-0">
                 <div className="absolute inset-0 rounded-full bg-white/10 blur-md group-hover:bg-white/20 transition-all duration-500" />
@@ -1150,9 +1164,10 @@ function NavbarLanding() {
                     relative nav-link-hover flex items-center gap-3 rounded-full text-[14.5px] font-medium
                     transition-all duration-200 ease-out group
                     ${i === 0 
-                      ? "active-pill text-white shadow-sm px-6 py-2" 
+                      ? "active-pill text-white shadow-sm" 
                       : "text-gray-400 hover:text-gray-100 hover:bg-white/[0.05] px-4 py-2"}
                   `}
+                    style={i === 0 ? { padding: '8px 22px' } : { padding: '8px 16px' }}
                 >
                   <Icon className={`w-4 h-4 transition-colors duration-200 ${i === 0 ? "text-white" : "text-gray-500 group-hover:text-gray-300"}`} />
                   <span className="tracking-wide">{label}</span>
@@ -1164,7 +1179,7 @@ function NavbarLanding() {
             </div>
 
             {/* ── Desktop Sign In ── */}
-            <div className="hidden md:flex items-center mr-2 md:mr-6 lg:mr-12">
+            <div className="hidden md:flex items-center">
               <Link
                 href="/auth/login"
                 className="
@@ -1206,51 +1221,69 @@ function NavbarLanding() {
 
         {/* ── Mobile Menu ── */}
         {isMenuOpen && (
-          <div className="mobile-enter md:hidden border-t border-white/[0.06] bg-[#0c1222]/98 backdrop-blur-3xl overflow-hidden shadow-2xl">
-            <div className="px-6 py-6 flex flex-col gap-3">
-              {navLinks.map(({ href, label, icon: Icon }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="
-                    flex items-center gap-4 px-5 py-4 rounded-2xl text-[16px] font-medium
-                    transition-all duration-150 group
-                    text-gray-400 hover:text-white hover:bg-white/[0.06]
-                  "
-                >
-                  <Icon className="w-6 h-6 text-gray-500 group-hover:text-white transition-colors" />
-                  <span className="tracking-wide">{label}</span>
-                </Link>
-              ))}
+          <div className="mobile-enter md:hidden overflow-hidden" style={{ background: 'rgba(12,18,34,0.98)', backdropFilter: 'blur(24px)' }}>
+
+            {/* Floating Card Panel */}
+            <div style={{
+              margin: '16px',
+              borderRadius: '16px',
+              border: '1px solid rgba(148,163,184,0.10)',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
+              overflow: 'hidden',
+            }}>
+
+              {/* Nav Links */}
+              <div style={{ padding: '8px' }} className="flex flex-col">
+                {navLinks.map(({ href, label, icon: Icon }, idx) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`mobile-item mobile-item-${idx} flex items-center gap-4 text-[15px] font-medium text-gray-300 active:text-white active:bg-white/[0.08] transition-all duration-150`}
+                    style={{
+                      padding: '16px 20px',
+                      borderRadius: '12px',
+                    }}
+                  >
+                    <div style={{
+                      width: '36px', height: '36px', borderRadius: '10px',
+                      background: 'rgba(148,163,184,0.06)',
+                      border: '1px solid rgba(148,163,184,0.10)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0,
+                    }}>
+                      <Icon style={{ width: '16px', height: '16px', strokeWidth: 1.8, color: 'rgba(255,255,255,0.5)' }} />
+                    </div>
+                    <span>{label}</span>
+                    <ArrowRight style={{ width: '14px', height: '14px', color: 'rgba(255,255,255,0.15)', marginLeft: 'auto' }} />
+                  </Link>
+                ))}
+              </div>
             </div>
 
-            {/* Divider */}
-            <div className="mx-8 h-px bg-white/[0.06]" />
-
-            {/* Mobile Auth Section */}
-            <div className="px-6 py-8 flex flex-col gap-4 mb-4">
-              <Link
-                href="/auth/login"
-                onClick={() => setIsMenuOpen(false)}
-                className="flex items-center justify-center gap-3 px-6 py-4 rounded-2xl text-[16px] font-medium
-                  text-gray-300 bg-white/[0.05] border border-white/[0.10]
-                  hover:bg-white/[0.08] hover:border-white/[0.16] hover:text-white
-                  transition-all duration-200"
-              >
-                <LogIn className="w-5 h-5" />
-                Sign In
-              </Link>
+            {/* Auth Section */}
+            <div style={{ padding: '4px 16px 24px' }} className="flex flex-col gap-2.5">
               <Link
                 href="/auth/signup"
                 onClick={() => setIsMenuOpen(false)}
-                className="flex items-center justify-center gap-3 px-6 py-4 rounded-2xl text-[16px] font-semibold
-                  text-[#0c1222] bg-white hover:scale-[1.02]
-                  hover:bg-gray-100
-                  transition-all duration-200 shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+                className="mobile-item mobile-item-3 flex items-center justify-center gap-2 text-[14px] font-semibold transition-all duration-200 active:scale-[0.98]"
+                style={{
+                  padding: '14px 24px',
+                  borderRadius: '12px',
+                  background: '#fff',
+                  color: '#0c1222',
+                }}
               >
                 Get Started Free
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight style={{ width: '15px', height: '15px' }} />
+              </Link>
+              <Link
+                href="/auth/login"
+                onClick={() => setIsMenuOpen(false)}
+                className="mobile-item mobile-item-4 flex items-center justify-center gap-2 text-[13px] font-medium text-gray-500 active:text-gray-300 transition-all duration-200"
+                style={{ padding: '12px 24px' }}
+              >
+                Already have an account?&nbsp;<span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>Sign In</span>
               </Link>
             </div>
           </div>
