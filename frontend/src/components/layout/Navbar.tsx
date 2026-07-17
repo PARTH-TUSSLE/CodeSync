@@ -31,6 +31,9 @@ export function Navbar() {
           <ThemeToggle />
           {isAuthenticated ? (
             <>
+              <Link href="/docs" className="nav-link">
+                Docs
+              </Link>
               <Link href="/repos" className="nav-link">
                 Explore
               </Link>
@@ -103,6 +106,9 @@ export function Navbar() {
             </>
           ) : (
             <>
+              <Link href="/docs" className="nav-link">
+                Docs
+              </Link>
               <Link href="/repos" className="nav-link">
                 Explore
               </Link>

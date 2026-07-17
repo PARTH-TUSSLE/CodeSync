@@ -141,7 +141,9 @@ export const fetchRepositoryByName = async (req: Request, res: Response) => {
   const ownerId = req.query.ownerId as string | undefined;
 
   try {
-    const where: Record<string, unknown> = { name: String(name) };
+    const where: Record<string, unknown> = {
+      name: { contains: String(name), mode: "insensitive" },
+    };
     if (ownerId) {
       where.ownerId = ownerId;
     }
