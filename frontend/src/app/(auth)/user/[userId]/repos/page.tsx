@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getTokenFromCookies } from "@/lib/auth/cookies";
 import { apiUrl } from "@/lib/api/urls";
 import { RepoCard } from "@/components/repo/RepoCard";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { BackButton } from "@/components/ui/BackButton";
 import type { Repository } from "@/types/models";
 
 export const metadata: Metadata = {
@@ -56,13 +58,29 @@ export default async function UserReposPage({
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-primary">
-        Repositories
-      </h1>
+      <div className="mb-6">
+        <BackButton />
+      </div>
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-bold text-primary">
+          Repositories
+        </h1>
+        <Link
+          href="/repos/new"
+          className="btn-primary !rounded-xl !px-4 !py-2 text-sm"
+        >
+          <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          New Repository
+        </Link>
+      </div>
       {paginatedRepos.length === 0 ? (
         <EmptyState
           title="No repositories yet"
           description="This user hasn't created any repositories."
+          actionLabel="Create one"
+          actionHref="/repos/new"
         />
       ) : (
         <>

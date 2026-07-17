@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api/client";
 import { useToast } from "@/components/ui/Toast";
+import { BackButton } from "@/components/ui/BackButton";
 
 export default function CreateRepoPage() {
   const [name, setName] = useState("");
@@ -49,7 +50,10 @@ export default function CreateRepoPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-8">
-      <div className="glass-card p-8">
+      <div className="mb-4">
+        <BackButton />
+      </div>
+      <div className="rounded-xl border border-glass-border bg-surface-elevated p-6 sm:p-8">
         <h1 className="mb-6 text-2xl font-bold text-primary">
           Create Repository
         </h1>

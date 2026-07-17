@@ -317,7 +317,7 @@ export const changePassword = async (req: Request, res: Response) => {
     );
 
     if (!isOldPasswordCorrect) {
-      return res.status(401).json({
+      return res.status(400).json({
         msg: "Old password is incorrect",
       });
     }

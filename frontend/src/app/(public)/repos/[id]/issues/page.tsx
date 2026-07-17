@@ -3,6 +3,7 @@ import { apiUrl } from "@/lib/api/urls";
 import { IssueCard } from "@/components/issue/IssueCard";
 import { IssueStatusFilter } from "@/components/issue/IssueStatusFilter";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { BackButton } from "@/components/ui/BackButton";
 import type { Issue } from "@/types/models";
 
 export const metadata: Metadata = {
@@ -48,6 +49,9 @@ export default async function IssueListPage({
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-8">
+      <div className="mb-4">
+        <BackButton />
+      </div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-primary">
           Issues

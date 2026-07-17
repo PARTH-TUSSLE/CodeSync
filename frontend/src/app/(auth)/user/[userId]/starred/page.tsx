@@ -3,6 +3,7 @@ import { getTokenFromCookies } from "@/lib/auth/cookies";
 import { apiUrl } from "@/lib/api/urls";
 import { RepoCard } from "@/components/repo/RepoCard";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { BackButton } from "@/components/ui/BackButton";
 import type { Repository } from "@/types/models";
 
 export const metadata: Metadata = {
@@ -45,6 +46,9 @@ export default async function StarredReposPage({
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-8">
+      <div className="mb-6">
+        <BackButton />
+      </div>
       <h1 className="mb-6 text-2xl font-bold text-primary">
         Starred Repositories
       </h1>

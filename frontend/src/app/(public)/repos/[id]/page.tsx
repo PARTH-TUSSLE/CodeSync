@@ -6,6 +6,7 @@ import { PinButton } from "@/components/repo/PinButton";
 import { VisibilityBadge } from "@/components/repo/VisibilityBadge";
 import { DeleteRepoButton } from "@/components/repo/DeleteRepoButton";
 import { IssueCountBadges } from "@/components/repo/IssueCountBadges";
+import { BackButton } from "@/components/ui/BackButton";
 import type { Repository } from "@/types/models";
 
 interface RepoResponse {
@@ -104,6 +105,9 @@ export default async function RepoDetailPage({
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-8">
+      <div className="mb-4">
+        <BackButton />
+      </div>
       <div className="mb-6">
         <div className="flex items-start justify-between gap-4">
           <div>
