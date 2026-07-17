@@ -11,8 +11,6 @@ import { loginUser, logoutUser } from "./utils/globalConfig.js";
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
-import http from "http";
-import { Server } from "socket.io";
 import { prisma } from "./prisma.js";
 import { mainRouter } from "./routes/main.router.js";
 
@@ -26,26 +24,6 @@ async function startServer() {
   app.use(express.json({ limit: '10mb' }));
   app.use("/", mainRouter);
 
-  let user = "test";
-
-  const httpServer = http.createServer(app);
-  const io = new Server(httpServer, {
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST"],
-    },
-  });
-
-  io.on("connection", (socket) => {
-    socket.on("joinRoom", (userID) => {
-      user = userID;
-      console.log(`========`);
-      console.log(user);
-      console.log(`========`);
-      socket.join(userID);
-    });
-  });
-
   try {
     await prisma.$connect();
     console.log("PostgreSQL connected!");
@@ -54,7 +32,7 @@ async function startServer() {
     process.exit(1);
   }
 
-  httpServer.listen(port, () => {
+  app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
   });
 }

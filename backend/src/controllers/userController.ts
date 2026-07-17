@@ -349,6 +349,13 @@ export const changePassword = async (req: Request, res: Response) => {
 
 export const deleteUserProfile = async (req: Request, res: Response) => {
   const userID = req.params.id;
+  const userId = req.userId;
+
+  if (!userId || userId !== userID) {
+    return res.status(403).json({
+      msg: "You can only delete your own profile",
+    });
+  }
 
   try {
     const deletedUser = await prisma.user.delete({
@@ -385,6 +392,64 @@ export const deleteUserProfile = async (req: Request, res: Response) => {
   }
 };
 
+
+export const followUser = async (req: Request, res: Response) => {
+  const followUserId = String(req.params.userId);
+  const currentUserId = req.userId;
+
+  if (!currentUserId) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
+
+  if (currentUserId === followUserId) {
+    return res.status(400).json({ msg: "Cannot follow yourself" });
+  }
+
+  try {
+    const userToFollow = await prisma.user.findUnique({
+      where: { id: followUserId },
+    });
+
+    if (!userToFollow) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    await prisma.user.update({
+      where: { id: currentUserId },
+      data: {
+        following: { connect: { id: followUserId } },
+      },
+    });
+
+    return res.status(200).json({ msg: "User followed successfully" });
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({ msg: "Error following user", error: errMsg });
+  }
+};
+
+export const unfollowUser = async (req: Request, res: Response) => {
+  const followUserId = String(req.params.userId);
+  const currentUserId = req.userId;
+
+  if (!currentUserId) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
+
+  try {
+    await prisma.user.update({
+      where: { id: currentUserId },
+      data: {
+        following: { disconnect: { id: followUserId } },
+      },
+    });
+
+    return res.status(200).json({ msg: "User unfollowed successfully" });
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({ msg: "Error unfollowing user", error: errMsg });
+  }
+};
 
 export const getUserContributions = async (req: Request, res: Response) => {
   const userId = String(req.params.id);

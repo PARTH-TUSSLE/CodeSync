@@ -4,7 +4,7 @@ import { logActivity } from "../utils/activityLogger.js";
 
 export const starRepository = async (req: Request, res: Response) => {
   const repoId = String(req.params.repoId);
-  const userId = req.userId; 
+  const userId = req.userId;
 
   if (!userId) {
     return res.status(401).json({
@@ -13,7 +13,6 @@ export const starRepository = async (req: Request, res: Response) => {
   }
 
   try {
-    // Check if repository exists
     const repository = await prisma.repository.findUnique({
       where: { id: repoId },
     });
@@ -24,7 +23,6 @@ export const starRepository = async (req: Request, res: Response) => {
       });
     }
 
-    // Add the repository to user's starred repos
     await prisma.user.update({
       where: { id: userId },
       data: {
@@ -32,6 +30,11 @@ export const starRepository = async (req: Request, res: Response) => {
           connect: { id: repoId },
         },
       },
+    });
+
+    await logActivity(userId, "STARRED_REPO", {
+      repoId: repoId,
+      repoName: repository.name,
     });
 
     return res.status(200).json({
@@ -48,7 +51,7 @@ export const starRepository = async (req: Request, res: Response) => {
 
 export const unstarRepository = async (req: Request, res: Response) => {
   const repoId = String(req.params.repoId);
-  const userId = req.userId; 
+  const userId = req.userId;
 
   if (!userId) {
     return res.status(401).json({
@@ -57,7 +60,6 @@ export const unstarRepository = async (req: Request, res: Response) => {
   }
 
   try {
-    
     await prisma.user.update({
       where: { id: userId },
       data: {
@@ -94,6 +96,9 @@ export const getStarredRepositories = async (req: Request, res: Response) => {
                 username: true,
               },
             },
+            _count: {
+              select: { starredBy: true, pinnedBy: true },
+            },
           },
         },
       },
@@ -107,7 +112,12 @@ export const getStarredRepositories = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       msg: "Starred repositories fetched successfully",
-      starredRepos: userWithStarredRepos.starredRepos,
+      starredRepos: userWithStarredRepos.starredRepos.map((r) => ({
+        ...r,
+        starCount: r._count.starredBy,
+        pinCount: r._count.pinnedBy,
+        _count: undefined,
+      })),
     });
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);

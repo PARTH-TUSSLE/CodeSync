@@ -3,41 +3,51 @@ import { prisma } from "../prisma.js";
 import { logActivity, removeActivity } from "../utils/activityLogger.js";
 
 export const createIssue = async (req: Request, res: Response) => {
-  const { title, description, status, repoID, creatorID } = req.body;
+  const { title, description, status, repoID } = req.body;
+  const authorId = req.userId;
 
-  if (!title || !description || !status || !repoID || !creatorID) {
+  if (!title || !description || !status || !repoID) {
     return res.status(400).json({
-      msg: `Fields title, status, repoID, creatorID are required !`,
+      msg: "Fields title, description, status, repoID are required !",
+    });
+  }
+
+  if (!authorId) {
+    return res.status(401).json({
+      msg: "Unauthorized",
     });
   }
 
   try {
+    const repo = await prisma.repository.findUnique({
+      where: { id: repoID },
+    });
+
+    if (!repo) {
+      return res.status(404).json({
+        msg: "Repository not found",
+      });
+    }
+
     const createdIssue = await prisma.issue.create({
       data: {
-        title: title,
-        description: description,
-        status: status,
+        title,
+        description,
+        status,
         repositoryId: repoID,
-        authorId: creatorID,
+        authorId,
       },
     });
 
-    // Log the activity for contribution tracking
-    await logActivity(creatorID, "ISSUE_CREATED", {
+    await logActivity(authorId, "ISSUE_CREATED", {
       issueId: createdIssue.id,
       issueTitle: createdIssue.title,
       repositoryId: repoID,
     });
 
-    if (createdIssue) {
-      return res.status(201).json({
-        msg: `Issue created successfully !`,
-        createdIssue,
-      });
-    }
-
-    return res.status(400).json({
-      msg: `Some error occurred while creating the issue`,
+    return res.status(201).json({
+      msg: "Issue created successfully !",
+      createdIssue,
     });
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
@@ -50,15 +60,15 @@ export const createIssue = async (req: Request, res: Response) => {
 export const updateIssueByID = async (req: Request, res: Response) => {
   const { title, description, status } = req.body;
   const issueID = req.params.id;
+  const userId = req.userId;
 
-  if ( !title || !description || !status ) {
-    return res.json({
-      msg: "At least one of the fields (title, description, status) is required !"
-    })
+  if (title === undefined && description === undefined && status === undefined) {
+    return res.status(400).json({
+      msg: "At least one of the fields (title, description, status) is required !",
+    });
   }
 
   try {
-
     const existingIssue = await prisma.issue.findUnique({
       where: { id: String(issueID) },
     });
@@ -70,17 +80,14 @@ export const updateIssueByID = async (req: Request, res: Response) => {
     }
 
     const updatedIssue = await prisma.issue.update({
-      where: {
-        id: String(issueID),
-      },
+      where: { id: String(issueID) },
       data: {
-        ...(title && { title }),
-        ...(description && { description }),
-        ...(status && { status }),
+        ...(title !== undefined && { title }),
+        ...(description !== undefined && { description }),
+        ...(status !== undefined && { status }),
       },
     });
 
-    
     if (status === "closed" && existingIssue.status !== "closed") {
       await logActivity(existingIssue.authorId, "ISSUE_CLOSED", {
         issueId: updatedIssue.id,
@@ -90,8 +97,8 @@ export const updateIssueByID = async (req: Request, res: Response) => {
     }
 
     return res.status(200).json({
-      msg: "Issue update successfully !",
-      updatedIssue
+      msg: "Issue updated successfully !",
+      updatedIssue,
     });
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
@@ -102,34 +109,32 @@ export const updateIssueByID = async (req: Request, res: Response) => {
 };
 
 export const deleteIssueByID = async (req: Request, res: Response) => {
-  
   const issueID = req.params.id;
+  const userId = req.userId;
+
+  if (!userId) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
 
   try {
-    // First get the issue to access its data
     const issue = await prisma.issue.findUnique({
       where: { id: String(issueID) },
     });
 
     if (!issue) {
       return res.status(404).json({
-        msg: "Issue with this ID not found !"
+        msg: "Issue with this ID not found !",
       });
     }
 
-    // Delete the issue
     const deletedIssue = await prisma.issue.delete({
-      where: {
-        id: String(issueID)
-      }
+      where: { id: String(issueID) },
     });
 
-    // Remove ISSUE_CREATED activity (-1 contribution)
     await removeActivity(issue.authorId, "ISSUE_CREATED", {
       issueId: issueID,
     });
 
-    // Also remove ISSUE_CLOSED activity if it was closed (-1 contribution)
     if (issue.status === "closed") {
       await removeActivity(issue.authorId, "ISSUE_CLOSED", {
         issueId: issueID,
@@ -138,78 +143,61 @@ export const deleteIssueByID = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       msg: "Issue deleted successfully and contribution count updated",
-      deletedIssue
-    })
-
+      deletedIssue,
+    });
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     return res.status(500).json({
       msg: `Error occurred while deleting the issue - ${errMsg}`,
     });
   }
-
 };
 
 export const getAllIssuesOfARepo = async (req: Request, res: Response) => {
-  
   const repoID = req.params.id;
-  
-  try {
 
+  try {
     const issues = await prisma.issue.findMany({
       where: {
-        repositoryId: String(repoID)
-      }
-    })
-
-    if (!issues || issues.length === 0) {
-      return res.status(404).json({
-        msg: "Invalid repository ID"
-      })
-    }
+        repositoryId: String(repoID),
+      },
+      orderBy: { createdAt: "desc" },
+    });
 
     return res.status(200).json({
       msg: "Issues fetched successfully !",
-      issues
-    })
-
+      issues: issues ?? [],
+    });
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     return res.status(500).json({
       msg: `Error occurred while fetching the issues - ${errMsg}`,
     });
   }
-
 };
 
 export const getIssueByID = async (req: Request, res: Response) => {
-
   const issueID = req.params.id;
 
   try {
-
     const issue = await prisma.issue.findUnique({
-      where: {
-        id: String(issueID)
-      }
-    }) 
+      where: { id: String(issueID) },
+    });
 
-    if ( !issue ) {
+    if (!issue) {
       return res.status(404).json({
-        msg: "Issue with this ID not found !"
-      })
+        msg: "Issue with this ID not found !",
+      });
     }
 
     return res.status(200).json({
       msg: "Issue fetched !",
-      issue
-    })
-
+      issue,
+    });
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     return res.status(500).json({
       msg: `Error occurred while fetching the issue - ${errMsg}`,
     });
   }
-
 };

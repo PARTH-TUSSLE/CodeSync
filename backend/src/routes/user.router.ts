@@ -2,11 +2,13 @@ import express from "express";
 import {
   changePassword,
   deleteUserProfile,
+  followUser,
   getAllUsers,
   getUserProfile,
   getUserContributions,
   login,
   signup,
+  unfollowUser,
   updateUserProfile,
 } from "../controllers/userController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
@@ -20,9 +22,11 @@ userRouter.get("/userProfile", (req, res) => {
     msg: "User ID required !",
   });
 });
-userRouter.get("/userProfile/:id",authMiddleware, getUserProfile);
+userRouter.get("/userProfile/:id", authMiddleware, getUserProfile);
 userRouter.post("/login", login);
-userRouter.put("/updateProfile/:id",authMiddleware, updateUserProfile);
+userRouter.put("/updateProfile/:id", authMiddleware, updateUserProfile);
 userRouter.put("/changePassword/:id", authMiddleware, changePassword);
-userRouter.delete("/deleteProfile/:id",authMiddleware, deleteUserProfile);
+userRouter.delete("/deleteProfile/:id", authMiddleware, deleteUserProfile);
 userRouter.get("/contributions/:id", authMiddleware, getUserContributions);
+userRouter.get("/follow/:userId", authMiddleware, followUser);
+userRouter.delete("/follow/:userId", authMiddleware, unfollowUser);

@@ -15,5 +15,6 @@ repoRouter.get("/repo", (req, res) => {
 repoRouter.get("/repo/name/:name", fetchRepositoryByName);
 repoRouter.get("/repo/user/:userID",authMiddleware,fetchRepositoriesForCurrentUser );
 repoRouter.put("/repo/update/:id",authMiddleware, updateRepositoryByID);
+repoRouter.patch("/repo/:id",authMiddleware, updateRepositoryByID);
 repoRouter.delete("/repo/delete/:id",authMiddleware, deleteRepositoryByID);
 repoRouter.patch("/repo/toggle/:id",authMiddleware, toggleVisibilityByID );
