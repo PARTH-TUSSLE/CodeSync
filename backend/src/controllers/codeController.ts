@@ -611,3 +611,114 @@ export const downloadRepoZip = async (req: Request, res: Response) => {
     }
   }
 };
+
+export const compareBranches = async (req: Request, res: Response) => {
+  const repoId = String(req.params.repoId);
+  const baseBranch = String(req.query.base || "");
+  const headBranch = String(req.query.head || "");
+
+  if (!baseBranch || !headBranch) {
+    return res.status(400).json({ msg: "Query params 'base' and 'head' are required" });
+  }
+
+  try {
+    const base = await prisma.branch.findUnique({
+      where: { repositoryId_name: { repositoryId: repoId, name: baseBranch } },
+    });
+    const head = await prisma.branch.findUnique({
+      where: { repositoryId_name: { repositoryId: repoId, name: headBranch } },
+    });
+    if (!base) return res.status(404).json({ msg: `Base branch '${baseBranch}' not found` });
+    if (!head) return res.status(404).json({ msg: `Head branch '${headBranch}' not found` });
+
+    const headCommit = await prisma.commit.findFirst({
+      where: { branchId: head.id },
+      orderBy: { createdAt: "desc" },
+      include: { files: true },
+    });
+
+    const baseCommit = await prisma.commit.findFirst({
+      where: { branchId: base.id },
+      orderBy: { createdAt: "desc" },
+      include: { files: true },
+    });
+
+    const headFiles = headCommit?.files || [];
+    const baseFiles = baseCommit?.files || [];
+    const baseFileMap = new Map(baseFiles.map((f) => [f.filename, f.content || ""]));
+
+    const diffFiles: Array<{
+      filename: string;
+      status: "added" | "deleted" | "modified";
+      additions: number;
+      deletions: number;
+      diff: string;
+    }> = [];
+
+    const processedFiles = new Set<string>();
+
+    for (const file of headFiles) {
+      processedFiles.add(file.filename);
+      let content = file.content;
+      if (!content && file.s3Key) {
+        const s3Obj = await s3.getObject({ Bucket: S3_BUCKET, Key: file.s3Key }).promise();
+        content = s3Obj.Body?.toString() || "";
+      }
+
+      const baseContent = baseFileMap.get(file.filename);
+      if (baseContent === undefined) {
+        diffFiles.push({
+          filename: file.filename,
+          status: "added",
+          additions: file.size,
+          deletions: 0,
+          diff: (content || "").split("\n").map((l: string) => `+${l}`).join("\n"),
+        });
+      } else if (baseContent !== content) {
+        const changes = diffLines(baseContent, content || "");
+        const diffText = changes.map((part: any) => {
+          const prefix = part.added ? "+" : part.removed ? "-" : " ";
+          return (part.value as string).split("\n").map((l: string) => l ? `${prefix}${l}` : "").join("\n");
+        }).join("\n");
+        const additions = changes.filter((p: any) => p.added).reduce((s: number, p: any) => s + (p.count || 0), 0);
+        const deletions = changes.filter((p: any) => p.removed).reduce((s: number, p: any) => s + (p.count || 0), 0);
+        diffFiles.push({ filename: file.filename, status: "modified", additions, deletions, diff: diffText });
+      }
+    }
+
+    for (const file of baseFiles) {
+      if (!processedFiles.has(file.filename)) {
+        diffFiles.push({
+          filename: file.filename,
+          status: "deleted",
+          additions: 0,
+          deletions: file.size,
+          diff: (file.content || "").split("\n").map((l: string) => `-${l}`).join("\n"),
+        });
+      }
+    }
+
+    const headCommits = await prisma.commit.findMany({
+      where: { branchId: head.id },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+      include: { author: { select: { username: true } } },
+    });
+
+    const aheadBy = headCommits.length;
+    const behindBy = baseCommit ? await prisma.commit.count({ where: { branchId: base.id } }) : 0;
+
+    return res.status(200).json({
+      msg: "Comparison fetched successfully",
+      baseBranch,
+      headBranch,
+      aheadBy,
+      behindBy,
+      files: diffFiles,
+      commits: headCommits,
+    });
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({ msg: "Error comparing branches", error: errMsg });
+  }
+};
