@@ -8,6 +8,7 @@ import {
   getFileContent,
   getRawFile,
   getCommitDiff,
+  downloadRepoZip,
 } from "../controllers/codeController.js";
 import {
   getBranches,
@@ -26,6 +27,7 @@ codeRouter.get("/repo/:repoId/commits/:commitId/diff", getCommitDiff);
 codeRouter.get("/repo/:repoId/tree", getFileTree);
 codeRouter.get("/repo/:repoId/blob", getFileContent);
 codeRouter.get("/repo/:repoId/raw", getRawFile);
+codeRouter.get("/repo/:repoId/zip", downloadRepoZip);
 
 codeRouter.get("/repo/:repoId/branches", getBranches);
 codeRouter.post("/repo/:repoId/branches", authMiddleware, createBranch);

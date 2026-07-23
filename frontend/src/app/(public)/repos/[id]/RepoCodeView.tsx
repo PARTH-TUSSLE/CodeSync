@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { apiUrl } from "@/lib/api/urls";
 import { BranchSelector } from "@/components/repo/BranchSelector";
 import { FileTree } from "@/components/repo/FileTree";
@@ -94,14 +94,23 @@ export function RepoCodeView({ repoId, defaultBranch, isOwner, repoName }: RepoC
           </div>
         )}
         <div className="flex items-center gap-2">
-          {isOwner && (
-            <a
-              href={`/repos/${repoId}/commits`}
-              className="text-xs text-muted hover:text-primary transition-colors"
-            >
-              {tree.length} files
-            </a>
-          )}
+          <CloneURL repoId={repoId} />
+          <a
+            href={apiUrl(`/repo/${repoId}/zip?branch=${encodeURIComponent(branch)}`)}
+            className="flex items-center gap-1 rounded border border-glass-border px-2 py-1 text-xs text-muted hover:text-primary transition-colors"
+            title="Download ZIP"
+          >
+            <svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            ZIP
+          </a>
+          <a
+            href={`/repos/${repoId}/commits`}
+            className="text-xs text-muted hover:text-primary transition-colors"
+          >
+            {tree.length} files
+          </a>
         </div>
       </div>
 
@@ -139,6 +148,65 @@ export function RepoCodeView({ repoId, defaultBranch, isOwner, repoName }: RepoC
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function CloneURL({ repoId }: { repoId: string }) {
+  const [copied, setCopied] = useState(false);
+  const [show, setShow] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const cloneCmd = `codesync clone ${repoId}`;
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(cloneCmd);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback
+    }
+  };
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setShow(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setShow(!show)}
+        className="flex items-center gap-1 rounded border border-glass-border px-2 py-1 text-xs text-muted hover:text-primary transition-colors"
+        title="Clone"
+      >
+        <svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+        </svg>
+        Clone
+      </button>
+      {show && (
+        <div className="absolute right-0 top-full z-30 mt-1 w-72 rounded-lg border border-glass-border bg-surface-tertiary/95 backdrop-blur-2xl shadow-elevated p-3">
+          <p className="text-[10px] font-medium text-subtle mb-1.5">Clone via CLI</p>
+          <div className="flex items-center gap-1">
+            <code className="flex-1 rounded bg-glass px-2 py-1.5 text-xs font-mono text-primary truncate">
+              {cloneCmd}
+            </code>
+            <button
+              onClick={copy}
+              className="shrink-0 rounded bg-accent px-2 py-1.5 text-xs text-white hover:bg-accent-soft transition-colors"
+            >
+              {copied ? "Copied!" : "Copy"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

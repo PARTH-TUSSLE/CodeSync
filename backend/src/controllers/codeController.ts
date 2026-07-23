@@ -3,6 +3,7 @@ import { prisma } from "../prisma.js";
 import { logActivity } from "../utils/activityLogger.js";
 import { s3, S3_BUCKET } from "../config/aws-config.js";
 import { diffLines } from "diff";
+const archiver: any = require("archiver");
 
 const MAX_INLINE_SIZE = 100 * 1024;
 
@@ -552,5 +553,61 @@ export const getCommitDiff = async (req: Request, res: Response) => {
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     return res.status(500).json({ msg: "Error computing diff", error: errMsg });
+  }
+};
+
+export const downloadRepoZip = async (req: Request, res: Response) => {
+  const repoId = String(req.params.repoId);
+  const branchName = String(req.query.branch || "") || (await ensureDefaultBranch(repoId));
+
+  try {
+    const repo = await prisma.repository.findUnique({
+      where: { id: repoId },
+      include: { owner: { select: { username: true } } },
+    });
+    if (!repo) {
+      return res.status(404).json({ msg: "Repository not found" });
+    }
+
+    const branch = await prisma.branch.findUnique({
+      where: { repositoryId_name: { repositoryId: repoId, name: branchName } },
+    });
+    if (!branch) {
+      return res.status(404).json({ msg: "Branch not found" });
+    }
+
+    const latestCommit = await prisma.commit.findFirst({
+      where: { branchId: branch.id },
+      orderBy: { createdAt: "desc" },
+      include: { files: true },
+    });
+    if (!latestCommit) {
+      return res.status(404).json({ msg: "No commits yet" });
+    }
+
+    const archive = archiver("zip", { zlib: { level: 9 } });
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", `attachment; filename="${repo.name}-${branchName}.zip"`);
+
+    archive.pipe(res);
+
+    for (const file of latestCommit.files) {
+      let content = file.content;
+      if (!content && file.s3Key) {
+        const s3Obj = await s3.getObject({ Bucket: S3_BUCKET, Key: file.s3Key }).promise();
+        content = s3Obj.Body?.toString() || "";
+      }
+      if (content !== undefined && content !== null) {
+        archive.append(content, { name: file.filename });
+      }
+    }
+
+    await archive.finalize();
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    if (!res.headersSent) {
+      return res.status(500).json({ msg: "Error downloading zip", error: errMsg });
+    }
   }
 };
