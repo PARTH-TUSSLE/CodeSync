@@ -4,12 +4,12 @@ import { readGlobalConfig } from "../utils/globalConfig.js";
 
 const API_BASE = process.env.API_URL || "http://localhost:8000";
 
-interface PushResult {
+type PushResult = {
   success: boolean;
   commitId?: string;
   error?: string;
   skipped?: boolean;
-}
+};
 
 async function pushCommit(
   repoId: string,
@@ -57,12 +57,18 @@ async function pushCommit(
     });
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ msg: res.statusText }));
-      return { success: false, error: err.msg || "Push failed" };
+      const errBody = await res.json().catch(() => ({ msg: res.statusText }));
+      const errMsg = (errBody as Record<string, unknown>).msg || res.statusText;
+      return { success: false, error: String(errMsg) };
     }
 
-    const data = await res.json();
-    return { success: true, commitId: data.commit?.id };
+    const data = (await res.json()) as Record<string, unknown>;
+    const commitData = data.commit as Record<string, unknown> | undefined;
+    const result: PushResult = { success: true };
+    if (commitData?.id) {
+      result.commitId = String(commitData.id);
+    }
+    return result;
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     return { success: false, error: msg };

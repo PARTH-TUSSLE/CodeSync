@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { prisma } from "../prisma.js";
 
 export const getBranches = async (req: Request, res: Response) => {
-  const { repoId } = req.params;
+  const repoId = String(req.params.repoId);
 
   try {
     const repo = await prisma.repository.findUnique({ where: { id: repoId } });
@@ -12,9 +12,6 @@ export const getBranches = async (req: Request, res: Response) => {
 
     const branches = await prisma.branch.findMany({
       where: { repositoryId: repoId },
-      include: {
-        _count: { select: { commits: true } },
-      },
       orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
     });
 
@@ -25,11 +22,16 @@ export const getBranches = async (req: Request, res: Response) => {
           orderBy: { createdAt: "desc" },
           select: { id: true, message: true, createdAt: true },
         });
+
+        const commitCount = await prisma.commit.count({
+          where: { branchId: b.id },
+        });
+
         return {
           id: b.id,
           name: b.name,
           isDefault: b.isDefault,
-          commitCount: b._count.commits,
+          commitCount,
           latestCommit,
           createdAt: b.createdAt,
         };
@@ -48,7 +50,7 @@ export const getBranches = async (req: Request, res: Response) => {
 };
 
 export const createBranch = async (req: Request, res: Response) => {
-  const { repoId } = req.params;
+  const repoId = String(req.params.repoId);
   const userId = req.userId;
   const { name, sourceBranch } = req.body;
 
@@ -73,50 +75,45 @@ export const createBranch = async (req: Request, res: Response) => {
     }
 
     const branch = await prisma.branch.create({
-      data: {
-        name,
-        repositoryId: repoId,
-        authorId: userId,
-        isDefault: false,
-      },
+      data: { name, repositoryId: repoId, authorId: userId, isDefault: false },
     });
 
     if (sourceBranch) {
       const source = await prisma.branch.findUnique({
         where: { repositoryId_name: { repositoryId: repoId, name: sourceBranch } },
-        include: {
-          commits: {
-            orderBy: { createdAt: "desc" },
-            take: 1,
-            include: { files: true },
-          },
-        },
       });
 
-      if (source && source.commits.length > 0) {
-        const latestSourceCommit = source.commits[0];
-        const newCommit = await prisma.commit.create({
-          data: {
-            message: `Create branch '${name}' from '${sourceBranch}'`,
-            branchId: branch.id,
-            repositoryId: repoId,
-            authorId: userId,
-            parentCommitId: latestSourceCommit.id,
-          },
+      if (source) {
+        const latestSourceCommit = await prisma.commit.findFirst({
+          where: { branchId: source.id },
+          orderBy: { createdAt: "desc" },
+          include: { files: true },
         });
 
-        for (const file of latestSourceCommit.files) {
-          await prisma.commitFile.create({
+        if (latestSourceCommit) {
+          const newCommit = await prisma.commit.create({
             data: {
-              commitId: newCommit.id,
-              filename: file.filename,
-              s3Key: file.s3Key,
-              content: file.content,
-              size: file.size,
-              additions: file.additions,
-              deletions: file.deletions,
+              message: `Create branch '${name}' from '${sourceBranch}'`,
+              branchId: branch.id,
+              repositoryId: repoId,
+              authorId: userId,
+              parentCommitId: latestSourceCommit.id,
             },
           });
+
+          for (const file of latestSourceCommit.files) {
+            await prisma.commitFile.create({
+              data: {
+                commitId: newCommit.id,
+                filename: file.filename,
+                s3Key: file.s3Key,
+                content: file.content,
+                size: file.size,
+                additions: file.additions,
+                deletions: file.deletions,
+              },
+            });
+          }
         }
       }
     }
@@ -137,7 +134,8 @@ export const createBranch = async (req: Request, res: Response) => {
 };
 
 export const setDefaultBranch = async (req: Request, res: Response) => {
-  const { repoId, branchName } = req.params;
+  const repoId = String(req.params.repoId);
+  const branchName = String(req.params.branchName);
   const userId = req.userId;
 
   if (!userId) {
@@ -186,7 +184,8 @@ export const setDefaultBranch = async (req: Request, res: Response) => {
 };
 
 export const deleteBranch = async (req: Request, res: Response) => {
-  const { repoId, branchName } = req.params;
+  const repoId = String(req.params.repoId);
+  const branchName = String(req.params.branchName);
   const userId = req.userId;
 
   if (!userId) {
