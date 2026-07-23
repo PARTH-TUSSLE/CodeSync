@@ -107,6 +107,7 @@ export default async function RepoDetailPage({
   const defaultBranch = branchesData?.defaultBranch || repo.defaultBranch || "main";
   const { StarButton } = await import("@/components/repo/StarButton");
   const { PinButton } = await import("@/components/repo/PinButton");
+  const { ForkButton } = await import("@/components/repo/ForkButton");
   const { VisibilityBadge } = await import("@/components/repo/VisibilityBadge");
   const { DeleteRepoButton } = await import("@/components/repo/DeleteRepoButton");
   const { IssueCountBadges } = await import("@/components/repo/IssueCountBadges");
@@ -116,6 +117,10 @@ export default async function RepoDetailPage({
       <div className="mb-4">
         <BackButton />
       </div>
+
+      {repo.forkedFromId && (
+        <ForkedFromBanner repoId={id} />
+      )}
 
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
@@ -136,6 +141,7 @@ export default async function RepoDetailPage({
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          <ForkButton repoId={id} />
           <StarButton repoId={id} isStarred={isStarred} />
           <PinButton repoId={id} isPinned={isPinned} />
         </div>
@@ -167,4 +173,33 @@ export default async function RepoDetailPage({
       )}
     </div>
   );
+}
+
+async function ForkedFromBanner({ repoId }: { repoId: string }) {
+  try {
+    const res = await fetch(apiUrl(`/repo/${repoId}/forks/parent`), {
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const parent = data.forkedFrom;
+    if (!parent) return null;
+
+    return (
+      <div className="mb-4 flex items-center gap-2 rounded-lg border border-glass-border bg-surface-elevated px-4 py-2 text-xs text-muted">
+        <svg className="size-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+        </svg>
+        <span>
+          Forked from{" "}
+          <a href={`/repos/${parent.id}`} className="font-medium text-accent hover:text-accent-soft transition-colors">
+            {parent.owner?.username}/{parent.name}
+          </a>
+        </span>
+      </div>
+    );
+  } catch {
+    return null;
+  }
 }

@@ -340,3 +340,133 @@ export const deleteRepositoryByID = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const forkRepository = async (req: Request, res: Response) => {
+  const repoId = String(req.params.repoId);
+  const userId = req.userId;
+
+  if (!userId) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
+
+  try {
+    const original = await prisma.repository.findUnique({
+      where: { id: repoId },
+      include: { owner: { select: { username: true } } },
+    });
+    if (!original) {
+      return res.status(404).json({ msg: "Repository not found" });
+    }
+    if (!original.visibility) {
+      return res.status(403).json({ msg: "Cannot fork a private repository" });
+    }
+
+    const existingFork = await prisma.repository.findUnique({
+      where: { ownerId_name: { ownerId: userId, name: original.name } },
+    });
+    if (existingFork) {
+      return res.status(409).json({
+        msg: "You already have a fork with this name",
+        existingForkId: existingFork.id,
+      });
+    }
+
+    const fork = await prisma.repository.create({
+      data: {
+        name: original.name,
+        description: original.description ? `Fork of ${original.owner.username}/${original.name}` : null,
+        content: [""],
+        visibility: true,
+        ownerId: userId,
+        forkedFromId: original.id,
+        defaultBranch: original.defaultBranch,
+      },
+    });
+
+    const defaultBranch = await prisma.branch.findFirst({
+      where: { repositoryId: repoId, isDefault: true },
+      include: { commits: { orderBy: { createdAt: "desc" }, take: 1, include: { files: true } } },
+    });
+
+    if (defaultBranch) {
+      const newBranch = await prisma.branch.create({
+        data: {
+          name: defaultBranch.name,
+          repositoryId: fork.id,
+          authorId: userId,
+          isDefault: true,
+        },
+      });
+
+      if (defaultBranch.commits.length > 0) {
+        const latestCommit = defaultBranch.commits[0];
+        const forkCommit = await prisma.commit.create({
+          data: {
+            message: `Fork from ${original.owner.username}/${original.name}`,
+            branchId: newBranch.id,
+            repositoryId: fork.id,
+            authorId: userId,
+          },
+        });
+
+        for (const file of latestCommit!.files) {
+          await prisma.commitFile.create({
+            data: {
+              commitId: forkCommit.id,
+              filename: file.filename,
+              s3Key: file.s3Key || "",
+              content: file.content,
+              size: file.size,
+              additions: file.size,
+              deletions: 0,
+            },
+          });
+        }
+      }
+    }
+
+    await logActivity(userId, "FORK", {
+      originalRepoId: repoId,
+      forkRepoId: fork.id,
+      originalOwner: original.owner.username,
+    });
+
+    return res.status(201).json({
+      msg: "Repository forked successfully",
+      fork: {
+        id: fork.id,
+        name: fork.name,
+        forkedFromId: fork.forkedFromId,
+        ownerId: fork.ownerId,
+        createdAt: fork.createdAt,
+      },
+    });
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({ msg: "Error forking repository", error: errMsg });
+  }
+};
+
+export const getForkedFrom = async (req: Request, res: Response) => {
+  const repoId = String(req.params.repoId);
+
+  try {
+    const repo = await prisma.repository.findUnique({
+      where: { id: repoId },
+      select: { forkedFromId: true },
+    });
+    if (!repo || !repo.forkedFromId) {
+      return res.status(200).json({ msg: "Not a fork", forkedFrom: null });
+    }
+
+    const original = await prisma.repository.findUnique({
+      where: { id: repo.forkedFromId },
+      select: { id: true, name: true, owner: { select: { id: true, username: true } } },
+    });
+
+    return res.status(200).json({ msg: "Forked from fetched", forkedFrom: original });
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({ msg: "Error fetching fork info", error: errMsg });
+  }
+};

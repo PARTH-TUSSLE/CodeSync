@@ -18,6 +18,7 @@ export interface Repository {
   content: string[];
   visibility: boolean;
   defaultBranch: string;
+  forkedFromId?: string | null;
   ownerId: string;
   owner?: { id: string; username: string };
   starCount?: number;

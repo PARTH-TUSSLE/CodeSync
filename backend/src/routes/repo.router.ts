@@ -1,5 +1,5 @@
 import express from "express";
-import { createRepository, deleteRepositoryByID, fetchRepositoriesForCurrentUser, fetchRepositoryByID, fetchRepositoryByName, getAllRepositories, toggleVisibilityByID, updateRepositoryByID } from "../controllers/repoController.js";
+import { createRepository, deleteRepositoryByID, fetchRepositoriesForCurrentUser, fetchRepositoryByID, fetchRepositoryByName, forkRepository, getForkedFrom, getAllRepositories, toggleVisibilityByID, updateRepositoryByID } from "../controllers/repoController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 export const repoRouter = express.Router();
@@ -18,3 +18,5 @@ repoRouter.put("/repo/update/:id",authMiddleware, updateRepositoryByID);
 repoRouter.patch("/repo/:id",authMiddleware, updateRepositoryByID);
 repoRouter.delete("/repo/delete/:id",authMiddleware, deleteRepositoryByID);
 repoRouter.patch("/repo/toggle/:id",authMiddleware, toggleVisibilityByID );
+repoRouter.post("/repo/:repoId/forks", authMiddleware, forkRepository);
+repoRouter.get("/repo/:repoId/forks/parent", getForkedFrom);
