@@ -1,5 +1,5 @@
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import { LandingNav } from "@/components/layout/LandingNav";
+import { LandingFooter } from "@/components/layout/LandingFooter";
 
 export default function PublicLayout({
   children,
@@ -8,9 +8,9 @@ export default function PublicLayout({
 }) {
   return (
     <>
-      <Navbar />
+      <LandingNav />
       <main className="flex-1">{children}</main>
-      <Footer />
+      <LandingFooter />
     </>
   );
 }

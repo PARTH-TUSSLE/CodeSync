@@ -10,7 +10,7 @@ const FaultyTerminal = dynamic(
 );
 
 const stats = [
-  { label: "Repos Created", value: "10,000+" },
+  { label: "Repositories", value: "10,000+" },
   { label: "Issues Tracked", value: "50,000+" },
   { label: "Developers", value: "5,000+" },
 ];
@@ -79,103 +79,77 @@ export function LandingHero() {
 
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-surface z-[2]" />
 
-      <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
-        <div className="mb-8 animate-fade-in">
-          <div className="inline-flex items-center gap-2 rounded-full border border-accent/15 bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
-            <span className="flex size-1.5 rounded-full bg-emerald-400 animate-glow-pulse-fast" />
-            <span className="font-mono">~/codesync</span>
+      <div className="relative z-10 mx-auto max-w-6xl px-6 pt-24 text-center">
+        <div className="mb-10 flex justify-center">
+          <div className="inline-flex items-center gap-2.5 rounded-full border border-accent/20 bg-accent/10 px-4 py-1.5">
+            <span className="flex size-1.5 rounded-full bg-emerald-400/80 animate-glow-pulse-fast" />
+            <span className="text-[11px] font-semibold tracking-[0.15em] uppercase text-accent">
+              Beta — Now available
+            </span>
           </div>
         </div>
 
-        <h1 className="mb-6 text-6xl font-bold tracking-tight text-primary sm:text-7xl lg:text-8xl animate-slide-up">
-          Code
-          <span className="text-gradient">Sync</span>
+        <h1 className="heading-xl text-balance mx-auto max-w-5xl">
+          Version control
+          <br />
+          <span className="text-gradient">reimagined</span>
+          <br />
+          for the modern era
         </h1>
 
-        <p
-          className="mx-auto mb-10 max-w-2xl text-lg text-muted sm:text-xl animate-slide-up"
-          style={{ animationDelay: "0.1s" }}
-        >
-          Git-inspired version control for the modern era.
-          Sync your code, track issues, and visualize contributions
-          with a beautifully crafted developer experience.
+        <p className="body-lg mx-auto mt-8 max-w-xl text-balance">
+          Git-inspired workflows, beautiful issue tracking, and
+          contribution insights — all in a platform built for how
+          developers actually work.
         </p>
 
-        <div
-          className="flex flex-col items-center justify-center gap-4 sm:flex-row animate-slide-up"
-          style={{ animationDelay: "0.2s" }}
-        >
-          <Link href="/signup" className="btn-primary text-base !px-8 !py-4">
-            <svg
-              className="size-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
+        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <Link
+            href="/signup"
+            className="inline-flex h-12 items-center gap-2.5 rounded-full bg-primary px-7 text-sm font-semibold tracking-[-0.01em] text-surface transition-all hover:opacity-90"
+          >
+            <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             Get Started Free
           </Link>
-          <Link href="/repos" className="btn-secondary text-base !px-8 !py-4">
-            <svg
-              className="size-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
+          <Link
+            href="/repos"
+            className="inline-flex h-12 items-center gap-2.5 rounded-full border border-glass-border bg-white/5 px-7 text-sm font-medium tracking-[-0.01em] text-primary backdrop-blur-sm transition-all hover:bg-white/10"
+          >
+            <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             Explore Repos
           </Link>
         </div>
 
-        <div
-          className="mt-16 grid grid-cols-3 gap-8 animate-slide-up"
-          style={{ animationDelay: "0.3s" }}
-        >
+        <div className="mt-20 grid grid-cols-3 gap-8 sm:gap-16">
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
-              <div className="text-2xl font-bold text-primary sm:text-3xl">
+              <div className="text-[clamp(1.75rem,3vw,2.5rem)] font-bold leading-none tracking-[-0.03em] text-primary">
                 {stat.value}
               </div>
-              <div className="mt-1 text-sm text-subtle">{stat.label}</div>
+              <div className="mt-2 text-xs font-medium tracking-[0.08em] uppercase text-subtle/70">
+                {stat.label}
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 animate-float">
-        <div className="flex flex-col items-center gap-2 text-subtle">
-          <span className="text-xs font-medium tracking-widest uppercase">
-            Scroll
-          </span>
+      <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2">
+        <div className="flex flex-col items-center gap-2 text-subtle/50">
+          <span className="text-[10px] font-semibold tracking-[0.2em] uppercase">Scroll</span>
           <svg
-            className="size-4"
+            className="size-3.5 animate-float"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={1.5}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
           </svg>
         </div>
       </div>
