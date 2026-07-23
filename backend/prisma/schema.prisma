@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -17,60 +11,23 @@ enum IssueStatus {
   closed
 }
 
-
-
-model User {
-  id           String       @id @default(uuid())
-  username     String       @unique
-  email        String       @unique
-  password     String
-  bio          String[]     @default([""])
-  profilePic   String?
-
-  repositories Repository[] @relation("UserRepositories")
-  following User[] @relation("UserFollows")
-  followers User[] @relation("UserFollows")
-  starredRepos Repository[] @relation("UserStars")
-  pinnedRepos  Repository[] @relation("UserPins")
-  issues       Issue[]
-  createdAt    DateTime     @default(now())
-   activities   Activity[]
+enum PullRequestStatus {
+  open
+  merged
+  closed
 }
 
-model Repository {
-  id          String   @id @default(uuid())
-
-  name        String   
-  @@unique([ownerId, name])
-  description String?
-  content     String[]        // array of strings
-  visibility  Boolean
-
-  ownerId     String
-  owner       User     @relation("UserRepositories", fields: [ownerId], references: [id])
-  starredBy User[] @relation("UserStars")
-  pinnedBy  User[]   @relation("UserPins")
-
-  issues      Issue[]
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+enum ReviewStatus {
+  approved
+  changes_requested
+  comment
 }
 
-model Issue {
-   id           String      @id @default(uuid())
-
-  title        String
-  description  String
-  status       IssueStatus @default(open)
-
-  repositoryId String
-  repository   Repository @relation(fields: [repositoryId], references: [id])
-  authorId     String
-  author       User       @relation(fields: [authorId], references: [id])
-
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+enum RepoRole {
+  owner
+  admin
+  write
+  read
 }
 
 enum ActivityType {
@@ -81,17 +38,318 @@ enum ActivityType {
   ISSUE_CLOSED
   STARRED_REPO
   PULL_REQUEST
+  PR_MERGED
+  PR_COMMENT
+  ISSUE_COMMENT
+  FORK
+}
+
+model User {
+  id           String       @id @default(uuid())
+  username     String       @unique
+  email        String       @unique
+  password     String
+  bio          String[]     @default([""])
+  profilePic   String?
+
+  repositories Repository[] @relation("UserRepositories")
+  branches     Branch[]
+  commits      Commit[]
+  following    User[]       @relation("UserFollows")
+  followers    User[]       @relation("UserFollows")
+  starredRepos Repository[] @relation("UserStars")
+  pinnedRepos  Repository[] @relation("UserPins")
+  issues       Issue[]
+  assignedIssues Issue[]    @relation("IssueAssignee")
+  issueComments IssueComment[]
+  pullRequests PullRequest[]
+  prReviews    PRReview[]
+  prComments   PRComment[]
+  orgMembers   OrgMember[]
+  repoAccesses RepoAccess[]
+  notifications Notification[]
+  wikiEdits    WikiPage[]
+  createdAt    DateTime     @default(now())
+  activities   Activity[]
+}
+
+model Organization {
+  id          String      @id @default(uuid())
+  name        String      @unique
+  displayName String?
+  description String?
+  avatarUrl   String?
+  ownerId     String
+  members     OrgMember[]
+  createdAt   DateTime    @default(now())
+}
+
+model OrgMember {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  role           String       @default("member")
+  createdAt      DateTime     @default(now())
+  @@unique([organizationId, userId])
+}
+
+model Repository {
+  id            String   @id @default(uuid())
+  name          String
+  @@unique([ownerId, name])
+  description   String?
+  content       String[]
+  visibility    Boolean
+  defaultBranch String   @default("main")
+  orgId         String?
+  forkedFromId  String?
+  ownerId       String
+  owner         User     @relation("UserRepositories", fields: [ownerId], references: [id])
+  starredBy     User[]   @relation("UserStars")
+  pinnedBy      User[]   @relation("UserPins")
+  issues        Issue[]
+  branches      Branch[]
+  commits       Commit[]
+  pullRequests  PullRequest[]
+  labels        Label[]
+  milestones    Milestone[]
+  accesses      RepoAccess[]
+  tags          Tag[]
+  releases      Release[]
+  wikiPages     WikiPage[]
+  webhooks      Webhook[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Branch {
+  id           String   @id @default(uuid())
+  name         String
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  authorId     String
+  author       User       @relation(fields: [authorId], references: [id])
+  isDefault    Boolean    @default(false)
+  commits      Commit[]
+  sourcePRs    PullRequest[] @relation("PRSource")
+  targetPRs    PullRequest[] @relation("PRTarget")
+  createdAt    DateTime   @default(now())
+  @@unique([repositoryId, name])
+}
+
+model Commit {
+  id             String   @id @default(uuid())
+  message        String
+  branchId       String
+  branch         Branch   @relation(fields: [branchId], references: [id])
+  repositoryId   String
+  repository     Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  authorId       String
+  author         User     @relation(fields: [authorId], references: [id])
+  parentCommitId String?
+  parentCommit   Commit?  @relation("CommitParent", fields: [parentCommitId], references: [id])
+  childCommits   Commit[] @relation("CommitParent")
+  files          CommitFile[]
+  tags           Tag[]
+  createdAt      DateTime @default(now())
+  @@index([repositoryId, createdAt])
+}
+
+model CommitFile {
+  id        String @id @default(uuid())
+  commitId  String
+  commit    Commit @relation(fields: [commitId], references: [id], onDelete: Cascade)
+  filename  String
+  s3Key     String
+  content   String?
+  size      Int
+  additions Int    @default(0)
+  deletions Int    @default(0)
+  @@index([commitId])
+}
+
+model PullRequest {
+  id             String            @id @default(uuid())
+  title          String
+  description    String?
+  status         PullRequestStatus @default(open)
+  sourceBranchId String
+  sourceBranch   Branch            @relation("PRSource", fields: [sourceBranchId], references: [id])
+  targetBranchId String
+  targetBranch   Branch            @relation("PRTarget", fields: [targetBranchId], references: [id])
+  repositoryId   String
+  repository     Repository        @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  authorId       String
+  author         User              @relation(fields: [authorId], references: [id])
+  reviewers      PRReview[]
+  comments       PRComment[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  @@index([repositoryId, status])
+}
+
+model PRReview {
+  id            String       @id @default(uuid())
+  pullRequestId String
+  pullRequest   PullRequest  @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  body          String?
+  status        ReviewStatus @default(comment)
+  createdAt     DateTime     @default(now())
+}
+
+model PRComment {
+  id            String      @id @default(uuid())
+  pullRequestId String
+  pullRequest   PullRequest @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  body          String
+  filePath      String?
+  lineNumber    Int?
+  createdAt     DateTime    @default(now())
+}
+
+model Issue {
+  id           String      @id @default(uuid())
+  title        String
+  description  String
+  status       IssueStatus @default(open)
+  repositoryId String
+  repository   Repository  @relation(fields: [repositoryId], references: [id])
+  authorId     String
+  author       User        @relation(fields: [authorId], references: [id])
+  assigneeId   String?
+  assignee     User?       @relation("IssueAssignee", fields: [assigneeId], references: [id])
+  milestoneId  String?
+  milestone    Milestone?  @relation(fields: [milestoneId], references: [id])
+  comments     IssueComment[]
+  labels       IssueLabel[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model IssueComment {
+  id        String   @id @default(uuid())
+  issueId   String
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model Label {
+  id           String      @id @default(uuid())
+  name         String
+  color        String      @default("0366d6")
+  repositoryId String
+  repository   Repository  @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  issues       IssueLabel[]
+  @@unique([repositoryId, name])
+}
+
+model IssueLabel {
+  issueId String
+  issue   Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  labelId String
+  label   Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
+  @@id([issueId, labelId])
+}
+
+model Milestone {
+  id           String    @id @default(uuid())
+  title        String
+  description  String?
+  dueDate      DateTime?
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  issues       Issue[]
+  createdAt    DateTime   @default(now())
+}
+
+model RepoAccess {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  role         RepoRole @default(read)
+  createdAt    DateTime @default(now())
+  @@unique([userId, repositoryId])
+}
+
+model Tag {
+  id           String    @id @default(uuid())
+  name         String
+  commitId     String
+  commit       Commit    @relation(fields: [commitId], references: [id])
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  release      Release?
+  createdAt    DateTime  @default(now())
+  @@unique([repositoryId, name])
+}
+
+model Release {
+  id            String   @id @default(uuid())
+  tagId         String   @unique
+  tag           Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?
+  isDraft       Boolean  @default(false)
+  isPrerelease  Boolean  @default(false)
+  repositoryId  String
+  repository    Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model WikiPage {
+  id           String   @id @default(uuid())
+  title        String
+  content      String
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  lastEditorId String
+  lastEditor   User     @relation(fields: [lastEditorId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@unique([repositoryId, title])
+}
+
+model Webhook {
+  id           String   @id @default(uuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  url          String
+  events       String[]
+  secret       String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  message   String
+  link      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  @@index([userId, read, createdAt])
 }
 
 model Activity {
   id        String       @id @default(uuid())
   userId    String
   user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   type      ActivityType
-  metadata  Json?        // Store additional info like repoId, issueId, etc.
-  
+  metadata  Json?
   createdAt DateTime     @default(now())
-  
   @@index([userId, createdAt])
 }
