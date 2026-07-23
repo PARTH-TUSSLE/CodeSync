@@ -38,7 +38,7 @@ export default function CreateRepoPage() {
         },
       });
       toast.success("Repository created!");
-      router.push(`/repos/${data.createdRepo.id}`);
+      router.push(`/repos/${data.createdRepo.id}/setup`);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to create repository";

@@ -48,7 +48,8 @@ export function ForkButton({ repoId }: ForkButtonProps) {
       title="Fork this repository"
     >
       <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10 20a2 2 0 100-4 2 2 0 000 4zM10 4a2 2 0 100-4 2 2 0 000 4zM18 14a2 2 0 100-4 2 2 0 000 4z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10 6v4a4 4 0 004 4h4" />
       </svg>
       {loading ? "Forking..." : "Fork"}
     </button>
