@@ -21,12 +21,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (pathname === "/login" && token) {
-    return NextResponse.redirect(new URL("/", request.url));
+  if ((pathname === "/login" || pathname === "/signup") && token) {
+    return NextResponse.redirect(new URL("/repos", request.url));
   }
 
-  if (pathname === "/signup" && token) {
-    return NextResponse.redirect(new URL("/", request.url));
+  if (pathname === "/" && token) {
+    return NextResponse.redirect(new URL("/repos", request.url));
   }
 
   return NextResponse.next();

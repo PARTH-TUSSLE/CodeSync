@@ -41,7 +41,7 @@ export function SignupForm() {
       setSignedUpToken(data.token);
 
       setTimeout(() => {
-        router.push("/");
+        router.push("/repos");
       }, 3000);
     } catch (err) {
       const message =

@@ -42,7 +42,7 @@ export function LoginForm() {
       toast.success("Signed in successfully!");
 
       const params = new URLSearchParams(window.location.search);
-      const redirect = params.get("redirect") || "/";
+      const redirect = params.get("redirect") || "/repos";
       router.push(redirect);
     } catch (err) {
       const message =
