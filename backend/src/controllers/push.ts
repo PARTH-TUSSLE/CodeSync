@@ -1,58 +1,149 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { s3, S3_BUCKET } from "../config/aws-config.js";
-import { logActivity } from "../utils/activityLogger.js";
-import { getUserIdFromToken } from "../utils/globalConfig.js";
+import { readGlobalConfig } from "../utils/globalConfig.js";
 
-export default async function pushChanges(): Promise<any> {
+const API_BASE = process.env.API_URL || "http://localhost:8000";
+
+interface PushResult {
+  success: boolean;
+  commitId?: string;
+  error?: string;
+  skipped?: boolean;
+}
+
+async function pushCommit(
+  repoId: string,
+  token: string,
+  commitId: string,
+  commitDir: string,
+  parentCommitId?: string,
+): Promise<PushResult> {
+  try {
+    const metaPath = path.join(commitDir, "commits.json");
+    let message = `Commit ${commitId}`;
+    try {
+      const meta = JSON.parse(await fs.readFile(metaPath, "utf-8"));
+      message = meta.commitMessage || message;
+    } catch {
+      // Use default message
+    }
+
+    const dir = await fs.readdir(commitDir);
+    const files: { filename: string; content: string }[] = [];
+
+    for (const file of dir) {
+      if (file === "commits.json") continue;
+      const filePath = path.join(commitDir, file);
+      const content = await fs.readFile(filePath, "utf-8");
+      files.push({ filename: file, content });
+    }
+
+    if (files.length === 0) {
+      return { success: false, skipped: true, error: "No files in commit" };
+    }
+
+    const res = await fetch(`${API_BASE}/repo/${repoId}/commits`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        branch: "main",
+        message,
+        parentCommitId,
+        files,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ msg: res.statusText }));
+      return { success: false, error: err.msg || "Push failed" };
+    }
+
+    const data = await res.json();
+    return { success: true, commitId: data.commit?.id };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    return { success: false, error: msg };
+  }
+}
+
+export default async function pushChanges(): Promise<void> {
   const repoPath = path.resolve(process.cwd(), ".codesync");
+  const configPath = path.join(repoPath, "config.json");
   const commitsPath = path.join(repoPath, "commits");
 
   try {
-    // Get userId from global config
-    const userId = await getUserIdFromToken();
-
-    const commitDirs = await fs.readdir(commitsPath);
-
-    if (commitDirs.length === 0) {
-      console.log("No commits to push!");
+    let config: Record<string, any>;
+    try {
+      config = JSON.parse(await fs.readFile(configPath, "utf-8"));
+    } catch {
+      console.log("Error: Not a CodeSync repository. Run 'codesync init <repoId>' first.");
       return;
     }
 
+    const repoId = config.repoId;
+    const token = config.token;
+
+    if (!repoId) {
+      console.log("Error: No remote set. Run 'codesync remote <repoId>' to link a CodeSync repo.");
+      return;
+    }
+    if (!token) {
+      console.log("Error: Not logged in. Run 'codesync login <token>' first.");
+      return;
+    }
+
+    let commitDirs: string[];
+    try {
+      commitDirs = await fs.readdir(commitsPath);
+    } catch {
+      console.log("No commits to push.");
+      return;
+    }
+
+    if (commitDirs.length === 0) {
+      console.log("No commits to push.");
+      return;
+    }
+
+    commitDirs.sort();
+
+    console.log(`Pushing ${commitDirs.length} commit(s) to CodeSync...`);
+
+    let lastCommitId: string | undefined;
+    let pushed = 0;
+    let errors = 0;
+
     for (const commitDir of commitDirs) {
       const commitPath = path.join(commitsPath, commitDir);
-      const files = await fs.readdir(commitPath);
+      const stat = await fs.stat(commitPath);
+      if (!stat.isDirectory()) continue;
 
-      for (const file of files) {
-        const filePath = path.join(commitPath, file);
-        const fileContent = await fs.readFile(filePath);
+      process.stdout.write(`  ↻ Commit ${commitDir.slice(0, 8)}... `);
 
-        const params = {
-          Bucket: S3_BUCKET,
-          Key: `commits/${commitDir}/${file}`,
-          Body: fileContent,
-        };
+      const result = await pushCommit(repoId, token, commitDir, commitPath, lastCommitId);
 
-        await s3.upload(params).promise();
+      if (result.success) {
+        lastCommitId = result.commitId;
+        pushed++;
+        console.log(`✓ (${result.commitId?.slice(0, 8)})`);
+      } else if (result.skipped) {
+        console.log(`⚠ skipped (no files)`);
+      } else {
+        errors++;
+        console.log(`✗ ${result.error}`);
       }
     }
 
-    console.log(`All commits pushed to the repository!`);
-    console.log(`Total commits pushed: ${commitDirs.length}`);
-
-    // Log activity if userId is available
-    if (userId) {
-      await logActivity(userId, "PUSH", {
-        commitCount: commitDirs.length,
-        timestamp: new Date().toISOString(),
-      });
-      console.log(`✓ Contribution tracked (+1)`);
+    if (errors > 0) {
+      console.log(`\n⚠ Push completed with ${errors} error(s). ${pushed} commit(s) pushed successfully.`);
+    } else {
+      console.log(`\n✓ All commits pushed successfully! (${pushed} commit(s))`);
     }
   } catch (error) {
-    if (error instanceof Error) {
-      console.log(`Error occurred while pushing the changes: ${error.message}`);
-    } else {
-      console.log(`Error occurred while pushing the changes: ${error}`);
-    }
+    const msg = error instanceof Error ? error.message : String(error);
+    console.log(`Error pushing changes: ${msg}`);
   }
 }

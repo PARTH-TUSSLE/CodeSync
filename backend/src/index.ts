@@ -8,6 +8,8 @@ import revert from "./controllers/revert.js";
 import pullChanges from "./controllers/pull.js";
 import pushChanges from "./controllers/push.js";
 import { loginUser, logoutUser } from "./utils/globalConfig.js";
+import createBranchCLI, { checkoutBranch, listBranches } from "./controllers/branchCli.js";
+import { setRemote, showRemote } from "./controllers/remote.js";
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
@@ -18,10 +20,9 @@ async function startServer() {
   const app = express();
   const port = process.env.PORT || 8000;
 
-  // CORS must be before routes
   app.use(cors({ origin: "*" }));
-  app.use(bodyParser.json({ limit: '10mb' }));
-  app.use(express.json({ limit: '10mb' }));
+  app.use(bodyParser.json({ limit: "50mb" }));
+  app.use(express.json({ limit: "50mb" }));
   app.use("/", mainRouter);
 
   try {
@@ -60,9 +61,36 @@ yargs(hideBin(process.argv))
   .command("logout", "Logout and remove stored credentials", {}, () => {
     logoutUser();
   })
-  .command("init", "Initialise a new repository", {}, () => {
-    initRepo();
-  })
+  .command(
+    "init [repoId]",
+    "Initialise a new repository",
+    (yargs) => {
+      yargs.positional("repoId", {
+        describe: "CodeSync repository ID to link (optional)",
+        type: "string",
+      });
+    },
+    (argv) => {
+      initRepo(argv.repoId as string | undefined);
+    },
+  )
+  .command(
+    "remote [repoId]",
+    "Set or show the remote CodeSync repository",
+    (yargs) => {
+      yargs.positional("repoId", {
+        describe: "CodeSync repository ID to link",
+        type: "string",
+      });
+    },
+    (argv) => {
+      if (argv.repoId) {
+        setRemote(argv.repoId as string);
+      } else {
+        showRemote();
+      }
+    },
+  )
   .command(
     "add <file>",
     "Add a file to the staging area",
@@ -98,7 +126,7 @@ yargs(hideBin(process.argv))
   )
   .command(
     "revert <commitID>",
-    "Revert the codebase back to a specific commt",
+    "Revert the codebase back to a specific commit",
     (yargs) => {
       yargs.positional("commitID", {
         describe: "Commit ID to be reverted to",
@@ -107,6 +135,36 @@ yargs(hideBin(process.argv))
     },
     (argv) => {
       revert(argv.commitID as string);
+    },
+  )
+  .command(
+    "branch [name]",
+    "Create, list, or switch branches",
+    (yargs) => {
+      yargs.positional("name", {
+        describe: "New branch name (omit to list branches)",
+        type: "string",
+      });
+    },
+    (argv) => {
+      if (argv.name) {
+        createBranchCLI(argv.name as string);
+      } else {
+        listBranches();
+      }
+    },
+  )
+  .command(
+    "checkout <branch>",
+    "Switch to a branch",
+    (yargs) => {
+      yargs.positional("branch", {
+        describe: "Branch name to switch to",
+        type: "string",
+      });
+    },
+    (argv) => {
+      checkoutBranch(argv.branch as string);
     },
   )
   .demandCommand(1, "You need to enter at least one command !")
