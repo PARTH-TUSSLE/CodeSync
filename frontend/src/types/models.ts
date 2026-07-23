@@ -17,8 +17,11 @@ export interface Repository {
   description?: string | null;
   content: string[];
   visibility: boolean;
+  defaultBranch: string;
   ownerId: string;
   owner?: { id: string; username: string };
+  starCount?: number;
+  pinCount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -32,6 +35,8 @@ export interface Issue {
   status: IssueStatus;
   repositoryId: string;
   authorId: string;
+  assigneeId?: string;
+  milestoneId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -43,7 +48,11 @@ export type ActivityType =
   | "ISSUE_CREATED"
   | "ISSUE_CLOSED"
   | "STARRED_REPO"
-  | "PULL_REQUEST";
+  | "PULL_REQUEST"
+  | "PR_MERGED"
+  | "PR_COMMENT"
+  | "ISSUE_COMMENT"
+  | "FORK";
 
 export interface Activity {
   id: string;
@@ -56,6 +65,127 @@ export interface Activity {
 export interface Contribution {
   date: string;
   count: number;
+}
+
+export interface Branch {
+  id: string;
+  name: string;
+  isDefault: boolean;
+  commitCount?: number;
+  latestCommit?: { id: string; message: string; createdAt: string } | null;
+  createdAt: string;
+}
+
+export interface Commit {
+  id: string;
+  message: string;
+  author?: { id: string; username: string };
+  branch?: string;
+  parentCommitId?: string | null;
+  filesCount?: number;
+  createdAt: string;
+}
+
+export interface CommitFile {
+  id: string;
+  filename: string;
+  size: number;
+  additions: number;
+  deletions: number;
+  content?: string;
+}
+
+export interface CommitDetail extends Commit {
+  files: CommitFile[];
+}
+
+export type FileTreeEntry = {
+  name: string;
+  type: "file" | "dir";
+  path: string;
+  size?: number;
+  children?: FileTreeEntry[];
+};
+
+export interface FileContent {
+  filename: string;
+  content: string;
+  size: number;
+  language: string | null;
+}
+
+export interface DiffFile {
+  filename: string;
+  status: "added" | "deleted" | "modified";
+  additions: number;
+  deletions: number;
+  diff: string;
+}
+
+export interface CommitDiff {
+  commit: { id: string; message: string; createdAt: string };
+  files: DiffFile[];
+}
+
+export type PullRequestStatus = "open" | "merged" | "closed";
+
+export interface PullRequest {
+  id: string;
+  title: string;
+  description?: string;
+  status: PullRequestStatus;
+  sourceBranch: string;
+  targetBranch: string;
+  author?: { id: string; username: string };
+  repositoryId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type ReviewStatus = "approved" | "changes_requested" | "comment";
+
+export interface PRReview {
+  id: string;
+  pullRequestId: string;
+  userId: string;
+  user?: { username: string };
+  body?: string;
+  status: ReviewStatus;
+  createdAt: string;
+}
+
+export interface PRComment {
+  id: string;
+  pullRequestId: string;
+  userId: string;
+  user?: { username: string };
+  body: string;
+  filePath?: string | null;
+  lineNumber?: number | null;
+  createdAt: string;
+}
+
+export interface IssueComment {
+  id: string;
+  issueId: string;
+  authorId: string;
+  author?: { username: string; profilePic?: string };
+  body: string;
+  createdAt: string;
+}
+
+export interface Label {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface Milestone {
+  id: string;
+  title: string;
+  description?: string;
+  dueDate?: string;
+  createdAt: string;
 }
 
 export interface ApiError {
