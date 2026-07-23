@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { apiUrl } from "@/lib/api/urls";
+import Link from "next/link";
 import { BranchSelector } from "@/components/repo/BranchSelector";
 import { FileTree } from "@/components/repo/FileTree";
 import { CodeViewer } from "@/components/repo/CodeViewer";
@@ -94,6 +95,16 @@ export function RepoCodeView({ repoId, defaultBranch, isOwner, repoName }: RepoC
           </div>
         )}
         <div className="flex items-center gap-2">
+          <Link
+            href={`/repos/${repoId}/edit?branch=${encodeURIComponent(branch)}`}
+            className="flex items-center gap-1 rounded border border-glass-border px-2 py-1 text-xs text-muted hover:text-primary transition-colors"
+            title="New file"
+          >
+            <svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            New
+          </Link>
           <CloneURL repoId={repoId} />
           <a
             href={apiUrl(`/repo/${repoId}/zip?branch=${encodeURIComponent(branch)}`)}
@@ -131,7 +142,10 @@ export function RepoCodeView({ repoId, defaultBranch, isOwner, repoName }: RepoC
           {loading ? (
             <div className="flex items-center justify-center h-48 text-xs text-subtle">Loading...</div>
           ) : fileContent ? (
-            <CodeViewer file={fileContent} />
+            <CodeViewer
+              file={fileContent}
+              editHref={`/repos/${repoId}/edit?branch=${encodeURIComponent(branch)}&path=${encodeURIComponent(fileContent.filename)}`}
+            />
           ) : isReadme ? (
             <ReadmePlaceholder repoId={repoId} branch={branch} />
           ) : tree.length === 0 ? (

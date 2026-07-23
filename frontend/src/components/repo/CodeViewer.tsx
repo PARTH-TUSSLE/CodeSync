@@ -5,6 +5,7 @@ import type { FileContent } from "@/types/models";
 
 interface CodeViewerProps {
   file: FileContent;
+  editHref?: string;
 }
 
 async function highlight(code: string, lang: string | null): Promise<string> {
@@ -32,7 +33,7 @@ function escapeHtml(text: string): string {
     .replace(/'/g, "&#039;");
 }
 
-export function CodeViewer({ file }: CodeViewerProps) {
+export function CodeViewer({ file, editHref }: CodeViewerProps) {
   const [html, setHtml] = useState<string>("");
 
   useEffect(() => {
@@ -58,6 +59,14 @@ export function CodeViewer({ file }: CodeViewerProps) {
           <span className="text-[10px] text-subtle">
             {file.size > 1024 ? `${(file.size / 1024).toFixed(1)} KB` : `${file.size} B`}
           </span>
+          {editHref && (
+            <a
+              href={editHref}
+              className="ml-2 rounded border border-glass-border px-2 py-0.5 text-[10px] text-muted hover:text-primary transition-colors"
+            >
+              Edit
+            </a>
+          )}
         </div>
       </div>
       <div
