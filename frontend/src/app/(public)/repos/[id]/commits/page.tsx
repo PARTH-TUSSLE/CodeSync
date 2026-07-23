@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { apiUrl } from "@/lib/api/urls";
+import Link from "next/link";
 import { BackButton } from "@/components/ui/BackButton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { RepoTabs } from "@/components/repo/RepoTabs";
+import { CommitGraph } from "@/components/repo/CommitGraph";
 import type { Commit } from "@/types/models";
 
 export const metadata: Metadata = {
@@ -61,11 +63,12 @@ export default async function CommitListPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ page?: string; branch?: string }>;
+  searchParams: Promise<{ page?: string; branch?: string; view?: string }>;
 }) {
   const { id } = await params;
   const sp = await searchParams;
   const page = parseInt(sp.page || "1") || 1;
+  const graphView = sp.view === "graph";
   const repo = await fetchRepo(id);
   const data = await fetchCommits(id, page, sp.branch);
 
@@ -86,7 +89,31 @@ export default async function CommitListPage({
       <RepoTabs repoId={id} />
 
       <div className="mt-4">
-        <h2 className="text-lg font-semibold text-primary mb-4">Commits</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-primary">Commits</h2>
+          <div className="flex items-center gap-1 rounded-lg border border-glass-border bg-glass p-0.5">
+            <Link
+              href={`/repos/${id}/commits?view=list`}
+              className={`rounded-md px-3 py-1 text-xs transition-colors ${
+                !graphView
+                  ? "bg-accent text-white"
+                  : "text-muted hover:text-primary"
+              }`}
+            >
+              List
+            </Link>
+            <Link
+              href={`/repos/${id}/commits?view=graph`}
+              className={`rounded-md px-3 py-1 text-xs transition-colors ${
+                graphView
+                  ? "bg-accent text-white"
+                  : "text-muted hover:text-primary"
+              }`}
+            >
+              Graph
+            </Link>
+          </div>
+        </div>
 
         {!data || data.commits.length === 0 ? (
           <EmptyState
@@ -95,9 +122,11 @@ export default async function CommitListPage({
             actionLabel="View Docs"
             actionHref="/docs/cli"
           />
+        ) : graphView ? (
+          <CommitGraph commits={data.commits} />
         ) : (
           <div className="space-y-1">
-            {data.commits.map((commit, idx) => (
+            {data.commits.map((commit) => (
               <a
                 key={commit.id}
                 href={`/repos/${id}/commits/${commit.id}`}
