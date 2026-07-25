@@ -722,3 +722,47 @@ export const compareBranches = async (req: Request, res: Response) => {
     return res.status(500).json({ msg: "Error comparing branches", error: errMsg });
   }
 };
+
+export const getBranchFiles = async (req: Request, res: Response) => {
+  const repoId = String(req.params.repoId);
+  const branchName = String(req.params.branchName);
+
+  try {
+    const branch = await prisma.branch.findUnique({
+      where: { repositoryId_name: { repositoryId: repoId, name: branchName } },
+    });
+    if (!branch) {
+      return res.status(404).json({ msg: "Branch not found" });
+    }
+
+    const latestCommit = await prisma.commit.findFirst({
+      where: { branchId: branch.id },
+      orderBy: { createdAt: "desc" },
+      include: { files: true },
+    });
+
+    if (!latestCommit) {
+      return res.status(200).json({ msg: "No commits yet", files: [] });
+    }
+
+    const files = await Promise.all(
+      latestCommit.files.map(async (f) => {
+        let content = f.content;
+        if (!content && f.s3Key) {
+          try {
+            const s3Obj = await s3.getObject({ Bucket: S3_BUCKET, Key: f.s3Key }).promise();
+            content = s3Obj.Body?.toString() || "";
+          } catch {
+            content = "";
+          }
+        }
+        return { filename: f.filename, content: content || "" };
+      }),
+    );
+
+    return res.status(200).json({ msg: "Files fetched", files, commitId: latestCommit.id });
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({ msg: "Error fetching branch files", error: errMsg });
+  }
+};

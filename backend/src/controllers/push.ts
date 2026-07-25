@@ -2,7 +2,13 @@ import { promises as fs } from "fs";
 import path from "path";
 import { readGlobalConfig } from "../utils/globalConfig.js";
 
-const API_BASE = process.env.API_URL || "http://localhost:8000";
+async function getApiBase(): Promise<string> {
+  try {
+    const config = await readGlobalConfig();
+    if (config.apiUrl) return config.apiUrl;
+  } catch {}
+  return process.env.API_URL || "http://localhost:8000";
+}
 
 type PushResult = {
   success: boolean;
@@ -14,6 +20,7 @@ type PushResult = {
 async function pushCommit(
   repoId: string,
   token: string,
+  apiBase: string,
   commitId: string,
   commitDir: string,
   parentCommitId?: string,
@@ -42,7 +49,7 @@ async function pushCommit(
       return { success: false, skipped: true, error: "No files in commit" };
     }
 
-    const res = await fetch(`${API_BASE}/repo/${repoId}/commits`, {
+    const res = await fetch(`${apiBase}/repo/${repoId}/commits`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -118,6 +125,8 @@ export default async function pushChanges(): Promise<void> {
 
     console.log(`Pushing ${commitDirs.length} commit(s) to CodeSync...`);
 
+    const apiBase = await getApiBase();
+
     let lastCommitId: string | undefined;
     let pushed = 0;
     let errors = 0;
@@ -129,7 +138,7 @@ export default async function pushChanges(): Promise<void> {
 
       process.stdout.write(`  ↻ Commit ${commitDir.slice(0, 8)}... `);
 
-      const result = await pushCommit(repoId, token, commitDir, commitPath, lastCommitId);
+      const result = await pushCommit(repoId, token, apiBase, commitDir, commitPath, lastCommitId);
 
       if (result.success) {
         lastCommitId = result.commitId;

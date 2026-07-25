@@ -53,9 +53,13 @@ yargs(hideBin(process.argv))
         describe: "JWT token from web app login",
         type: "string",
       });
+      yargs.option("api-url", {
+        describe: "CodeSync API URL (default: http://localhost:8000)",
+        type: "string",
+      });
     },
     (argv) => {
-      loginUser(argv.token as string);
+      loginUser(argv.token as string, argv["api-url"] as string | undefined);
     },
   )
   .command("logout", "Logout and remove stored credentials", {}, () => {

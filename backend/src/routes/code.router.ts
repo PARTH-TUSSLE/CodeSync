@@ -10,6 +10,7 @@ import {
   getCommitDiff,
   downloadRepoZip,
   compareBranches,
+  getBranchFiles,
 } from "../controllers/codeController.js";
 import {
   getBranches,
@@ -35,3 +36,5 @@ codeRouter.get("/repo/:repoId/branches", getBranches);
 codeRouter.post("/repo/:repoId/branches", authMiddleware, createBranch);
 codeRouter.put("/repo/:repoId/branches/:branchName/default", authMiddleware, setDefaultBranch);
 codeRouter.delete("/repo/:repoId/branches/:branchName", authMiddleware, deleteBranch);
+
+codeRouter.get("/repo/:repoId/branch/:branchName/files", getBranchFiles);

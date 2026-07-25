@@ -1,18 +1,24 @@
 {
-  "name": "backend",
+  "name": "codesync-cli",
   "version": "1.0.0",
-  "description": "CodeSync backend",
-  "main": "index.js",
+  "description": "CodeSync CLI and backend",
+  "main": "dist/index.js",
+  "bin": {
+    "codesync": "./dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "npm run build && npm run start"
+    "start": "node dist/index.js start",
+    "dev": "npm run build && npm run start",
+    "postinstall": "npx prisma generate || true"
   },
   "keywords": [],
   "author": "Parth Gartan",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@types/archiver": "^8.0.0",
+    "@types/diff": "^7.0.2",
     "@types/node": "^25.2.0",
     "@types/pg": "^8.16.0",
     "prisma": "^7.3.0"
@@ -29,10 +35,12 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/uuid": "^10.0.0",
     "@types/yargs": "^17.0.35",
+    "archiver": "^8.0.0",
     "aws-sdk": "^2.1693.0",
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.2.2",
     "cors": "^2.8.6",
+    "diff": "^9.0.0",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",

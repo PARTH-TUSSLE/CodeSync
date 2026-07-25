@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 interface GlobalConfig {
   token?: string;
   userId?: string;
+  apiUrl?: string;
 }
 
 /**
@@ -87,7 +88,7 @@ export async function getUserIdFromToken(): Promise<string | null> {
 /**
  * Login command - stores token for future CLI usage
  */
-export async function loginUser(token: string): Promise<void> {
+export async function loginUser(token: string, apiUrlInput?: string): Promise<void> {
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {
     console.log("Error: JWT_SECRET not configured");
@@ -99,12 +100,15 @@ export async function loginUser(token: string): Promise<void> {
     const decoded = jwt.verify(token, jwtSecret) as any;
     const userId = decoded.id;
 
+    const apiUrl = apiUrlInput || process.env.API_URL || "http://localhost:8000";
+
     // Store both token and userId
-    await writeGlobalConfig({ token, userId });
+    await writeGlobalConfig({ token, userId, apiUrl });
 
     console.log("✓ Successfully logged in!");
+    console.log(`✓ API URL: ${apiUrl}`);
     console.log(
-      "You can now use CodeSync CLI commands with automatic contribution tracking.",
+      "You can now use CodeSync CLI commands from any directory.",
     );
   } catch (error) {
     console.log("Error: Invalid token");

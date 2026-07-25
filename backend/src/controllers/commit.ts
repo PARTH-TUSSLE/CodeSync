@@ -44,12 +44,16 @@ export default async function commitFiles(message: string): Promise<any> {
 
     // Log activity if userId is available
     if (userId) {
-      await logActivity(userId, "COMMIT", {
-        commitId: commitID,
-        message: message,
-        filesCount: files.length,
-      });
-      console.log(`✓ Contribution tracked (+1)`);
+      try {
+        await logActivity(userId, "COMMIT", {
+          commitId: commitID,
+          message: message,
+          filesCount: files.length,
+        });
+        console.log(`✓ Contribution tracked (+1)`);
+      } catch {
+        // Activity logging is optional — skip if DB unavailable
+      }
     }
   } catch (error) {
     if (error instanceof Error) {
