@@ -3,7 +3,7 @@ import { prisma } from "../prisma.js";
 import { logActivity } from "../utils/activityLogger.js";
 import { s3, S3_BUCKET } from "../config/aws-config.js";
 import { diffLines } from "diff";
-const archiver: any = require("archiver");
+import { ZipArchive } from "archiver";
 
 const MAX_INLINE_SIZE = 100 * 1024;
 
@@ -585,7 +585,7 @@ export const downloadRepoZip = async (req: Request, res: Response) => {
       return res.status(404).json({ msg: "No commits yet" });
     }
 
-    const archive = archiver("zip", { zlib: { level: 9 } });
+    const archive = new ZipArchive({ zlib: { level: 9 } });
 
     res.setHeader("Content-Type", "application/zip");
     res.setHeader("Content-Disposition", `attachment; filename="${repo.name}-${branchName}.zip"`);
