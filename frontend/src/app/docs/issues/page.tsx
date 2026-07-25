@@ -85,6 +85,84 @@ export default function IssuesPage() {
         can close and reopen any issue in their repository.
       </Callout>
 
+      <h2 id="labels" className="heading-anchor">
+        Labels
+      </h2>
+      <p>
+        Labels help categorize and filter issues. You can create custom labels
+        for a repository and assign them to any issue:
+      </p>
+      <ol>
+        <li>
+          Navigate to <code>/repos/&lt;id&gt;/labels</code> or click Labels
+          on the repo page.
+        </li>
+        <li>
+          Create a label with a name and color (e.g., <code>bug</code> in red,
+          <code>enhancement</code> in green).
+        </li>
+        <li>
+          On any issue, click the label selector to assign one or more labels.
+        </li>
+        <li>
+          Filter the issue list by clicking on a label.
+        </li>
+      </ol>
+
+      <h2 id="milestones" className="heading-anchor">
+        Milestones
+      </h2>
+      <p>
+        Milestones group issues together for a specific goal or release:
+      </p>
+      <ol>
+        <li>
+          Create a milestone with a title and optional due date.
+        </li>
+        <li>
+          Assign issues to the milestone from the issue detail page.
+        </li>
+        <li>
+          Track progress as issues are opened and closed.
+        </li>
+      </ol>
+
+      <h2 id="assignees" className="heading-anchor">
+        Assignees
+      </h2>
+      <p>
+        Assign issues to specific users to indicate who is responsible:
+      </p>
+      <ol>
+        <li>
+          On the issue detail page, click the assignee selector.
+        </li>
+        <li>
+          Select a user from the list of CodeSync users.
+        </li>
+        <li>
+          The assignee's avatar appears on the issue card in the list view.
+        </li>
+      </ol>
+
+      <h2 id="comments" className="heading-anchor">
+        Comments
+      </h2>
+      <p>
+        Each issue has a comment thread for discussion:
+      </p>
+      <ul>
+        <li>
+          Scroll to the bottom of any issue to add a comment.
+        </li>
+        <li>
+          Comments show the author's avatar, username, and timestamp.
+        </li>
+        <li>
+          All comments appear in chronological order.
+        </li>
+      </ul>
+
       <h2 id="closing-and-reopening" className="heading-anchor">
         Closing &amp; Reopening Issues
       </h2>

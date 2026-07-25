@@ -101,8 +101,59 @@ export default function GettingStartedPage() {
         <li>Click <strong>Create</strong>.</li>
       </ol>
       <p>
-        Once created, you will be redirected to your new repository page, where
-        you can view details, manage issues, and star or pin the repository.
+        Once created, you land on the{" "}
+        <strong>Setup page</strong> (<code>/repos/&lt;id&gt;/setup</code>). This
+        page shows your repository ID (click to copy) and the CLI commands you
+        need to push code. Click <strong>Go to Repository</strong> to view your
+        empty repo, or follow the steps below to push code from your terminal.
+      </p>
+
+      <h2 id="pushing-code-with-the-cli" className="heading-anchor">
+        Pushing Code with the CLI
+      </h2>
+      <p>
+        The CodeSync CLI works from <strong>any directory</strong> on your
+        machine. After installing it globally, you can push code to any repo:
+      </p>
+      <ol>
+        <li>
+          <strong>Install the CLI globally</strong> (one time):
+          <CodeBlock
+            language="bash"
+            code={`cd /path/to/CodeSync/backend
+npm run build
+npm install -g .`}
+          />
+        </li>
+        <li>
+          <strong>Login</strong> with your token (one time):
+          <CodeBlock
+            language="bash"
+            code="codesync login <your-token> --api-url http://localhost:8000"
+          />
+          Get your token from{" "}
+          <Link href="/docs/profile">Profile &rarr; CLI Token</Link>.
+        </li>
+        <li>
+          <strong>In your project directory</strong>, init and push:
+          <CodeBlock
+            language="bash"
+            code={`cd ~/my-project
+codesync init <repoId>
+# create your files...
+codesync add .
+codesync commit "Initial commit"
+codesync push`}
+          />
+        </li>
+      </ol>
+      <p>
+        After pushing, refresh your repo page — you will see the file tree,
+        syntax-highlighted code, README rendering, and commit history.
+      </p>
+      <p>
+        For detailed CLI usage, see the{" "}
+        <Link href="/docs/cli">CLI Guide</Link>.
       </p>
 
       <h2 id="navigating-the-dashboard" className="heading-anchor">

@@ -138,17 +138,154 @@ export default function RepositoriesPage() {
 
       <h3>Repository Detail Page</h3>
       <p>
-        Clicking on a repository takes you to its detail page, which shows:
+        Clicking on a repository takes you to its detail page. The page has
+        several tabs for browsing code, managing issues, and viewing activity:
+      </p>
+
+      <h4 id="code-tab" className="heading-anchor">Code Tab</h4>
+      <p>
+        The default tab shows your repository's files:
       </p>
       <ul>
-        <li>Full repository information (name, owner, description)</li>
-        <li>Visibility badge and creation date</li>
-        <li>Issue count (open and closed)</li>
         <li>
-          <strong>Star</strong> and <strong>Pin</strong> buttons
+          <strong>File Tree</strong> — Browse the project structure. Click any
+          file to view its contents with syntax highlighting.
         </li>
-        <li>Issue management links</li>
-        <li>Owner-only actions (edit, delete, visibility toggle)</li>
+        <li>
+          <strong>README</strong> — If your repo has a <code>README.md</code> in
+          the root, it is rendered below the file tree.
+        </li>
+        <li>
+          <strong>Branch Selector</strong> — Switch between branches to view
+          different versions of the codebase.
+        </li>
+        <li>
+          <strong>Clone URL</strong> — Copy the repository URL for reference.
+        </li>
+        <li>
+          <strong>Download ZIP</strong> — Download the entire repository as a
+          ZIP archive.
+        </li>
+        <li>
+          <strong>Raw File</strong> — Access raw file content at
+          <code>/repos/&lt;id&gt;/raw/&lt;path&gt;</code>.
+        </li>
+      </ul>
+
+      <h4 id="commits-tab" className="heading-anchor">Commits Tab</h4>
+      <p>
+        View the commit history for the repository:
+      </p>
+      <ul>
+        <li>
+          <strong>Commit List</strong> — Shows author, commit message, time,
+          and file count for each commit.
+        </li>
+        <li>
+          <strong>Commit Detail</strong> — Click a commit to see the full diff
+          with syntax-highlighted before/after code.
+        </li>
+        <li>
+          <strong>Graph View</strong> — Toggle from "List" to "Graph" to see a
+          timeline visualization with connected dots.
+        </li>
+      </ul>
+
+      <h4 id="branches-tab" className="heading-anchor">Branches Tab</h4>
+      <p>
+        Manage your repository's branches:
+      </p>
+      <ul>
+        <li>
+          <strong>List</strong> — See all branches with an indicator for the
+          current default branch.
+        </li>
+        <li>
+          <strong>Create</strong> — Enter a name and create a new branch.
+        </li>
+        <li>
+          <strong>Set Default</strong> — Change which branch is the default.
+        </li>
+        <li>
+          <strong>Delete</strong> — Remove a branch (not the default).
+        </li>
+      </ul>
+      <p>
+        Use the CLI to switch between branches locally:{" "}
+        <code>codesync checkout &lt;branch&gt;</code>. Pushes after switching
+        will be associated with that branch.
+      </p>
+
+      <h4 id="compare" className="heading-anchor">Compare Branches</h4>
+      <p>
+        Navigate to <code>/repos/&lt;id&gt;/compare?base=main&amp;head=feature</code>{" "}
+        to see what's different between two branches:
+      </p>
+      <ul>
+        <li>Shows which commits are ahead and behind.</li>
+        <li>Displays file diffs between the two branches.</li>
+        <li>Useful for reviewing changes before opening a pull request.</li>
+      </ul>
+
+      <h4 id="pull-requests" className="heading-anchor">Pull Requests</h4>
+      <p>
+        Pull requests let you propose changes and collaborate with others:
+      </p>
+      <ul>
+        <li>
+          <strong>Create</strong> — Select a base branch and a head branch, add
+          a title and description.
+        </li>
+        <li>
+          <strong>List</strong> — Filter by status: Open, Closed, or Merged.
+        </li>
+        <li>
+          <strong>Detail</strong> — View the diff, timeline, and comments.
+        </li>
+        <li>
+          <strong>Merge</strong> — Click "Merge" to merge the head branch into
+          the base branch.
+        </li>
+        <li>
+          <strong>Comments &amp; Reviews</strong> — Leave comments on the PR
+          timeline or submit a code review.
+        </li>
+      </ul>
+
+      <h4 id="forking" className="heading-anchor">Forking</h4>
+      <p>
+        Forking creates a copy of another user's repository under your account:
+      </p>
+      <ul>
+        <li>
+          Visit any public repository and click the <strong>Fork</strong> button.
+        </li>
+        <li>
+          A banner at the top of forked repos shows "Forked from owner/repo"
+          with a link to the original.
+        </li>
+        <li>
+          You can push changes to your fork independently.
+        </li>
+        <li>
+          Create pull requests from your fork to the original repository.
+        </li>
+      </ul>
+
+      <h4 id="web-file-editor" className="heading-anchor">Web File Editor</h4>
+      <p>
+        You can edit files directly in the browser:
+      </p>
+      <ul>
+        <li>
+          Navigate to <code>/repos/&lt;id&gt;/edit</code> (must be logged in).
+        </li>
+        <li>
+          Select a file, make changes, write a commit message, and click Commit.
+        </li>
+        <li>
+          The file tree and commit history update immediately.
+        </li>
       </ul>
 
       <h2 id="starring-and-pinning" className="heading-anchor">

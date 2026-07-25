@@ -8,7 +8,8 @@ export default function CLIPage() {
       <h1>CLI Guide</h1>
       <p className="lead">
         The CodeSync CLI provides a Git-inspired command-line interface for
-        managing your repositories directly from the terminal.
+        managing your repositories directly from the terminal. Unlike Git, the
+        CodeSync CLI requires a running backend server to store your data.
       </p>
 
       <hr />
@@ -17,28 +18,51 @@ export default function CLIPage() {
         Overview
       </h2>
       <p>
-        The CodeSync CLI is built directly into the CodeSync backend server. It
-        supports the core version control workflow: initialize a repository,
-        stage files, commit changes, push to remote, pull updates, and revert
-        mistakes. The CLI is designed to feel familiar to anyone who has used
-        Git.
+        The CLI works from <strong>any directory</strong> on your machine. It
+        creates a <code>.codesync</code> folder in your project (just like
+        <code>.git</code>) to track local state. Commands like{" "}
+        <code>init</code>, <code>push</code>, <code>branch</code>, and{" "}
+        <code>pull</code> let you sync code between your local machine and the
+        CodeSync web dashboard.
       </p>
+
+      <h2 id="prerequisites" className="heading-anchor">
+        Prerequisites
+      </h2>
+      <p>
+        Before using the CLI, make sure:
+      </p>
+      <ol>
+        <li>
+          The <strong>backend server</strong> is running
+          (<code>npx tsx src/index.ts start</code> from the
+          <code>backend/</code> directory).
+        </li>
+        <li>
+          You have a <strong>CodeSync account</strong> and can log in to the web
+          app at <code>http://localhost:3000</code>.
+        </li>
+      </ol>
 
       <h2 id="installation" className="heading-anchor">
         Installation
       </h2>
       <p>
-        The CLI is included with the CodeSync backend. To start the server and
-        enable CLI commands, run:
+        The CLI is included in the <code>backend/</code> directory. Install it
+        globally so the <code>codesync</code> command is available anywhere:
       </p>
       <CodeBlock
         language="bash"
-        code="node dist/index.js start"
+        code={`cd /path/to/CodeSync/backend
+npm run build
+npm install -g .`}
       />
       <p>
-        Once the server is running, you can use the CLI commands directly from
-        your terminal.
+        After this, you can run <code>codesync</code> from any directory.
       </p>
+      <Callout type="tip" title="Verify Installation">
+        Run <code>codesync --help</code> to see all available commands.
+      </Callout>
 
       <h2 id="authentication" className="heading-anchor">
         Authentication
@@ -46,32 +70,33 @@ export default function CLIPage() {
       <p>
         Before using the CLI, you need to authenticate with your CodeSync
         account. The CLI stores your credentials in{" "}
-        <code>~/.codesync/config.json</code>.
+        <code>~/.codesync/config.json</code> (global, across all projects).
       </p>
+
+      <h3>Getting Your Token</h3>
+      <p>
+        Your JWT authentication token is available in the web app:
+      </p>
+      <ol>
+        <li>Log in at <code>http://localhost:3000</code>.</li>
+        <li>
+          Go to your <Link href="/docs/profile">Profile &rarr; CLI Token</Link>.
+        </li>
+        <li>Copy the token (use the reveal button to see the full token).</li>
+      </ol>
 
       <h3>Logging In</h3>
       <p>
-        To log in, you need your JWT token. You can get this from:
-      </p>
-      <ul>
-        <li>
-          Your <Link href="/docs/profile">CLI Token settings</Link> page on
-          CodeSync.
-        </li>
-        <li>
-          The token displayed after signing up (if you saved it).
-        </li>
-      </ul>
-      <p>
-        Once you have your token, log in with:
+        Once you have your token, run the login command. You can optionally
+        specify the API URL if your backend runs on a different host or port:
       </p>
       <CodeBlock
         language="bash"
-        code="codesync login <your-jwt-token>"
+        code="codesync login <your-jwt-token> --api-url http://localhost:8000"
       />
       <p>
-        Replace <code>{'<your-jwt-token>'}</code> with your actual JWT token.
-        The token is stored locally and used for all subsequent CLI commands.
+        The token and API URL are stored in{" "}
+        <code>~/.codesync/config.json</code>. You only need to log in once.
       </p>
 
       <h3>Logging Out</h3>
@@ -80,10 +105,6 @@ export default function CLIPage() {
         language="bash"
         code="codesync logout"
       />
-      <p>
-        This removes the stored token from <code>~/.codesync/config.json</code>.
-        You will need to log in again before using CLI commands.
-      </p>
 
       <Callout type="warning" title="Token Security">
         Your JWT token grants full access to your CodeSync account. Never share
@@ -92,18 +113,43 @@ export default function CLIPage() {
 
       <hr />
 
+      <h2 id="quick-start" className="heading-anchor">
+        Quick Start (Typical Workflow)
+      </h2>
+      <p>
+        Here is the typical end-to-end workflow:
+      </p>
+      <CodeBlock
+        language="bash"
+        code={`# 1. Create a repo on the web app first (at /repos/new)
+#    Copy the repo ID from the setup page
+
+# 2. In your project directory, init and link to that repo
+cd /my/project
+codesync init <repoId>
+
+# 3. Create some files, then push them
+codesync add .
+codesync commit "Initial commit"
+codesync push
+
+# 4. View the result at /repos/<repoId> in the browser`}
+      />
+      <p>
+        The rest of this guide explains each command in detail.
+      </p>
+
+      <hr />
+
       <h2 id="commands" className="heading-anchor">
         Commands
       </h2>
-      <p>
-        CodeSync CLI supports the following commands:
-      </p>
 
-      {/* Init */}
       <h3 id="cmd-init" className="heading-anchor">codesync init</h3>
       <p>
-        Initializes a new CodeSync repository in the current directory. This
-        creates a <code>.codesync</code> directory to store repository metadata.
+        Initializes a CodeSync repository in the <strong>current directory</strong>.
+        Creates a <code>.codesync</code> folder to store repository metadata,
+        staging area, and local commits.
       </p>
       <table className="command-table">
         <thead>
@@ -115,11 +161,15 @@ export default function CLIPage() {
         <tbody>
           <tr>
             <td><strong>Description</strong></td>
-            <td>Initialize a new CodeSync repository</td>
+            <td>Initialize a new CodeSync repository locally</td>
           </tr>
           <tr>
             <td><strong>Syntax</strong></td>
-            <td><code>codesync init</code></td>
+            <td><code>codesync init [repoId]</code></td>
+          </tr>
+          <tr>
+            <td><strong>Arguments</strong></td>
+            <td><code>repoId</code> (optional) — Link to an existing remote repo</td>
           </tr>
           <tr>
             <td><strong>Requires Auth</strong></td>
@@ -127,20 +177,54 @@ export default function CLIPage() {
           </tr>
         </tbody>
       </table>
-      <p><strong>Example:</strong></p>
       <CodeBlock
         language="bash"
-        code="$ cd my-project
-$ codesync init
-Initialized empty CodeSync repository in .codesync/"
+        code={`$ cd my-project
+$ codesync init abc-123
+✓ Repository initialised successfully!
+✓ Linked to CodeSync repo: abc-123`}
       />
-      <p><strong>Expected result:</strong> A <code>.codesync</code> directory is created in your project folder, ready to track changes.</p>
+      <p>
+        If you omit the repo ID, you can set it later with{" "}
+        <code>codesync remote &lt;repoId&gt;</code>.
+      </p>
 
-      {/* Add */}
+      <h3 id="cmd-remote" className="heading-anchor">codesync remote</h3>
+      <p>
+        Link the local repo to a remote CodeSync repository, or show the
+        currently linked remote.
+      </p>
+      <table className="command-table">
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Description</strong></td>
+            <td>Set or show the linked remote repository</td>
+          </tr>
+          <tr>
+            <td><strong>Syntax</strong></td>
+            <td><code>codesync remote [repoId]</code></td>
+          </tr>
+          <tr>
+            <td><strong>Set</strong></td>
+            <td><code>codesync remote abc-123</code></td>
+          </tr>
+          <tr>
+            <td><strong>Show</strong></td>
+            <td><code>codesync remote</code> (no arguments)</td>
+          </tr>
+        </tbody>
+      </table>
+
       <h3 id="cmd-add" className="heading-anchor">codesync add</h3>
       <p>
-        Stages a file for the next commit. This tells CodeSync to track changes
-        to the specified file.
+        Stages a file for the next commit. Copies the file into the{" "}
+        <code>.codesync/staging/</code> directory.
       </p>
       <table className="command-table">
         <thead>
@@ -168,19 +252,17 @@ Initialized empty CodeSync repository in .codesync/"
           </tr>
         </tbody>
       </table>
-      <p><strong>Example:</strong></p>
       <CodeBlock
         language="bash"
-        code="$ codesync add src/index.ts
-Staged src/index.ts for commit"
+        code={`$ codesync add README.md
+File README.md added to the staging area !`}
       />
-      <p><strong>Expected result:</strong> The specified file is staged and ready to be included in the next commit.</p>
 
-      {/* Commit */}
       <h3 id="cmd-commit" className="heading-anchor">codesync commit</h3>
       <p>
-        Creates a commit with all staged files. A commit is a snapshot of your
-        project at a specific point in time.
+        Creates a local commit with all currently staged files. The commit is
+        stored in <code>.codesync/commits/</code> and will be sent to the server
+        on the next <code>push</code>.
       </p>
       <table className="command-table">
         <thead>
@@ -200,33 +282,28 @@ Staged src/index.ts for commit"
           </tr>
           <tr>
             <td><strong>Arguments</strong></td>
-            <td><code>{'<message>'}</code> — Commit message describing the changes</td>
+            <td><code>{'<message>'}</code> — Commit message</td>
           </tr>
           <tr>
             <td><strong>Requires Auth</strong></td>
-            <td>No</td>
+            <td>No (tracking requires login)</td>
           </tr>
         </tbody>
       </table>
-      <p><strong>Example:</strong></p>
       <CodeBlock
         language="bash"
-        code={`$ codesync commit "Add user authentication"
-[main 1a2b3c4d] Add user authentication
- 1 file changed, 42 insertions(+)`}
+        code={`$ codesync commit "Add README"
+Commit a1b2c3d4 created with message: Add README!`}
       />
-      <p><strong>Expected result:</strong> A new commit is created with a unique commit ID. The commit is stored locally in the <code>.codesync</code> directory.</p>
-      <Callout type="tip" title="Writing Commit Messages">
-        Use clear, descriptive commit messages that explain <em>what</em> and{" "}
-        <em>why</em>. Good commit messages help you understand the history of
-        your project.
+      <Callout type="tip" title="Commit Messages">
+        Use clear, descriptive commit messages. Good messages help you
+        understand the history of your project.
       </Callout>
 
-      {/* Push */}
       <h3 id="cmd-push" className="heading-anchor">codesync push</h3>
       <p>
-        Pushes your local commits to the remote CodeSync server, associating
-        them with your repository.
+        Pushes all local commits to the remote CodeSync server. Commits appear
+        in the web dashboard under the Commits tab.
       </p>
       <table className="command-table">
         <thead>
@@ -238,7 +315,7 @@ Staged src/index.ts for commit"
         <tbody>
           <tr>
             <td><strong>Description</strong></td>
-            <td>Push local commits to the remote server</td>
+            <td>Send local commits to the remote server</td>
           </tr>
           <tr>
             <td><strong>Syntax</strong></td>
@@ -250,24 +327,60 @@ Staged src/index.ts for commit"
           </tr>
         </tbody>
       </table>
-      <p><strong>Example:</strong></p>
       <CodeBlock
         language="bash"
-        code="$ codesync push
-Pushing 1 commit to remote...
-Successfully pushed to remote repository"
+        code={`$ codesync push
+Pushing 1 commit(s) to CodeSync...
+  ↻ a1b2c3d4... ✓ (f5e6d7c8)
+✓ All commits pushed successfully! (1 commit(s))`}
       />
-      <p><strong>Expected result:</strong> All local commits are pushed to the remote server. A push activity is logged for your contributions.</p>
       <Callout type="note">
-        You must be authenticated (<code>codesync login</code>) before you can
-        push. The push command sends all commits that have not yet been pushed.
+        You must be logged in (<code>codesync login</code>) and have a remote
+        set (<code>codesync init &lt;repoId&gt;</code>) before pushing.
       </Callout>
 
-      {/* Pull */}
-      <h3 id="cmd-pull" className="heading-anchor">codesync pull</h3>
+      <h3 id="cmd-branch" className="heading-anchor">codesync branch</h3>
       <p>
-        Pulls the latest changes from the remote server, updating your local
-        repository.
+        Create a new branch or list existing branches. Works like Git branches
+        — you can develop features in isolation and switch between them.
+      </p>
+      <table className="command-table">
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Create</strong></td>
+            <td><code>codesync branch {'<name>'}</code></td>
+          </tr>
+          <tr>
+            <td><strong>List</strong></td>
+            <td><code>codesync branch</code> (no arguments)</td>
+          </tr>
+          <tr>
+            <td><strong>Requires Auth</strong></td>
+            <td>No</td>
+          </tr>
+        </tbody>
+      </table>
+      <CodeBlock
+        language="bash"
+        code={`$ codesync branch feature
+✓ Switched to new branch 'feature'
+
+$ codesync branch
+Branches:
+  main
+* feature`}
+      />
+
+      <h3 id="cmd-checkout" className="heading-anchor">codesync checkout</h3>
+      <p>
+        Switch to an existing branch. All subsequent commits and pushes will be
+        associated with this branch.
       </p>
       <table className="command-table">
         <thead>
@@ -279,7 +392,40 @@ Successfully pushed to remote repository"
         <tbody>
           <tr>
             <td><strong>Description</strong></td>
-            <td>Pull latest changes from the remote server</td>
+            <td>Switch to a branch</td>
+          </tr>
+          <tr>
+            <td><strong>Syntax</strong></td>
+            <td><code>codesync checkout {'<name>'}</code></td>
+          </tr>
+          <tr>
+            <td><strong>Requires Auth</strong></td>
+            <td>No</td>
+          </tr>
+        </tbody>
+      </table>
+      <CodeBlock
+        language="bash"
+        code={`$ codesync checkout main
+✓ Switched to branch 'main'`}
+      />
+
+      <h3 id="cmd-pull" className="heading-anchor">codesync pull</h3>
+      <p>
+        Downloads the latest files from the remote repository for the current
+        branch and writes them into your project directory.
+      </p>
+      <table className="command-table">
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Description</strong></td>
+            <td>Pull latest files from the remote server</td>
           </tr>
           <tr>
             <td><strong>Syntax</strong></td>
@@ -291,20 +437,17 @@ Successfully pushed to remote repository"
           </tr>
         </tbody>
       </table>
-      <p><strong>Example:</strong></p>
       <CodeBlock
         language="bash"
-        code="$ codesync pull
-Pulling latest changes from remote...
-Already up to date."
+        code={`$ codesync pull
+Pulling latest files from main...
+✓ Pulled 3 file(s) from main`}
       />
-      <p><strong>Expected result:</strong> If there are new changes on the remote server, they are pulled down to your local repository. If everything is current, you will see &ldquo;Already up to date.&rdquo;</p>
 
-      {/* Revert */}
       <h3 id="cmd-revert" className="heading-anchor">codesync revert</h3>
       <p>
-        Reverts your local repository to a specific commit. This undoes all
-        changes made after the specified commit.
+        Restores your local project files to the state of a specific commit.
+        Useful for undoing changes.
       </p>
       <table className="command-table">
         <thead>
@@ -316,7 +459,7 @@ Already up to date."
         <tbody>
           <tr>
             <td><strong>Description</strong></td>
-            <td>Revert to a specific commit</td>
+            <td>Revert local files to a specific commit</td>
           </tr>
           <tr>
             <td><strong>Syntax</strong></td>
@@ -324,7 +467,7 @@ Already up to date."
           </tr>
           <tr>
             <td><strong>Arguments</strong></td>
-            <td><code>{'<commitID>'}</code> — The ID of the commit to revert to</td>
+            <td><code>{'<commitID>'}</code> — The commit ID to revert to</td>
           </tr>
           <tr>
             <td><strong>Requires Auth</strong></td>
@@ -332,17 +475,71 @@ Already up to date."
           </tr>
         </tbody>
       </table>
-      <p><strong>Example:</strong></p>
       <CodeBlock
         language="bash"
-        code="$ codesync revert 1a2b3c4d
-Reverted to commit 1a2b3c4d"
+        code={`$ codesync revert a1b2c3d4
+Successfully reverted the codebase to commit - a1b2c3d4`}
       />
-      <p><strong>Expected result:</strong> Your local repository is reverted to the state of the specified commit. All commits after that point are undone locally.</p>
       <Callout type="warning" title="Revert is Local">
-        Reverting only affects your local repository. To sync the reverted state
-        with the remote server, you will need to push again.
+        Reverting only affects your local files. To sync the reverted state
+        with the remote server, push again.
       </Callout>
+
+      <hr />
+
+      <h2 id="full-example" className="heading-anchor">
+        Full Workflow Example
+      </h2>
+      <CodeBlock
+        language="bash"
+        code={`# === Terminal 1: Start the backend server ===
+cd CodeSync/backend
+npx tsx src/index.ts start
+
+# === Web browser: Create an account and a repo ===
+# 1. Go to http://localhost:3000/signup
+# 2. Create a repository at /repos/new
+# 3. Copy the repo ID from the setup page
+
+# === Terminal 2: Use the CLI from any directory ===
+
+# Install the CLI globally (one time)
+cd CodeSync/backend
+npm run build
+npm install -g .
+
+# Login (one time)
+codesync login <your-token> --api-url http://localhost:8000
+
+# Now work in any project folder
+cd ~/projects/my-app
+
+# Init and link to your repo
+codesync init <repoId>
+
+# Create files
+echo "# Hello World" > README.md
+echo "console.log('hi');" > index.js
+
+# Stage, commit, push
+codesync add README.md
+codesync add index.js
+codesync commit "Add initial files"
+codesync push
+
+# Create a feature branch
+codesync branch feature
+echo "// new feature" > feature.js
+codesync add feature.js
+codesync commit "Add feature"
+codesync push
+
+# Switch back to main
+codesync checkout main
+
+# Pull latest
+codesync pull`}
+      />
 
       <hr />
 
@@ -352,45 +549,33 @@ Reverted to commit 1a2b3c4d"
 
       <h3>&ldquo;Not authenticated&rdquo; error</h3>
       <p>
-        If you see an authentication error when running push or pull, make sure
-        you have logged in:
-      </p>
-      <CodeBlock
-        language="bash"
-        code="codesync login <your-jwt-token>"
-      />
-      <p>
-        Your token can be found on the{" "}
-        <Link href="/docs/profile">CLI Token page</Link> in your account
-        settings.
+        Run <code>codesync login &lt;token&gt; --api-url http://localhost:8000</code>.
+        Get your token from the{" "}
+        <Link href="/docs/profile">CLI Token page</Link>.
       </p>
 
       <h3>&ldquo;Not a CodeSync repository&rdquo; error</h3>
       <p>
-        This means the current directory has not been initialized. Run{" "}
-        <code>codesync init</code> first to create a <code>.codesync</code>{" "}
-        directory.
+        The current directory has no <code>.codesync</code> folder. Run{" "}
+        <code>codesync init &lt;repoId&gt;</code> first.
+      </p>
+
+      <h3>&ldquo;No remote set&rdquo; error</h3>
+      <p>
+        Run <code>codesync init &lt;repoId&gt;</code> or{" "}
+        <code>codesync remote &lt;repoId&gt;</code> to link to a remote repo.
       </p>
 
       <h3>Token expired</h3>
       <p>
-        JWT tokens expire after 7 days. If your token has expired, log in again
-        with a fresh token from your CLI Token settings page.
+        JWT tokens expire after 7 days. Get a fresh token from the{" "}
+        <Link href="/docs/profile">CLI Token page</Link> and log in again.
       </p>
 
-      <h3>CLI commands not found</h3>
+      <h3>Backend not reachable</h3>
       <p>
-        Make sure the CodeSync backend server is running. The CLI commands are
-        processed by the backend process. Start the server with:
-      </p>
-      <CodeBlock
-        language="bash"
-        code="node dist/index.js start"
-      />
-      <p>
-        For more help, visit the{" "}
-        <Link href="/docs/troubleshooting">Troubleshooting</Link> page or check
-        the <Link href="/docs/faq">FAQ</Link>.
+        Make sure the backend server is running and the <code>--api-url</code>{" "}
+        is correct. Default is <code>http://localhost:8000</code>.
       </p>
     </>
   );
