@@ -14,8 +14,8 @@ export async function logActivity(
         metadata: metadata || {},
       },
     });
-  } catch (error) {
-    console.error("Error logging activity:", error);
+  } catch {
+    // Activity logging is optional — skip silently if DB unavailable
   }
 }
 
@@ -49,7 +49,7 @@ export async function removeActivity(
         },
       },
     });
-  } catch (error) {
-    console.error("Error removing activity:", error);
+  } catch {
+    // Activity removal is optional
   }
 }

@@ -10,13 +10,14 @@ import pushChanges from "./controllers/push.js";
 import { loginUser, logoutUser } from "./utils/globalConfig.js";
 import createBranchCLI, { checkoutBranch, listBranches } from "./controllers/branchCli.js";
 import { setRemote, showRemote } from "./controllers/remote.js";
-import express from "express";
-import bodyParser from "body-parser";
-import cors from "cors";
-import { prisma } from "./prisma.js";
-import { mainRouter } from "./routes/main.router.js";
 
 async function startServer() {
+  const { default: express } = await import("express");
+  const { default: bodyParser } = await import("body-parser");
+  const { default: cors } = await import("cors");
+  const { prisma } = await import("./prisma.js");
+  const { mainRouter } = await import("./routes/main.router.js");
+
   const app = express();
   const port = process.env.PORT || 8000;
 
