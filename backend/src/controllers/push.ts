@@ -21,6 +21,7 @@ async function pushCommit(
   repoId: string,
   token: string,
   apiBase: string,
+  branch: string,
   commitId: string,
   commitDir: string,
   parentCommitId?: string,
@@ -56,7 +57,7 @@ async function pushCommit(
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        branch: "main",
+        branch,
         message,
         parentCommitId,
         files,
@@ -96,8 +97,13 @@ export default async function pushChanges(): Promise<void> {
       return;
     }
 
-    const repoId = config.repoId;
-    const token = config.token;
+    let repoId = config.repoId;
+    let token = config.token;
+
+    if (!token) {
+      const globalConfig = await readGlobalConfig();
+      token = globalConfig.token;
+    }
 
     if (!repoId) {
       console.log("Error: No remote set. Run 'codesync remote <repoId>' to link a CodeSync repo.");
@@ -125,6 +131,7 @@ export default async function pushChanges(): Promise<void> {
 
     console.log(`Pushing ${commitDirs.length} commit(s) to CodeSync...`);
 
+    const branchName = config.branch || "main";
     const apiBase = await getApiBase();
 
     let lastCommitId: string | undefined;
@@ -138,7 +145,7 @@ export default async function pushChanges(): Promise<void> {
 
       process.stdout.write(`  ↻ Commit ${commitDir.slice(0, 8)}... `);
 
-      const result = await pushCommit(repoId, token, apiBase, commitDir, commitPath, lastCommitId);
+      const result = await pushCommit(repoId, token, apiBase, branchName, commitDir, commitPath, lastCommitId);
 
       if (result.success) {
         lastCommitId = result.commitId;

@@ -4,7 +4,7 @@
   "description": "CodeSync CLI and backend",
   "main": "dist/index.js",
   "bin": {
-    "codesync": "./dist/index.js"
+    "codesync": "./cli.mjs"
   },
   "scripts": {
     "build": "tsc",
