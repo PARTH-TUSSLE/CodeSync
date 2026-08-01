@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "../prisma.js";
 import { logActivity } from "../utils/activityLogger.js";
+import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { s3, S3_BUCKET } from "../config/aws-config.js";
 import { diffLines } from "diff";
 import { ZipArchive } from "archiver";
@@ -147,9 +148,7 @@ export const createCommit = async (req: Request, res: Response) => {
 
       if (size > MAX_INLINE_SIZE) {
         s3Key = `commits/${repoId}/${commit.id}/${filename}`;
-        await s3
-          .upload({ Bucket: S3_BUCKET, Key: s3Key, Body: content })
-          .promise();
+        await s3.send(new PutObjectCommand({ Bucket: S3_BUCKET, Key: s3Key, Body: content }));
       } else {
         inlineContent = content;
       }
@@ -402,10 +401,8 @@ export const getFileContent = async (req: Request, res: Response) => {
 
     let content = commitFile.content;
     if (!content && commitFile.s3Key) {
-      const s3Obj = await s3
-        .getObject({ Bucket: S3_BUCKET, Key: commitFile.s3Key })
-        .promise();
-      content = s3Obj.Body?.toString() || "";
+      const s3Obj = await s3.send(new GetObjectCommand({ Bucket: S3_BUCKET, Key: commitFile.s3Key }));
+      content = s3Obj.Body ? await s3Obj.Body.transformToString() : "";
     }
 
     const ext = filePath.split(".").pop() || "";
@@ -471,10 +468,8 @@ export const getRawFile = async (req: Request, res: Response) => {
 
     let content = commitFile.content;
     if (!content && commitFile.s3Key) {
-      const s3Obj = await s3
-        .getObject({ Bucket: S3_BUCKET, Key: commitFile.s3Key })
-        .promise();
-      content = s3Obj.Body?.toString() || "";
+      const s3Obj = await s3.send(new GetObjectCommand({ Bucket: S3_BUCKET, Key: commitFile.s3Key }));
+      content = s3Obj.Body ? await s3Obj.Body.transformToString() : "";
     }
 
     res.setHeader("Content-Type", "text/plain");
@@ -514,10 +509,8 @@ export const getCommitDiff = async (req: Request, res: Response) => {
       commit.files.map(async (file) => {
         let currentContent = file.content;
         if (!currentContent && file.s3Key) {
-          const s3Obj = await s3
-            .getObject({ Bucket: S3_BUCKET, Key: file.s3Key })
-            .promise();
-          currentContent = s3Obj.Body?.toString() || "";
+          const s3Obj = await s3.send(new GetObjectCommand({ Bucket: S3_BUCKET, Key: file.s3Key }));
+          currentContent = s3Obj.Body ? await s3Obj.Body.transformToString() : "";
         }
 
         const parentContent = parentFileMap.get(file.filename) || "";
@@ -610,8 +603,8 @@ export const downloadRepoZip = async (req: Request, res: Response) => {
     for (const file of latestCommit.files) {
       let content = file.content;
       if (!content && file.s3Key) {
-        const s3Obj = await s3.getObject({ Bucket: S3_BUCKET, Key: file.s3Key }).promise();
-        content = s3Obj.Body?.toString() || "";
+        const s3Obj = await s3.send(new GetObjectCommand({ Bucket: S3_BUCKET, Key: file.s3Key }));
+        content = s3Obj.Body ? await s3Obj.Body.transformToString() : "";
       }
       if (content !== undefined && content !== null) {
         archive.append(content, { name: file.filename });
@@ -678,8 +671,8 @@ export const compareBranches = async (req: Request, res: Response) => {
       processedFiles.add(file.filename);
       let content = file.content;
       if (!content && file.s3Key) {
-        const s3Obj = await s3.getObject({ Bucket: S3_BUCKET, Key: file.s3Key }).promise();
-        content = s3Obj.Body?.toString() || "";
+        const s3Obj = await s3.send(new GetObjectCommand({ Bucket: S3_BUCKET, Key: file.s3Key }));
+        content = s3Obj.Body ? await s3Obj.Body.transformToString() : "";
       }
 
       const baseContent = baseFileMap.get(file.filename);
@@ -769,8 +762,8 @@ export const getBranchFiles = async (req: Request, res: Response) => {
         let content = f.content;
         if (!content && f.s3Key) {
           try {
-            const s3Obj = await s3.getObject({ Bucket: S3_BUCKET, Key: f.s3Key }).promise();
-            content = s3Obj.Body?.toString() || "";
+            const s3Obj = await s3.send(new GetObjectCommand({ Bucket: S3_BUCKET, Key: f.s3Key }));
+            content = s3Obj.Body ? await s3Obj.Body.transformToString() : "";
           } catch {
             content = "";
           }
