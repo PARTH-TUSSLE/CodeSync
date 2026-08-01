@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Contribution } from "@/types/models";
+import type { MouseEvent } from "react";
 
 interface ContributionGridProps {
   contributions: Contribution[];
@@ -31,8 +32,9 @@ function getIntensity(count: number): string {
 interface TooltipData {
   date: string;
   count: number;
-  x: number;
-  y: number;
+  left: number;
+  top: number;
+  flipBelow: boolean;
 }
 
 export function ContributionGrid({ contributions, year }: ContributionGridProps) {
@@ -78,7 +80,11 @@ export function ContributionGrid({ contributions, year }: ContributionGridProps)
   const svgWidth = weeks.length * (CELL_SIZE + CELL_GAP) + 40;
   const svgHeight = 7 * (CELL_SIZE + CELL_GAP) + 20;
 
-  const handleMouseEnter = (day: { date: Date; count: number }, colIdx: number, rowIdx: number) => {
+  const handleMouseEnter = (day: { date: Date; count: number }, e: MouseEvent<SVGRectElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const left = Math.min(Math.max(rect.left + rect.width / 2, 80), window.innerWidth - 80);
+    const top = rect.top;
+
     const dateStr = day.date.toLocaleDateString("en-US", {
       weekday: "long",
       month: "short",
@@ -88,8 +94,9 @@ export function ContributionGrid({ contributions, year }: ContributionGridProps)
     setTooltip({
       date: dateStr,
       count: day.count,
-      x: colIdx * (CELL_SIZE + CELL_GAP) + CELL_SIZE / 2,
-      y: rowIdx * (CELL_SIZE + CELL_GAP) + CELL_SIZE / 2,
+      left,
+      top,
+      flipBelow: top < 90,
     });
   };
 
@@ -121,15 +128,19 @@ export function ContributionGrid({ contributions, year }: ContributionGridProps)
               height={CELL_SIZE}
               rx={2}
               className={`${getIntensity(day.count)} cursor-pointer`}
-              onMouseEnter={() => handleMouseEnter(day, colIdx, rowIdx)}
+              onMouseEnter={(e) => handleMouseEnter(day, e)}
             />
           )),
         )}
       </svg>
       {tooltip && (
         <div
-            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded bg-surface-tertiary px-2 py-1 text-xs text-primary shadow-lg"
-          style={{ left: tooltip.x + 30, top: tooltip.y + 6 - 6 }}
+          className="pointer-events-none fixed z-50 rounded bg-surface-tertiary px-2 py-1 text-xs text-primary shadow-lg"
+          style={{
+            left: tooltip.left,
+            top: tooltip.flipBelow ? tooltip.top + CELL_SIZE + 8 : tooltip.top - 8,
+            transform: tooltip.flipBelow ? "translateX(-50%)" : "translate(-50%, -100%)",
+          }}
         >
           {tooltip.count > 0
             ? `${tooltip.count} contribution${tooltip.count === 1 ? "" : "s"} on ${tooltip.date}`
