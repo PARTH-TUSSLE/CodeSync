@@ -4,6 +4,7 @@ import { logActivity } from "../utils/activityLogger.js";
 import { s3, S3_BUCKET } from "../config/aws-config.js";
 import { diffLines } from "diff";
 import { ZipArchive } from "archiver";
+import { canAccessRepo } from "../utils/repoAccess.js";
 
 const MAX_INLINE_SIZE = 100 * 1024;
 
@@ -232,6 +233,8 @@ export const getCommits = async (req: Request, res: Response) => {
   const skip = (page - 1) * limit;
 
   try {
+    if (!(await canAccessRepo(req, res, repoId))) return;
+
     const repo = await prisma.repository.findUnique({ where: { id: repoId } });
     if (!repo) {
       return res.status(404).json({ msg: "Repository not found" });
@@ -290,6 +293,8 @@ export const getCommitDetail = async (req: Request, res: Response) => {
   const commitId = String(req.params.commitId);
 
   try {
+    if (!(await canAccessRepo(req, res, repoId))) return;
+
     const commit = await prisma.commit.findUnique({
       where: { id: commitId },
       include: {
@@ -329,6 +334,8 @@ export const getFileTree = async (req: Request, res: Response) => {
   const prefix = String(req.query.path || "");
 
   try {
+    if (!(await canAccessRepo(req, res, repoId))) return;
+
     const branch = await prisma.branch.findUnique({
       where: { repositoryId_name: { repositoryId: repoId, name: branchName } },
     });
@@ -369,6 +376,8 @@ export const getFileContent = async (req: Request, res: Response) => {
   }
 
   try {
+    if (!(await canAccessRepo(req, res, repoId))) return;
+
     const branch = await prisma.branch.findUnique({
       where: { repositoryId_name: { repositoryId: repoId, name: branchName } },
     });
@@ -436,6 +445,8 @@ export const getRawFile = async (req: Request, res: Response) => {
   }
 
   try {
+    if (!(await canAccessRepo(req, res, repoId))) return;
+
     const branch = await prisma.branch.findUnique({
       where: { repositoryId_name: { repositoryId: repoId, name: branchName } },
     });
@@ -479,6 +490,8 @@ export const getCommitDiff = async (req: Request, res: Response) => {
   const commitId = String(req.params.commitId);
 
   try {
+    if (!(await canAccessRepo(req, res, repoId))) return;
+
     const commit = await prisma.commit.findUnique({
       where: { id: commitId },
       include: { files: true },
@@ -561,6 +574,8 @@ export const downloadRepoZip = async (req: Request, res: Response) => {
   const branchName = String(req.query.branch || "") || (await ensureDefaultBranch(repoId));
 
   try {
+    if (!(await canAccessRepo(req, res, repoId))) return;
+
     const repo = await prisma.repository.findUnique({
       where: { id: repoId },
       include: { owner: { select: { username: true } } },
@@ -622,6 +637,8 @@ export const compareBranches = async (req: Request, res: Response) => {
   }
 
   try {
+    if (!(await canAccessRepo(req, res, repoId))) return;
+
     const base = await prisma.branch.findUnique({
       where: { repositoryId_name: { repositoryId: repoId, name: baseBranch } },
     });
@@ -728,6 +745,8 @@ export const getBranchFiles = async (req: Request, res: Response) => {
   const branchName = String(req.params.branchName);
 
   try {
+    if (!(await canAccessRepo(req, res, repoId))) return;
+
     const branch = await prisma.branch.findUnique({
       where: { repositoryId_name: { repositoryId: repoId, name: branchName } },
     });

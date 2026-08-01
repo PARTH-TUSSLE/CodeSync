@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "../prisma.js";
 import { logActivity, removeActivity } from "../utils/activityLogger.js";
+import { canAccessRepo } from "../utils/repoAccess.js";
 
 export const createIssue = async (req: Request, res: Response) => {
   const { title, description, status, repoID } = req.body;
@@ -157,6 +158,8 @@ export const getAllIssuesOfARepo = async (req: Request, res: Response) => {
   const repoID = req.params.id;
 
   try {
+    if (!(await canAccessRepo(req, res, String(repoID)))) return;
+
     const issues = await prisma.issue.findMany({
       where: {
         repositoryId: String(repoID),
@@ -189,6 +192,7 @@ export const getIssueByID = async (req: Request, res: Response) => {
         msg: "Issue with this ID not found !",
       });
     }
+    if (!(await canAccessRepo(req, res, issue.repositoryId))) return;
 
     return res.status(200).json({
       msg: "Issue fetched !",

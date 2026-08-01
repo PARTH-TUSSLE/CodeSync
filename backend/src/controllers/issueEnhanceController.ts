@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "../prisma.js";
 import { logActivity } from "../utils/activityLogger.js";
+import { canAccessRepo } from "../utils/repoAccess.js";
 
 export const createLabel = async (req: Request, res: Response) => {
   const repoId = String(req.params.repoId);
@@ -29,6 +30,7 @@ export const createLabel = async (req: Request, res: Response) => {
 export const getLabels = async (req: Request, res: Response) => {
   const repoId = String(req.params.repoId);
   try {
+    if (!(await canAccessRepo(req, res, repoId))) return;
     const labels = await prisma.label.findMany({ where: { repositoryId: repoId }, orderBy: { name: "asc" } });
     return res.status(200).json({ msg: "Labels fetched", labels });
   } catch (error) {
@@ -109,6 +111,7 @@ export const createMilestone = async (req: Request, res: Response) => {
 export const getMilestones = async (req: Request, res: Response) => {
   const repoId = String(req.params.repoId);
   try {
+    if (!(await canAccessRepo(req, res, repoId))) return;
     const milestones = await prisma.milestone.findMany({
       where: { repositoryId: repoId },
       include: { _count: { select: { issues: true } } },
@@ -172,6 +175,13 @@ export const createIssueComment = async (req: Request, res: Response) => {
 export const getIssueComments = async (req: Request, res: Response) => {
   const issueId = String(req.params.issueId);
   try {
+    const issue = await prisma.issue.findUnique({
+      where: { id: issueId },
+      select: { repositoryId: true },
+    });
+    if (!issue) return res.status(404).json({ msg: "Issue not found" });
+    if (!(await canAccessRepo(req, res, issue.repositoryId))) return;
+
     const comments = await prisma.issueComment.findMany({
       where: { issueId },
       include: { author: { select: { id: true, username: true, profilePic: true } } },

@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "../prisma.js";
 import { logActivity } from "../utils/activityLogger.js";
+import { canAccessRepo } from "../utils/repoAccess.js";
 
 export const createPullRequest = async (req: Request, res: Response) => {
   const repoId = String(req.params.repoId);
@@ -95,6 +96,8 @@ export const getPullRequests = async (req: Request, res: Response) => {
   const skip = (page - 1) * limit;
 
   try {
+    if (!(await canAccessRepo(req, res, repoId))) return;
+
     const where: Record<string, unknown> = { repositoryId: repoId };
     if (statusFilter && ["open", "merged", "closed"].includes(statusFilter)) {
       where.status = statusFilter;
@@ -164,6 +167,7 @@ export const getPullRequestById = async (req: Request, res: Response) => {
     if (!pr) {
       return res.status(404).json({ msg: "Pull request not found" });
     }
+    if (!(await canAccessRepo(req, res, pr.repositoryId))) return;
 
     return res.status(200).json({
       msg: "Pull request fetched successfully",

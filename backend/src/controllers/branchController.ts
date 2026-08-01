@@ -1,10 +1,13 @@
 import type { Request, Response } from "express";
 import { prisma } from "../prisma.js";
+import { canAccessRepo } from "../utils/repoAccess.js";
 
 export const getBranches = async (req: Request, res: Response) => {
   const repoId = String(req.params.repoId);
 
   try {
+    if (!(await canAccessRepo(req, res, repoId))) return;
+
     const repo = await prisma.repository.findUnique({ where: { id: repoId } });
     if (!repo) {
       return res.status(404).json({ msg: "Repository not found" });

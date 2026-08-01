@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "../prisma.js";
 import { logActivity, removeActivity } from "../utils/activityLogger.js";
+import { getOptionalUserId, canViewRepo } from "../utils/repoAccess.js";
 
 export const createRepository = async (req: Request, res: Response) => {
   const { name, description, content, visibility } = req.body;
@@ -64,13 +65,14 @@ export const getAllRepositories = async (req: Request, res: Response) => {
       prisma.repository.findMany({
         skip,
         take: limit,
+        where: { visibility: true },
         include: {
           owner: { select: { id: true, username: true } },
           _count: { select: { starredBy: true, pinnedBy: true } },
         },
         orderBy: { createdAt: "desc" },
       }),
-      prisma.repository.count(),
+      prisma.repository.count({ where: { visibility: true } }),
     ]);
 
     return res.status(200).json({
@@ -113,7 +115,7 @@ export const fetchRepositoryByID = async (req: Request, res: Response) => {
       },
     });
 
-    if (repo) {
+    if (repo && (await canViewRepo(repo, getOptionalUserId(req)))) {
       return res.json({
         msg: "Repo successfully fetched !",
         repo: {
@@ -143,6 +145,7 @@ export const fetchRepositoryByName = async (req: Request, res: Response) => {
   try {
     const where: Record<string, unknown> = {
       name: { contains: String(name), mode: "insensitive" },
+      visibility: true,
     };
     if (ownerId) {
       where.ownerId = ownerId;
