@@ -36,7 +36,7 @@ export default async function initRepo(repoId?: string): Promise<void> {
       console.log(`✓ Contribution tracking enabled for user: ${userId}`);
     } else {
       console.log(
-        `⚠ Not logged in. Run 'codesync login <token>' to enable contribution tracking`,
+        `⚠ Not logged in. Run 'codesync login' to enable contribution tracking`,
       );
     }
     if (!repoId) {

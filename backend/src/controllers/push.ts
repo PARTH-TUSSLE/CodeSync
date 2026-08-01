@@ -110,7 +110,7 @@ export default async function pushChanges(): Promise<void> {
       return;
     }
     if (!token) {
-      console.log("Error: Not logged in. Run 'codesync login <token>' first.");
+      console.log("Error: Not logged in. Run 'codesync login' first.");
       return;
     }
 

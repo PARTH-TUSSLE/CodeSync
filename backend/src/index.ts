@@ -7,7 +7,7 @@ import commitFiles from "./controllers/commit.js";
 import revert from "./controllers/revert.js";
 import pullChanges from "./controllers/pull.js";
 import pushChanges from "./controllers/push.js";
-import { loginUser, logoutUser } from "./utils/globalConfig.js";
+import { loginUser, logoutUser, deviceLogin } from "./utils/globalConfig.js";
 import createBranchCLI, { checkoutBranch, listBranches } from "./controllers/branchCli.js";
 import { setRemote, showRemote } from "./controllers/remote.js";
 
@@ -47,20 +47,31 @@ yargs(hideBin(process.argv))
     });
   })
   .command(
-    "login <token>",
-    "Login with your authentication token",
+    "login [token]",
+    "Login — no token required, authorize from your browser",
     (yargs) => {
       yargs.positional("token", {
-        describe: "JWT token from web app login",
+        describe: "JWT token from web app login (optional)",
         type: "string",
       });
       yargs.option("api-url", {
         describe: "CodeSync API URL (default: http://localhost:8000)",
         type: "string",
       });
+      yargs.option("web-url", {
+        describe: "CodeSync web app URL (default: http://localhost:3000)",
+        type: "string",
+      });
     },
-    (argv) => {
-      loginUser(argv.token as string, argv["api-url"] as string | undefined);
+    async (argv) => {
+      if (argv.token) {
+        await loginUser(argv.token as string, argv["api-url"] as string | undefined);
+      } else {
+        await deviceLogin(
+          argv["api-url"] as string | undefined,
+          argv["web-url"] as string | undefined,
+        );
+      }
     },
   )
   .command("logout", "Logout and remove stored credentials", {}, () => {

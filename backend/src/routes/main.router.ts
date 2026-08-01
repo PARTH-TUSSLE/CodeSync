@@ -8,9 +8,11 @@ import { pinRouter } from "./pin.router.js";
 import { codeRouter } from "./code.router.js";
 import { prRouter } from "./pr.router.js";
 import { issueEnhanceRouter } from "./issueEnhance.router.js";
+import { authRouter } from "./auth.router.js";
 
 export const mainRouter = express.Router();
 
+mainRouter.use(authRouter);
 mainRouter.use(userRouter);
 mainRouter.use(repoRouter);
 mainRouter.use(issueRouter);

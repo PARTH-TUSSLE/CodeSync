@@ -71,6 +71,19 @@ model User {
   wikiEdits    WikiPage[]
   createdAt    DateTime     @default(now())
   activities   Activity[]
+  deviceSessions DeviceSession[]
+}
+
+model DeviceSession {
+  id         String    @id @default(uuid())
+  deviceCode String    @unique
+  userCode   String
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id])
+  status     String    @default("pending")
+  token      String?
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime
 }
 
 model Organization {
