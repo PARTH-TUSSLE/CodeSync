@@ -73,30 +73,45 @@ npm install -g .`}
         <code>~/.codesync/config.json</code> (global, across all projects).
       </p>
 
-      <h3>Getting Your Token</h3>
+      <h3>Browser Device Flow (recommended)</h3>
       <p>
-        Your JWT authentication token is available in the web app:
+        You don&apos;t need a token to log in. Just run{" "}
+        <code>codesync login</code> with no arguments — the CLI opens your
+        browser where you approve the connection with a single click:
       </p>
+      <CodeBlock
+        language="bash"
+        code="codesync login --api-url http://localhost:8000"
+      />
       <ol>
-        <li>Log in at <code>http://localhost:3000</code>.</li>
         <li>
-          Go to your <Link href="/docs/profile">Profile &rarr; CLI Token</Link>.
+          The CLI prints a link and a pairing code, then opens your browser.
         </li>
-        <li>Copy the token (use the reveal button to see the full token).</li>
+        <li>
+          Make sure you are logged in to the web app in that browser.
+        </li>
+        <li>
+          Click <strong>Connect this device</strong> (the code is pre-filled).
+        </li>
+        <li>
+          The CLI finishes the login automatically and stores a long-lived
+          credential — you only ever do this once.
+        </li>
       </ol>
 
-      <h3>Logging In</h3>
+      <h3>Token Login (alternative)</h3>
       <p>
-        Once you have your token, run the login command. You can optionally
-        specify the API URL if your backend runs on a different host or port:
+        If you prefer, or if you are on a machine without a browser, you can
+        log in with your authentication token:
       </p>
       <CodeBlock
         language="bash"
         code="codesync login <your-jwt-token> --api-url http://localhost:8000"
       />
       <p>
-        The token and API URL are stored in{" "}
-        <code>~/.codesync/config.json</code>. You only need to log in once.
+        Get the token from the{" "}
+        <Link href="/docs/profile">CLI Token settings</Link> page in the web
+        app.
       </p>
 
       <h3>Logging Out</h3>
@@ -106,9 +121,9 @@ npm install -g .`}
         code="codesync logout"
       />
 
-      <Callout type="warning" title="Token Security">
-        Your JWT token grants full access to your CodeSync account. Never share
-        it or commit it to version control. Treat it like a password.
+      <Callout type="warning" title="Credential Security">
+        The stored credential grants full access to your CodeSync account. Never
+        share it or commit it to version control. Treat it like a password.
       </Callout>
 
       <hr />
@@ -508,8 +523,8 @@ cd CodeSync/backend
 npm run build
 npm install -g .
 
-# Login (one time)
-codesync login <your-token> --api-url http://localhost:8000
+# Login (one time) — your browser opens, click "Connect this device"
+codesync login --api-url http://localhost:8000
 
 # Now work in any project folder
 cd ~/projects/my-app
@@ -549,8 +564,9 @@ codesync pull`}
 
       <h3>&ldquo;Not authenticated&rdquo; error</h3>
       <p>
-        Run <code>codesync login &lt;token&gt; --api-url http://localhost:8000</code>.
-        Get your token from the{" "}
+        Run <code>codesync login</code> to authorize your device from the
+        browser. If you are on a headless machine, use{" "}
+        <code>codesync login &lt;token&gt;</code> with a token from the{" "}
         <Link href="/docs/profile">CLI Token page</Link>.
       </p>
 
@@ -568,8 +584,11 @@ codesync pull`}
 
       <h3>Token expired</h3>
       <p>
-        JWT tokens expire after 7 days. Get a fresh token from the{" "}
-        <Link href="/docs/profile">CLI Token page</Link> and log in again.
+        CLI credentials issued through the device flow last for one year. If you
+        logged in with a web JWT token instead, it expires after 7 days — re-run{" "}
+        <code>codesync login</code> (or <code>codesync login &lt;token&gt;</code>)
+        with a fresh token from the{" "}
+        <Link href="/docs/profile">CLI Token page</Link>.
       </p>
 
       <h3>Backend not reachable</h3>

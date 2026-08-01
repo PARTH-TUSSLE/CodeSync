@@ -126,12 +126,14 @@ npm install -g .`}
           />
         </li>
         <li>
-          <strong>Login</strong> with your token (one time):
+          <strong>Login</strong> (one time). Your browser opens — click{" "}
+          <strong>Connect this device</strong> to authorize:
           <CodeBlock
             language="bash"
-            code="codesync login <your-token> --api-url http://localhost:8000"
+            code="codesync login --api-url http://localhost:8000"
           />
-          Get your token from{" "}
+          On a headless machine, use{" "}
+          <code>codesync login &lt;token&gt;</code> with a token from{" "}
           <Link href="/docs/profile">Profile &rarr; CLI Token</Link>.
         </li>
         <li>

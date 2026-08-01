@@ -133,9 +133,16 @@ export default function ProfilePage() {
 
       <h3>CLI Token</h3>
       <p>
-        Your CLI authentication token is available at{" "}
-        <code>/profile/[id]/cli-token</code>. This is the JWT token you need to
-        authenticate the CodeSync CLI. You can:
+        The <strong>recommended</strong> way to authenticate the CLI is the
+        browser device flow: run <code>codesync login</code> in your terminal
+        and approve the connection from the browser with one click — no tokens
+        to copy or paste.
+      </p>
+      <p>
+        For headless machines, or if you prefer a manual approach, your CLI
+        authentication token is available at{" "}
+        <code>/profile/[id]/cli-token</code>. This is the token you pass to{" "}
+        <code>codesync login &lt;token&gt;</code>. You can:
       </p>
       <ul>
         <li>

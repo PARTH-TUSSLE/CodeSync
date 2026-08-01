@@ -163,10 +163,12 @@ export default function TroubleshootingPage() {
       </p>
       <CodeBlock
         language="bash"
-        code="codesync login <your-jwt-token>"
+        code="codesync login"
       />
       <p>
-        Get your token from the{" "}
+        Your browser opens and you approve the connection with one click. On a
+        headless machine, use{" "}
+        <code>codesync login &lt;token&gt;</code> with a token from the{" "}
         <Link href="/docs/profile">CLI Token settings</Link> page.
       </p>
 
@@ -196,13 +198,18 @@ export default function TroubleshootingPage() {
       <h3>Token-related issues</h3>
       <ul>
         <li>
-          <strong>Token expired</strong> — Tokens are valid for 7 days. Get a
-          new token from your CLI Token settings and run <code>codesync login</code>{" "}
-          again.
+          <strong>Credential expired</strong> — Device-flow credentials last one
+          year; web JWT tokens last 7 days. Re-run <code>codesync login</code>{" "}
+          to refresh.
         </li>
         <li>
           <strong>Invalid token</strong> — Make sure you copied the entire token
           without any extra spaces or characters.
+        </li>
+        <li>
+          <strong>Browser doesn&apos;t open</strong> — The CLI prints the
+          authorization URL and pairing code. Open the URL manually, enter the
+          code, and click <strong>Connect this device</strong>.
         </li>
       </ul>
 

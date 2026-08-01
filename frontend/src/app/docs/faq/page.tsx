@@ -37,28 +37,33 @@ const faqs = [
     ),
   },
   {
-    q: "How do I get my CLI token?",
+    q: "How do I authenticate the CLI?",
     a: (
       <>
         <p>
-          You can find your CLI token in your account settings. Navigate to your{" "}
-          <Link href="/docs/profile">profile</Link>, then click on{" "}
-          <strong>CLI Token</strong> in the sidebar. You can view, copy, and
-          follow setup instructions from there.
+          The easiest way is the browser device flow: run{" "}
+          <code>codesync login</code> in your terminal and click{" "}
+          <strong>Connect this device</strong> when your browser opens. No
+          tokens to copy or paste.
         </p>
-        <p>Alternatively, you will see your token immediately after signing up.</p>
+        <p>
+          For a manual approach, you can use your CLI token. Navigate to your{" "}
+          <Link href="/docs/profile">profile</Link>, click on{" "}
+          <strong>CLI Token</strong> in the sidebar, and run{" "}
+          <code>codesync login &lt;token&gt;</code>.
+        </p>
       </>
     ),
   },
   {
-    q: "My token expired. What should I do?",
+    q: "My CLI credential expired. What should I do?",
     a: (
       <p>
-        JWT tokens expire after 7 days. If your token has expired, simply log
-        in to the web dashboard, navigate to your{" "}
-        <Link href="/docs/profile">CLI Token settings</Link>, and get a new
-        token. Then run <code>codesync login &lt;new-token&gt;</code> to update
-        your CLI credentials.
+        Credentials issued through the browser device flow last for one year.
+        If you logged in with a web JWT token instead, it expires after 7 days —
+        simply run <code>codesync login</code> again (or{" "}
+        <code>codesync login &lt;token&gt;</code> with a fresh token from your{" "}
+        <Link href="/docs/profile">CLI Token settings</Link>).
       </p>
     ),
   },
