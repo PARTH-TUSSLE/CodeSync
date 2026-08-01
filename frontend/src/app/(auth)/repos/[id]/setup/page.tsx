@@ -27,7 +27,7 @@ export default function RepoSetupPage({ params }: { params: Promise<{ id: string
 
   const commands = [
     { label: "Install CLI", cmd: "cd /path/to/CodeSync/backend && npm run build && npm install -g ." },
-    { label: "Login", cmd: `codesync login <your-token> --api-url http://localhost:8000` },
+    { label: "Login", cmd: `codesync login --api-url http://localhost:8000` },
     { label: "Init", cmd: `codesync init ${id}` },
     { label: "Stage All", cmd: "codesync add ." },
     { label: "Commit", cmd: 'codesync commit "Initial commit"' },
@@ -38,8 +38,8 @@ export default function RepoSetupPage({ params }: { params: Promise<{ id: string
 cd /path/to/CodeSync/backend
 npm run build && npm install -g .
 
-# 2. Login (one time — get token from Profile > CLI Token)
-codesync login <your-token> --api-url http://localhost:8000
+# 2. Login (one time — your browser opens, click "Connect this device")
+codesync login --api-url http://localhost:8000
 
 # 3. In your project directory
 cd /path/to/your/project

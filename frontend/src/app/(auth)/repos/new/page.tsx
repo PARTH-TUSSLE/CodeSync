@@ -96,7 +96,7 @@ export default function CreateRepoPage() {
               htmlFor="visibility"
               className="text-sm font-medium text-muted"
             >
-              Public
+              {visibility ? "Public" : "Private"}
             </label>
             <button
               type="button"
